@@ -6,10 +6,11 @@
 import { useState } from 'react';
 import type { JSX } from 'react';
 import { Icon } from '@/shell/Icon';
+import { NavButtons } from '@/shell/NavButtons';
 import { CONTENT } from '@/content';
 import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore } from '@/state/answerStore';
-import { next, prev } from '@/routing/navigation';
+import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
 
 type ProfileValues = Record<string, string>;
@@ -127,36 +128,8 @@ export function ProfileScreen(): JSX.Element {
           </div>
         </section>
 
-        <NavButtons onPrev={prev} onNext={onContinue} />
+        <NavButtons onNext={onContinue} />
       </div>
-    </div>
-  );
-}
-
-function NavButtons({
-  onPrev,
-  onNext,
-}: {
-  onPrev: () => void;
-  onNext: () => void;
-}): JSX.Element {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 'var(--space-7)',
-        paddingTop: 'var(--space-4)',
-        borderTop: '0.5px solid var(--border-soft)',
-      }}
-    >
-      <button type="button" className="btn btn--ghost" onClick={onPrev}>
-        <Icon name="chevron-left" size={14} /> Back
-      </button>
-      <button type="button" className="btn btn--primary" onClick={onNext}>
-        Continue <Icon name="chevron-right" size={14} />
-      </button>
     </div>
   );
 }

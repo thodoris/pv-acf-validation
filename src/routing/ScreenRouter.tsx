@@ -9,6 +9,7 @@ import { useSessionStore } from '@/state/sessionStore';
 import { Placeholder } from '@/screens/placeholders';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
+import { OrientG1, OrientG2 } from '@/screens/OrientationScreen';
 import { requireScreen, type Screen } from './screens';
 
 export function ScreenRouter(): JSX.Element {
@@ -40,9 +41,9 @@ function renderByKind(screen: Screen): JSX.Element {
     case 'profile':
       return <ProfileScreen />;
     case 'orient-1':
-      return <Placeholder name="Grounding · g1 — AI in public administration" />;
+      return <OrientG1 />;
     case 'orient-2':
-      return <Placeholder name="Grounding · g2 — The framework you will evaluate" />;
+      return <OrientG2 />;
     case 'problem-setup-1':
       return <Placeholder name="Problem · Setup 1 of 2" />;
     case 'problem-setup-2':
