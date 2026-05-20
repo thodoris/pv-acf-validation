@@ -1,0 +1,1591 @@
+/* Phase A additions for the cluster-based platform. */
+
+/* ============================================================
+   Profile + interview form
+   ============================================================ */
+.profile-form {
+  margin-top: var(--space-6);
+  max-width: 640px;
+  display: flex; flex-direction: column;
+  gap: var(--space-4);
+}
+.field__req {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: #FFFFFF;
+  background: var(--coral);
+  padding: 2px 7px;
+  border: 0.5px solid var(--coral);
+  border-radius: var(--radius-sm);
+  margin-left: 6px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.field__opt {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  background: transparent;
+  padding: 2px 7px;
+  border: 0.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  margin-left: 6px;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* ============================================================
+   Cluster 3 — shared open response between the two ratings
+   ============================================================ */
+.shared-open {
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--space-5) var(--space-5);
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  border-left: 3px solid var(--coral);
+}
+.shared-open__head {
+  display: flex; align-items: baseline; gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  flex-wrap: wrap;
+}
+.shared-open__chip {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--coral-deep, var(--coral));
+  background: var(--coral-tint);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.shared-open__hint {
+  font-size: 12.5px;
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
+/* ============================================================
+   Cluster 4 — optional Q4.2 wrap; softer than the required Q4.1
+   ============================================================ */
+.q-card--optional-wrap .q-card {
+  background: var(--surface-deep, var(--surface));
+  border-style: dashed;
+  opacity: 0.96;
+}
+.q-card--optional-wrap .q-card::before {
+  background: var(--border) !important;
+  opacity: 0.6;
+}
+.q-card--optional-wrap .q-card__tag {
+  background: transparent;
+  color: var(--ink-mute);
+  border: 0.5px dashed var(--border);
+}
+
+.radio-group, .check-group {
+  display: flex; flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+}
+.radio {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  cursor: pointer;
+  font-size: 13.5px;
+  color: var(--ink);
+  line-height: 1.4;
+  border-bottom: 0.5px solid var(--border-soft);
+}
+.radio:last-child { border-bottom: 0; }
+.radio input { display: none; }
+.radio__dot {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 0.8px solid var(--border-strong);
+  background: var(--surface);
+  flex-shrink: 0;
+  position: relative;
+  transition: all var(--dur-quick) var(--ease-out);
+}
+.radio input:checked + .radio__dot {
+  border-color: var(--coral);
+}
+.radio input:checked + .radio__dot::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--coral);
+}
+
+.profile-note {
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  background: var(--page-subtle);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  display: flex; gap: 10px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-style: italic;
+  line-height: 1.5;
+}
+.profile-note > svg { flex-shrink: 0; margin-top: 2px; color: var(--coral); }
+
+/* ============================================================
+   Cluster setup screen
+   ============================================================ */
+.setup-header {
+  max-width: 760px;
+  margin-bottom: var(--space-7);
+}
+.setup-header__title {
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.setup-header__intro {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4) var(--space-5);
+  border-left: 3px solid var(--coral);
+  background: var(--surface);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.setup__title-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 0.5px solid var(--border);
+}
+.setup__title { margin: 0; }
+.setup__count {
+  font-size: 11px;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.setup {
+  margin-top: var(--space-6);
+}
+.setup__sections {
+  display: flex; flex-direction: column;
+  gap: 0;
+  margin-top: var(--space-4);
+}
+.setup__section {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: var(--space-4);
+  padding: var(--space-5) 0;
+  border-bottom: 0.5px solid var(--border-soft);
+}
+.setup__section:last-child { border-bottom: 0; }
+.setup__num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--coral);
+  padding-top: 2px;
+  font-weight: 500;
+}
+.setup__label {
+  font-weight: 600;
+  font-size: 15.5px;
+  color: var(--ink-strong);
+  margin-bottom: var(--space-2);
+}
+.setup__body {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 680px;
+}
+.setup__body em { color: var(--ink); font-style: italic; }
+.setup__body strong { color: var(--ink-strong); font-weight: 600; }
+
+.setup__pullquote {
+  margin: var(--space-6) 0 0;
+  padding: var(--space-5) var(--space-6);
+  background: var(--coral-tint);
+  border-radius: var(--radius-md);
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: var(--space-2);
+  align-items: start;
+}
+.setup__pullquote-mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 48px;
+  color: var(--coral);
+  line-height: 0.8;
+  padding-top: 4px;
+}
+.setup__pullquote p {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--coral-deep);
+  font-style: italic;
+  max-width: none;
+}
+
+/* ---- Question preview footer ---- */
+.setup-preview {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 0.5px solid var(--border);
+}
+.setup-preview__head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+.setup-preview__head .kicker { margin: 0; }
+.setup-preview__count {
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.setup-preview__list {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2) var(--space-4);
+}
+.setup-preview__item {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: var(--space-2);
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 0.5px solid var(--border-soft);
+}
+.setup-preview__num {
+  font-size: 11.5px;
+  color: var(--coral);
+  letter-spacing: 0.04em;
+  font-weight: 500;
+}
+.setup-preview__title {
+  font-size: 13.5px;
+  color: var(--ink);
+  line-height: 1.4;
+  font-weight: 500;
+}
+.setup-preview__kind {
+  font-size: 10.5px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* ============================================================
+   Rating controls
+   ============================================================ */
+.rating-row {
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.rating-row__pills {
+  display: flex; flex-wrap: wrap;
+  gap: 8px;
+}
+.rating-pill {
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 0.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--ink);
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease-out);
+  line-height: 1.3;
+  text-align: left;
+}
+.rating-pill:hover { border-color: var(--ink-mute); background: var(--page); }
+.rating-pill.is-selected {
+  background: var(--coral); color: #fff; border-color: var(--coral);
+}
+
+.rating-grid {
+  margin-top: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.rating-grid__head, .rating-grid__row {
+  display: grid;
+  grid-template-columns: var(--rating-grid-cols, 1.8fr repeat(5, 1fr));
+  align-items: stretch;
+}
+.rating-grid__head {
+  background: var(--surface-deep);
+  border-bottom: 1px solid var(--border);
+}
+.rating-grid__col-label {
+  padding: 8px 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  text-align: center;
+  border-left: 1px solid var(--border);
+  line-height: 1.2;
+}
+.rating-grid__col-label:first-child { border-left: 0; }
+.rating-grid__row { border-bottom: 1px solid var(--border); }
+.rating-grid__row:last-child { border-bottom: 0; }
+.rating-grid__row:nth-child(even) { background: var(--page-subtle); }
+.rating-grid__row:nth-child(even) .rating-grid__cell { background: var(--page-subtle); }
+.rating-grid__row:nth-child(even) .rating-grid__row-label { background: transparent; }
+.rating-grid__row-label {
+  padding: 18px 16px;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: transparent;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.rating-grid__cell {
+  border: 0;
+  border-left: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: background var(--dur-quick) var(--ease-out);
+  min-height: 62px;
+}
+.rating-grid__cell::after {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 22px; height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  transition: all var(--dur-quick) var(--ease-out);
+}
+.rating-grid__cell:hover { background: var(--page); }
+.rating-grid__cell:hover::after { border-color: var(--ink-mute); }
+.rating-grid__cell.is-selected { background: var(--coral-tint); }
+.rating-grid__cell.is-selected::after {
+  background: var(--coral); border-color: var(--coral);
+  box-shadow: 0 0 0 4px var(--coral-tint);
+}
+
+/* ============================================================
+   Instrument screen — top panel
+   ============================================================ */
+.inst-panel {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: var(--space-5);
+}
+.inst-panel__head {
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-deep);
+  border-bottom: 0.5px solid var(--border-soft);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+}
+.inst-panel__kicker {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+  margin-bottom: 4px;
+}
+.inst-panel__claim {
+  font-size: 14px;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.inst-panel__claim strong { color: var(--ink-strong); }
+.inst-panel__body { padding: var(--space-5); }
+
+.inst-panel .maturity { margin: 0 var(--space-5) var(--space-5); }
+
+.inst-rep__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.inst-rep__table th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  padding: 8px 10px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--surface-deep);
+}
+.inst-rep__table td {
+  padding: 10px;
+  border-bottom: 0.5px solid var(--border-soft);
+  vertical-align: top;
+  line-height: 1.5;
+}
+.inst-rep__table tr:last-child td { border-bottom: 0; }
+.inst-rep__caption {
+  margin-top: var(--space-3);
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.verdict {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+.verdict--ok   { background: var(--sage-tint);    color: var(--sage-deep); }
+.verdict--warn { background: var(--saffron-tint); color: var(--saffron-deep); }
+.verdict--no   { background: #FAECE7;             color: #712B13; }  /* hard-pinned coral — categorical verdict, ignores cluster theming */
+
+.inst-rep--ast .ast__pool { padding: 0 !important; gap: 8px; display: flex; flex-direction: column; }
+
+/* ---------- Instrument at a glance card ---------- */
+.inst-glance {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: var(--space-5);
+}
+.inst-glance__head {
+  padding: var(--space-3) var(--space-5);
+  background: var(--surface-deep);
+  border-bottom: 0.5px solid var(--border);
+}
+.inst-glance__kicker {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-mute);
+}
+.inst-glance__grid {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  column-gap: var(--space-5);
+}
+.inst-glance__row {
+  display: contents;
+}
+.inst-glance__row > dt,
+.inst-glance__row > dd {
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 0.5px solid var(--border-soft);
+}
+.inst-glance__row > dt {
+  padding-right: 0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--ink-strong);
+}
+.inst-glance__row > dd {
+  padding-left: 0;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.inst-glance__row:last-child > dt,
+.inst-glance__row:last-child > dd { border-bottom: 0; }
+
+/* ---------- CIW flow table ----------
+   Restructured: per-flow group header (Flow # · description · verdict)
+   spans all columns; body collapses to 3 columns (Parameter | Before AI |
+   After AI), one row per CI parameter — so Before / After read across
+   horizontally and remain aligned regardless of cell text length. */
+.inst-rep__table--ciw {
+  table-layout: fixed;
+  width: 100%;
+  font-size: 12.5px;
+  border-collapse: collapse;
+}
+.inst-rep__table--ciw thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--ink-mute);
+  background: var(--surface-deep);
+  border-bottom: 0.5px solid var(--border);
+}
+.inst-rep__table--ciw .ci-flow__col-key { width: 140px; }
+.inst-rep__table--ciw td { vertical-align: top; padding: 8px 14px; }
+
+/* Per-flow header row — Flow # · description · verdict, spans cols */
+.ci-flow__flow-head th {
+  text-align: left;
+  padding: 10px 14px;
+  background: var(--surface-deep);
+  border-top: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border-soft);
+  font-weight: 500;
+}
+.ci-flow__flow-head th > * { vertical-align: middle; }
+.ci-flow__flow-head .ci-flow__num {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--ink-strong);
+  margin-right: 12px;
+  letter-spacing: 0.04em;
+}
+.ci-flow__flow-head .ci-flow__desc {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 13.5px;
+  color: var(--ink-strong);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.ci-flow__flow-head .verdict { float: right; margin-left: var(--space-3); }
+
+/* Param rows */
+.ci-flow__param + .ci-flow__param > td { border-top: 0.5px dashed var(--border-soft); }
+.ci-flow__pkey {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-family: var(--font-mono);
+  padding-top: 10px !important;
+}
+.ci-flow__pval {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+/* tighten the q-card on instrument screens so two of them fit nicely */
+.inst-panel + .firewall { margin-top: var(--space-6); }
+.firewall + .q-card { margin-top: var(--space-4); }
+.q-card + .q-card { margin-top: var(--space-5); }
+
+
+/* ---------- Welcome polish: consent grid + time bar ---------- */
+.consent-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+.consent-grid__col {
+  padding: var(--space-4) var(--space-5);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.consent-grid__col--yes { border-left: 3px solid var(--sage); }
+.consent-grid__col--no  { border-left: 3px solid var(--ink-mute); }
+.consent-grid__head {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--ink-strong);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+}
+.consent-grid__col--yes .consent-grid__head { color: var(--sage-deep); }
+.consent-grid__col--no  .consent-grid__head { color: var(--ink-soft); }
+.consent-grid__icon {
+  width: 20px; height: 20px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  font-size: 13px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+.consent-grid__col--yes .consent-grid__icon { background: var(--sage-tint); color: var(--sage-deep); }
+.consent-grid__col--no  .consent-grid__icon { background: var(--page-subtle); color: var(--ink-mute); border: 0.5px solid var(--border); }
+.consent-grid__col ul { margin: 0; padding-left: var(--space-4); font-size: 13.5px; color: var(--ink); line-height: 1.55; }
+.consent-grid__col li { margin-bottom: 6px; }
+.consent-grid__col li:last-child { margin-bottom: 0; }
+
+.welcome__time-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--page-subtle);
+}
+.welcome__time-seg { display: block; height: 100%; }
+.welcome__time-legend {
+  display: flex; flex-wrap: wrap; gap: 4px 10px;
+  margin-top: var(--space-2);
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.welcome__time-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.welcome__time-legend i {
+  width: 8px; height: 8px; border-radius: 2px; display: inline-block;
+}
+
+
+/* ============================================================
+   Composite-select — secondary single-select beneath a primary
+   control. Currently used on Q2.4 (Cluster 2): after rating each of
+   the four gaps in the grid, the respondent picks the one that
+   mattered most. Visually distinct from the grid above so the two
+   read as parts of one composite question, not two separate ones.
+   ============================================================ */
+.compsel {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 0.5px dashed var(--border);
+}
+.compsel__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.compsel__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--coral);
+  font-weight: 500;
+}
+.compsel__chip::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background: var(--coral);
+}
+.compsel__sub-stem {
+  font-size: 16px;
+  font-style: italic;
+  color: var(--coral-deep);
+  line-height: 1.45;
+  margin: 0 0 var(--space-4);
+  max-width: 62ch;
+}
+.compsel__opts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.compsel__opt {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 40px 1fr 24px;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 14.5px;
+  line-height: 1.4;
+  position: relative;
+  transition:
+    background var(--dur-quick) var(--ease-out),
+    color var(--dur-quick) var(--ease-out),
+    border-color var(--dur-quick) var(--ease-out),
+    box-shadow var(--dur-quick) var(--ease-out),
+    transform var(--dur-quick) var(--ease-out);
+}
+.compsel__opt:hover {
+  border-color: var(--ink-mute);
+  background: var(--surface-deep);
+}
+.compsel__opt:focus-visible {
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.compsel__opt.is-selected {
+  background: var(--coral);
+  color: #FFFFFF;
+  border-color: var(--coral);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(184, 71, 46, 0.22);
+}
+.compsel__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  background: var(--coral-tint);
+  color: var(--coral-deep);
+  border: 0.5px solid transparent;
+  transition: background var(--dur-quick) var(--ease-out), color var(--dur-quick) var(--ease-out);
+}
+.compsel__opt.is-selected .compsel__num {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.36);
+}
+.compsel__label {
+  font-weight: 500;
+}
+.compsel__opt.is-selected .compsel__label {
+  font-weight: 600;
+}
+.compsel__check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  color: #FFFFFF;
+  opacity: 0;
+  transform: scale(0.7);
+  transition:
+    opacity 160ms var(--ease-out),
+    transform 220ms var(--ease-out);
+}
+.compsel__opt.is-selected .compsel__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+
+/* ============================================================
+   Cluster-2 introductory setup screens — c2-setup1 + c2-setup2
+   ============================================================ */
+
+/* A narrower inner column for the setup screens. The default
+   .main__inner sized for question screens with a right rail; setup
+   screens have no rail and benefit from a slightly tighter measure. */
+.main__inner--narrow {
+  max-width: 880px;
+}
+
+/* Screen-level title + tagline shared by both setup screens. */
+.fws__title {
+  margin: var(--space-2) 0 var(--space-3);
+}
+.fws__tagline {
+  margin-bottom: var(--space-6);
+}
+
+/* Coral-tinted kicker variant for the cluster-2 setup screens. */
+.kicker--coral { color: var(--coral); }
+
+/* ============================================================
+   Cluster badge — the prominent identity mark that sits above the
+   title on every introductory setup screen and on the two grounding
+   screens. Uses the cluster-scoped --coral tokens so the badge
+   automatically takes on its cluster's accent.
+
+   Anatomy: a circular numbered disc + the cluster name + the step
+   sublabel ("Introductory setup · 1 of 2") in a single pill.
+
+   Grounding variant (.cluster-badge--prologue): no number disc, no
+   accent fill; renders as a calm preamble mark.
+   ============================================================ */
+.cluster-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 14px 5px 5px;
+  background: var(--coral-tint);
+  border: 0.5px solid var(--coral);
+  border-radius: var(--radius-pill);
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--coral-deep);
+}
+.cluster-badge__num {
+  display: inline-grid;
+  place-items: center;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--coral);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+.cluster-badge__name {
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--coral-deep);
+}
+.cluster-badge__step {
+  padding-left: 9px;
+  margin-left: 1px;
+  border-left: 0.5px solid var(--coral);
+  color: var(--coral-deep);
+  opacity: 0.72;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+/* Grounding "prologue" variant — no number, no accent fill. The two
+   thin grey rules and an italic display-set "prologue" tell the eye
+   "this is preamble, not chapter". */
+.cluster-badge--prologue {
+  background: transparent;
+  border-top: 0.5px solid var(--ink-mute);
+  border-bottom: 0.5px solid var(--ink-mute);
+  border-left: 0; border-right: 0;
+  border-radius: 0;
+  padding: 6px 0;
+  gap: 14px;
+  color: var(--ink-soft);
+}
+.cluster-badge--prologue .cluster-badge__mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink-strong);
+}
+.cluster-badge--prologue .cluster-badge__step {
+  padding-left: 14px;
+  border-left: 0.5px solid var(--border-strong);
+  color: var(--ink-mute);
+  opacity: 1;
+}
+
+/* ---------- Lede panel ----------
+   A distinguished container that sits above the diagram / four-gap grid.
+   Visual register: a soft inset surface with a coral left rule and
+   slightly larger body text — distinct from the surrounding flow without
+   being a card.
+   ---------- */
+.lede-panel {
+  background: var(--surface-deep);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5) var(--space-6);
+  margin: 0 0 var(--space-6);
+}
+.lede-panel p {
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: 0 0 var(--space-3);
+}
+.lede-panel p:last-child { margin-bottom: 0; }
+.lede-panel--italic p {
+  font-style: italic;
+  color: var(--coral-deep);
+  font-size: 15px;
+}
+.lede-panel--italic p em { font-style: normal; color: var(--coral-deep); }
+
+/* ---------- Body paragraphs below the diagram on setup 1 ---------- */
+.fws__body {
+  margin-top: var(--space-5);
+  max-width: 760px;
+}
+.fws__body p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin: 0 0 var(--space-4);
+}
+.fws__body p:last-child { margin-bottom: 0; }
+.fws__body strong { color: var(--ink-strong); font-weight: 600; }
+.fws__body em { color: var(--ink); font-style: italic; }
+
+/* ---------- Diagram slot — frame, caption row, replay button ---------- */
+.framework-diagram {
+  margin: var(--space-6) 0;
+}
+.framework-diagram__frame {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.framework-diagram__caption-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-2);
+  padding: 0 var(--space-2);
+}
+.framework-diagram__caption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-mute);
+  line-height: 1.5;
+  flex: 1;
+  max-width: 680px;
+}
+.framework-diagram__replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease-out);
+  flex-shrink: 0;
+}
+.framework-diagram__replay:hover {
+  color: var(--coral);
+  border-color: var(--coral);
+  background: var(--coral-tint);
+}
+.framework-diagram__replay-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ---------- Diagram placeholder ----------
+   What you see until window.FrameworkOrganisationDiagram lands.
+   Subtly striped background + a propositions checklist so the placeholder
+   reads as "this is where the diagram goes, and here are the load-bearing
+   propositions it must communicate."
+   ---------- */
+.diagram-ph {
+  width: 100%;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--surface-deep) 0,
+      var(--surface-deep) 8px,
+      var(--page-subtle) 8px,
+      var(--page-subtle) 9px
+    );
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-self: stretch;
+  flex: 1;
+}
+.diagram-ph__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--coral-deep);
+  background: var(--coral-tint);
+  border: 0.5px solid var(--coral);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+}
+.diagram-ph__chip-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--coral);
+  animation: phPulse 1.6s ease-in-out infinite;
+}
+@keyframes phPulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+.diagram-ph__chip code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  background: rgba(255,255,255,0.6);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: var(--coral-deep);
+}
+.diagram-ph__title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
+.diagram-ph__propos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.diagram-ph__propos li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 6px;
+  padding: 4px 0;
+}
+.diagram-ph__propos strong {
+  font-family: var(--font-mono);
+  color: var(--coral);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+}
+.diagram-ph__props {
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 0.5px dashed var(--border);
+  font-size: 11px;
+  color: var(--ink-mute);
+  letter-spacing: 0.04em;
+}
+.diagram-ph__props em { color: var(--coral-deep); font-style: normal; }
+
+/* ============================================================
+   Four-gap typographic grid — setup screen 2
+   ============================================================ */
+.fourgap {
+  margin: var(--space-6) 0;
+}
+.fourgap__heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--ink-strong);
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 0.5px solid var(--border);
+}
+.fourgap__grid {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6) var(--space-7);
+}
+.fourgap__block {
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-top: 0.5px solid var(--border-soft);
+}
+.fourgap__num {
+  grid-row: 1 / span 2;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--coral);
+  padding-top: 4px;
+}
+.fourgap__title {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-strong);
+  font-weight: 600;
+  margin: 0;
+}
+.fourgap__body {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  max-width: 36em;
+}
+
+/* ============================================================
+   "What you will be asked" — standalone variant on setup 2
+   (the existing .setup-preview was nested inside .setup; this
+   instance sits on its own at the bottom of the screen.)
+   ============================================================ */
+.setup-preview--standalone {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 0.5px solid var(--border);
+}
+.setup-preview--standalone .setup-preview__head {
+  margin-bottom: var(--space-4);
+}
+.setup-preview--standalone .setup-preview__kind {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diagram-ph__chip-dot { animation: none; opacity: 1; }
+}
+
+/* ============================================================
+   Grounding screens (G1 / G2)
+   Visual register matches cluster setup screens — lede panel,
+   numbered grid, closing callout. The neutral muted accent is
+   used in place of the coral cluster accent, because grounding
+   sits before the cluster spine.
+   ============================================================ */
+
+/* Grounding-tinted lede panel — neutral muted accent rather than coral. */
+.lede-panel--grounding {
+  border-left-color: var(--ink-mute);
+  background: var(--surface-deep);
+}
+
+/* Closing callout variant — same structure as lede panel, but the
+   text takes a slightly more contemplative register. */
+.lede-panel--closer {
+  margin-top: var(--space-6);
+  margin-bottom: 0;
+}
+.lede-panel--closer p {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+/* Three-block variant of fourgap — used for the three governance
+   registers on G1. Equal columns, no item-3 wrap to a second row. */
+.fourgap__grid--triple {
+  grid-template-columns: repeat(3, 1fr);
+}
+@media (max-width: 880px) {
+  .fourgap__grid--triple { grid-template-columns: 1fr; }
+}
+
+/* ---------- Concept-card strip (G2) ----------
+   A lighter visual unit than a callout. Section title, tag-style
+   chip list, and a small note. No card chrome.
+   ---------- */
+.concept-strip {
+  margin: var(--space-6) 0 var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 0.5px solid var(--border);
+}
+.concept-strip__head {
+  margin-bottom: var(--space-4);
+}
+.concept-strip__head .kicker { margin: 0; }
+.concept-strip__list {
+  list-style: none;
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+}
+.concept-strip__chip {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: var(--surface-deep);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-pill, 999px);
+  padding: 5px 11px;
+  white-space: nowrap;
+}
+.concept-strip__note {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-mute);
+  font-style: italic;
+  margin: 0;
+  max-width: 60ch;
+}
+
+/* Small closing line at the bottom of G2 — not a callout. */
+.grounding-closer {
+  margin: var(--space-6) 0 0;
+  font-size: 13.5px;
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
+/* ============================================================
+   Research-context band (Welcome screen, bottom).
+   Three columns at desktop; stacks on narrow.
+   Visually distinct from the "How it works" summary above —
+   hairline rule + generous top padding.
+   ============================================================ */
+.research-band {
+  margin-top: var(--space-7);
+  padding-top: var(--space-6);
+  border-top: 0.5px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-6) var(--space-7);
+}
+@media (max-width: 880px) {
+  .research-band { grid-template-columns: 1fr; gap: var(--space-5); }
+}
+.research-band__col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.research-band__col .kicker {
+  margin-bottom: 4px;
+}
+.research-band__body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+  max-width: 38ch;
+}
+.research-band__body strong {
+  color: var(--ink-strong);
+  font-weight: 600;
+}
+.research-band__email {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+}
+.research-band__links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+.research-band__link {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--coral-deep, var(--coral));
+  cursor: pointer;
+  text-align: left;
+}
+.research-band__link:hover {
+  color: var(--coral);
+  text-decoration: underline;
+}
+
+/* ---------- Welcome info overlay ---------- */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.welcome-overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 24, 22, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+.welcome-overlay__panel {
+  position: relative;
+  width: min(560px, calc(100% - 32px));
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--elev-modal, 0 12px 40px rgba(0,0,0,0.18));
+}
+.welcome-overlay__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+.welcome-overlay__head .kicker { margin: 0; }
+.welcome-overlay__close {
+  background: transparent;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+.welcome-overlay__close:hover {
+  background: var(--surface-deep);
+  color: var(--ink);
+}
+.welcome-overlay__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink-strong);
+  margin: 0 0 var(--space-3);
+}
+.welcome-overlay__body p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: 0 0 var(--space-3);
+}
+.welcome-overlay__body p:last-child { margin-bottom: 0; }
+
+/* Visual gap between research band and the consent moment that follows.
+   The band is the last block of information; the consent checkboxes
+   and CTA sit beneath it as the consent moment proper. Read as the
+   same information-to-consent flow, with appropriate breathing. */
+.welcome-consent {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 0.5px solid var(--border);
+  max-width: 760px;
+}
+.welcome-consent .check {
+  margin: 0 0 var(--space-2);
+}
+.welcome-consent__cta {
+  margin-top: var(--space-6);
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   Consent-to-participate block (Profile screen) — rolled back.
+   v1 Delta D's block is removed; styles retained but unused.
+   ============================================================ */
+.consent-block {
+  margin-top: var(--space-6);
+  padding: var(--space-5) var(--space-6);
+  background: var(--surface-deep);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+.consent-block .kicker {
+  margin: 0 0 var(--space-3);
+}
+.consent-block__check {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 10px;
+  align-items: start;
+  cursor: pointer;
+}
+.consent-block__check input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.consent-block__text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.consent-block__hint {
+  margin-top: var(--space-3);
+  padding-left: 34px;
+  font-size: 12px;
+  color: var(--ink-mute);
+  font-style: italic;
+}
+
+/* ============================================================
+   Cluster 3 — Instruments setup (c3-setup1 + c3-setup2)
+   ============================================================ */
+
+/* ---------- c3-setup1 — caption directly under the diagram ---------- */
+.ird-caption {
+  margin: calc(-1 * var(--space-3)) 0 var(--space-5);
+  max-width: 620px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-mute);
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ird-caption em { font-style: italic; color: var(--ink-soft); }
+
+/* ---------- c3-setup2 — stage-grouped 2×2 instrument grid ---------- */
+.instgrid {
+  margin: var(--space-6) 0;
+}
+.instgrid__heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+  margin: 0 0 var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 0.5px solid var(--border);
+}
+.instgrid__stage {
+  margin-bottom: var(--space-6);
+}
+.instgrid__stage:last-child { margin-bottom: 0; }
+
+.instgrid__stage-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--coral);
+  font-weight: 500;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-2);
+  border-bottom: 0.5px solid var(--border-soft);
+}
+.instgrid__row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5) var(--space-7);
+}
+@media (max-width: 880px) {
+  .instgrid__row { grid-template-columns: 1fr; }
+}
+.instgrid__block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.instgrid__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.instgrid__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--coral-deep);
+  background: var(--coral-tint);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.instgrid__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  color: var(--ink-strong);
+  margin: 0;
+}
+.instgrid__body {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+/* ---------- c3-setup2 — three small italic notes below the grid ---------- */
+.instnotes {
+  list-style: none;
+  margin: var(--space-6) 0 var(--space-5);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 760px;
+}
+.instnotes__note {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.instnotes__note em { font-style: italic; }
+.instnotes__note strong { font-weight: 600; color: var(--ink); }
+
+/* ---------- c3-setup2 — load-bearing-concept callout ----------
+   A second callout below the register-callout, visually distinct
+   from it: smaller, hung-quoted, italic. Preserved verbatim from
+   the original screen 22's italic-callout treatment.
+   ---------- */
+.loadbear-callout {
+  margin: var(--space-5) 0 var(--space-6);
+  padding: var(--space-3) var(--space-5);
+  border-left: 2px solid var(--ink-faint);
+  background: transparent;
+}
+.loadbear-callout p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.loadbear-callout em { font-style: italic; }
+
+/* ---------- c3-setup2 — closing italic line ---------- */
+.closing-italic {
+  margin: var(--space-6) 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  font-style: italic;
+  text-align: center;
+}
