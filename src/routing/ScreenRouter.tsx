@@ -10,6 +10,13 @@ import { Placeholder } from '@/screens/placeholders';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { OrientG1, OrientG2 } from '@/screens/OrientationScreen';
+import { ProblemSetup1, ProblemSetup2 } from '@/screens/setup/ProblemSetup';
+import { FrameworkSetup1, FrameworkSetup2 } from '@/screens/setup/FrameworkSetup';
+import {
+  InstrumentsSetup1,
+  InstrumentsSetup2,
+} from '@/screens/setup/InstrumentsSetup';
+import { ClusterSetupScreen } from '@/screens/setup/ClusterSetupScreen';
 import { requireScreen, type Screen } from './screens';
 
 export function ScreenRouter(): JSX.Element {
@@ -45,19 +52,23 @@ function renderByKind(screen: Screen): JSX.Element {
     case 'orient-2':
       return <OrientG2 />;
     case 'problem-setup-1':
-      return <Placeholder name="Problem · Setup 1 of 2" />;
+      return <ProblemSetup1 />;
     case 'problem-setup-2':
-      return <Placeholder name="Problem · Setup 2 of 2" />;
+      return <ProblemSetup2 />;
     case 'framework-setup-1':
-      return <Placeholder name="Framework · Setup 1 of 2" />;
+      return <FrameworkSetup1 />;
     case 'framework-setup-2':
-      return <Placeholder name="Framework · Setup 2 of 2" />;
+      return <FrameworkSetup2 />;
     case 'instruments-setup-1':
-      return <Placeholder name="Instruments · Setup 1 of 2" />;
+      return <InstrumentsSetup1 />;
     case 'instruments-setup-2':
-      return <Placeholder name="Instruments · Setup 2 of 2" />;
+      return <InstrumentsSetup2 />;
     case 'cluster-setup':
-      return <Placeholder name={`Cluster setup · ${screen.clusterId ?? '(no cluster id)'}`} />;
+      return screen.clusterId ? (
+        <ClusterSetupScreen clusterId={screen.clusterId} />
+      ) : (
+        <Placeholder name="Cluster setup · (no cluster id)" />
+      );
     case 'question':
       return <Placeholder name={`Question · ${screen.id}`} />;
     case 'paired':
