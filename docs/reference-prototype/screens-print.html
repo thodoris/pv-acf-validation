@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>PV-ACF Expert Review — All screens (print sheet)</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap&subset=greek,latin" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css"/>
+
+<style>
+  html, body { margin: 0; padding: 0; background: #ECEAE2; }
+  body { font-family: "IBM Plex Sans", system-ui, sans-serif; color: #1A1816; }
+
+  .sheet-header {
+    max-width: 1440px;
+    margin: 32px auto 24px;
+    padding: 0 24px;
+    color: #5F5C54;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .sheet-header h1 {
+    font: 700 26px "GFS Neohellenic", serif;
+    color: #1A1816;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  .sheet-header em { color: #712B13; }
+  .sheet-header .tip {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: #FAECE7;
+    border-radius: 8px;
+    border: 0.5px solid #B8472E;
+    color: #712B13;
+    font-size: 13px;
+  }
+  .sheet-header .tip strong { font-weight: 600; }
+  .sheet-header .tip code {
+    font-family: "IBM Plex Mono", monospace;
+    background: rgba(255,255,255,0.6);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+
+  .page-frame {
+    width: 1440px;
+    height: 960px;
+    margin: 0 auto 28px;
+    background: #FBF8F1;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+    page-break-after: always;
+    break-after: page;
+    overflow: hidden;
+    position: relative;
+    isolation: isolate;
+  }
+  .page-frame:last-of-type {
+    page-break-after: auto;
+    break-after: auto;
+  }
+  .page-frame__caption {
+    position: absolute;
+    top: 10px; right: 16px;
+    z-index: 9999;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    color: #5F5C54;
+    background: rgba(255,255,255,0.92);
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 0.5px solid #E5E0D2;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+  /* Each instance must scope its sticky elements inside its own frame. */
+  .page-frame .rail {
+    position: relative !important;
+    top: auto !important;
+    height: 896px !important;
+    overflow: hidden !important;
+  }
+  .page-frame .topbar {
+    position: relative !important;
+  }
+  .page-frame > div[id^="m-"] { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow: hidden; }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .sheet-header { display: none; }
+    .page-frame {
+      box-shadow: none;
+      margin: 0;
+      width: 1440px;
+      height: 960px;
+    }
+    .page-frame__caption {
+      background: transparent;
+      border: 0;
+    }
+  }
+  @page {
+    size: 1480px 1000px;
+    margin: 20px;
+  }
+</style>
+
+<!-- React + Babel pinned -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#FBF8F1"/>
+    <g transform="translate(28, 30)">
+      <rect width="144" height="6" rx="2" fill="#B8472E"/>
+      <rect y="14" width="144" height="120" rx="6" fill="#FFFFFF" stroke="#E5E0D2"/>
+      <rect x="12" y="30" width="48" height="4" fill="#8A867C"/>
+      <rect x="12" y="42" width="80" height="8" fill="#1A1816"/>
+      <rect x="12" y="64" width="120" height="3" fill="#E5E0D2"/>
+      <rect x="12" y="72" width="100" height="3" fill="#E5E0D2"/>
+      <rect x="12" y="80" width="110" height="3" fill="#E5E0D2"/>
+    </g>
+    <text x="100" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#5F5C54">12 SCREENS · PV-ACF</text>
+  </svg>
+</template>
+
+<div class="sheet-header">
+  <h1>PV-ACF Expert Validation Platform — All screens</h1>
+  <p>
+    All 12 demo screens in the order a reviewer encounters them, rendered live from the same prototype source.
+    Open as a <em>contact sheet</em> — or save as a PDF to share.
+  </p>
+  <div class="tip">
+    <strong>To save as PDF:</strong> press <code>Cmd + P</code> (Mac) or <code>Ctrl + P</code> (Windows) →
+    Destination: <code>Save as PDF</code> → in <strong>More settings</strong>, set the paper size to a
+    landscape custom size (~1480 × 1000 px) and disable headers/footers. Each screen prints on its own page.
+  </div>
+</div>
+
+<div class="page-frame"><span class="page-frame__caption">01 · Welcome</span><div id="m-welcome" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">02 · Orientation M1 — The subject</span><div id="m-o1" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">03 · Orientation M2 — Foundations</span><div id="m-o2" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">04 · Orientation M3 — What PV-ACF is</span><div id="m-o3" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">05 · Orientation M4 — Visual presentation</span><div id="m-o4" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">06 · Orientation M5 — Bridge to the questionnaire</span><div id="m-o5" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">07 · Block 1 — C1′ Architectural soundness</span><div id="m-b1" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">08 · Block 2 — CIW Contextual Integrity Worksheet</span><div id="m-ciw" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">09 · Block 2 — AST Architecture Selection Tool (flagship)</span><div id="m-ast" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">10 · Block 3 — Open feedback</span><div id="m-b3" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">11 · Submit — review & confirm</span><div id="m-submit" data-skip-mount="true"></div></div>
+<div class="page-frame"><span class="page-frame__caption">12 · Thank-you</span><div id="m-thanks" data-skip-mount="true"></div></div>
+
+<!-- Hidden root so app.jsx's auto-mount block doesn't error. The data-skip-mount attribute prevents auto-mount. -->
+<div id="root" data-skip-mount="true" style="display:none"></div>
+
+<script src="content.js"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="shell.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="screens-orientation.jsx"></script>
+<script type="text/babel" src="screens-submit.jsx"></script>
+<script type="text/babel" src="overlays.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+
+<script type="text/babel">
+  (function () {
+    const SCREENS_TO_RENDER = [
+      "welcome", "o1", "o2", "o3", "o4", "o5",
+      "b1", "ciw", "ast", "b3", "submit", "thanks",
+    ];
+    function mountAll() {
+      if (!window.__App) { setTimeout(mountAll, 100); return; }
+      SCREENS_TO_RENDER.forEach((id) => {
+        const el = document.getElementById("m-" + id);
+        if (!el) return;
+        ReactDOM.createRoot(el).render(
+          <window.__App initialScreen={id} printMode={true}/>
+        );
+      });
+    }
+    mountAll();
+  })();
+</script>
+
+</body>
+</html>

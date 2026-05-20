@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>PV-ACF · Expert Validation — Prototype</title>
+
+<!-- Fonts: GFS Neohellenic + IBM Plex Sans + Plex Mono. Greek + Latin subsets. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap&subset=greek,latin" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css?v=19"/>
+<link rel="stylesheet" href="styles-phase-a.css?v=18"/>
+
+<!-- React + Babel pinned per CLAUDE.md -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#FBF8F1"/>
+    <rect x="60" y="50" width="80" height="100" rx="8" fill="#FFFFFF" stroke="#E5E0D2"/>
+    <rect x="60" y="50" width="80" height="4" rx="2" fill="#B8472E"/>
+    <rect x="72" y="70" width="40" height="3" fill="#8A867C"/>
+    <rect x="72" y="82" width="56" height="6" fill="#1A1816"/>
+    <rect x="72" y="100" width="56" height="3" fill="#E5E0D2"/>
+    <rect x="72" y="108" width="44" height="3" fill="#E5E0D2"/>
+    <rect x="72" y="116" width="52" height="3" fill="#E5E0D2"/>
+    <rect x="72" y="130" width="32" height="8" rx="3" fill="#B8472E"/>
+  </svg>
+</template>
+<div id="root" data-screen-label="C-9 Expert Review prototype"></div>
+
+<!-- Plain JS first, then JSX. Versioned querystrings keep browsers from serving
+     stale content.js / app.jsx after edits. Bump the v= number when changing JS. -->
+<script src="content.js?v=33"></script>
+<!-- AST Explore web component (vanilla JS, single-file). Defines <ast-explore>. -->
+<script src="ast-explore.js?v=34"></script>
+<script type="text/babel" src="tweaks-panel.jsx?v=33"></script>
+<script type="text/babel" src="shell.jsx?v=33"></script>
+<script type="text/babel" src="screens.jsx?v=34"></script>
+<script type="text/babel" src="screens-orientation.jsx?v=34"></script>
+<script type="text/babel" src="screens-submit.jsx?v=33"></script>
+<script type="text/babel" src="screens-templates.jsx?v=37"></script>
+<!-- Framework-organisation diagram (Cluster 2). animations.jsx must precede it. -->
+<script type="text/babel" src="diagrams/animations.jsx?v=33"></script>
+<script type="text/babel" src="diagrams/framework-organisation-diagram.jsx?v=33"></script>
+<!-- Three-levels diagram (Cluster 1). No animations.jsx dependency. -->
+<script type="text/babel" src="diagrams/three-levels-diagram.jsx?v=33"></script>
+<!-- Instrument-reading diagram (Cluster 3). No animations.jsx dependency. -->
+<script type="text/babel" src="diagrams/instrument-reading-diagram.jsx?v=33"></script>
+<script type="text/babel" src="screens-problem-setup.jsx?v=34"></script>
+<script type="text/babel" src="screens-framework-setup.jsx?v=34"></script>
+<script type="text/babel" src="screens-instruments-setup.jsx?v=34"></script>
+<script type="text/babel" src="overlays.jsx?v=33"></script>
+<script type="text/babel" src="app.jsx?v=34"></script>
+</body>
+</html>

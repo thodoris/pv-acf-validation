@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>PV-ACF · Distinguishing the eight introductory screens — proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap&subset=greek,latin" rel="stylesheet">
+
+<style>
+  :root {
+    /* Palette pulled from project tokens (styles.css). */
+    --page:          #FBF8F1;
+    --page-subtle:   #F4EFE3;
+    --surface:       #FFFFFF;
+    --surface-deep:  #F8F4EA;
+    --ink-strong:    #1A1816;
+    --ink:           #2C2A26;
+    --ink-soft:      #5F5C54;
+    --ink-mute:      #8A867C;
+    --ink-faint:     #BFBBB0;
+    --border:        #E5E0D2;
+    --border-soft:   #EEE9DC;
+    --border-strong: #C9C3B3;
+
+    --coral:         #B8472E;
+    --coral-deep:    #712B13;
+    --coral-tint:    #FAECE7;
+
+    --cobalt:        #2B5BD9;
+    --cobalt-deep:   #1E3FA0;
+    --cobalt-tint:   #E3EBFC;
+
+    --sage:          #4F7A66;
+    --sage-deep:     #2A4D3D;
+    --sage-tint:     #E7F0EB;
+
+    --font-body:    "IBM Plex Sans", system-ui, sans-serif;
+    --font-display: "GFS Neohellenic", "IBM Plex Sans", system-ui, serif;
+    --font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .doc { max-width: 1240px; margin: 0 auto; padding: 56px 56px 96px; }
+
+  /* ---------- Document header ---------- */
+  .doc-kicker {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--ink-mute); margin: 0 0 12px;
+  }
+  .doc-title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 44px; line-height: 1.08; letter-spacing: -0.02em;
+    color: var(--ink-strong); margin: 0 0 14px; max-width: 920px;
+  }
+  .doc-lede {
+    font-size: 17px; line-height: 1.55; color: var(--ink-soft);
+    max-width: 760px; margin: 0 0 40px;
+  }
+  .doc-lede em { color: var(--coral-deep); font-style: italic; }
+
+  /* ---------- Section structure ---------- */
+  section { margin: 56px 0; scroll-margin-top: 32px; }
+  .section-head { display: flex; align-items: baseline; gap: 16px; margin: 0 0 22px;
+                  padding-bottom: 12px; border-bottom: 0.5px solid var(--border); }
+  .section-num {
+    font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em;
+    color: var(--ink-mute); padding-top: 4px;
+  }
+  .section-title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 26px; line-height: 1.2; letter-spacing: -0.01em;
+    color: var(--ink-strong); margin: 0;
+  }
+  .section-sub {
+    margin: 0 0 28px; max-width: 800px; color: var(--ink-soft); font-size: 15px;
+  }
+
+  /* ---------- Generic helpers ---------- */
+  .mono { font-family: var(--font-mono); }
+  .small-caps { font-family: var(--font-mono); font-size: 11px;
+                letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute); }
+  p { margin: 0 0 12px; text-wrap: pretty; }
+  strong { color: var(--ink-strong); font-weight: 600; }
+  em { font-style: italic; color: var(--ink); }
+
+  /* ============================================================
+     1 — Diagnosis card
+     ============================================================ */
+  .diag {
+    display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px;
+    align-items: start;
+  }
+  .diag__copy p { font-size: 15px; color: var(--ink); }
+  .diag__list { margin: 16px 0 0; padding: 0; list-style: none; }
+  .diag__list li {
+    display: grid; grid-template-columns: 36px 1fr; gap: 10px;
+    padding: 10px 0; border-top: 0.5px solid var(--border-soft);
+    font-size: 14px; color: var(--ink);
+  }
+  .diag__list li:first-child { border-top: 0; }
+  .diag__list .mono { color: var(--coral); font-size: 11px; letter-spacing: 0.06em;
+                      padding-top: 3px; }
+
+  /* Mini composite preview of the existing template — shows what
+     respondents see across all 8 screens today, all looking alike. */
+  .stack {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 8px; padding: 22px; display: grid; gap: 14px;
+  }
+  .stack__row {
+    display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 10px;
+  }
+  .stack__tag {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em;
+    color: var(--ink-mute); writing-mode: vertical-rl; transform: rotate(180deg);
+    text-align: center; padding: 2px 0;
+  }
+  .stack__bar { height: 36px; border-radius: 3px;
+                background: linear-gradient(90deg, var(--coral-tint), var(--page-subtle));
+                border-left: 3px solid var(--coral);
+                display: flex; align-items: center; padding: 0 10px;
+                font-family: var(--font-mono); font-size: 10.5px;
+                color: var(--ink-mute); letter-spacing: 0.06em; }
+
+  /* ============================================================
+     2 — Identity-system table (the proposed vocabulary)
+     ============================================================ */
+  .sys {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+    border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden;
+    background: var(--surface);
+  }
+  .sys__col { padding: 24px 22px; border-left: 0.5px solid var(--border);
+              display: grid; gap: 14px; }
+  .sys__col:first-child { border-left: 0; }
+  .sys__col[data-tone="ground"]  { background: var(--surface); }
+  .sys__col[data-tone="coral"]   { background: linear-gradient(180deg, var(--surface) 0%, var(--coral-tint)  120%); }
+  .sys__col[data-tone="cobalt"]  { background: linear-gradient(180deg, var(--surface) 0%, var(--cobalt-tint) 120%); }
+  .sys__col[data-tone="sage"]    { background: linear-gradient(180deg, var(--surface) 0%, var(--sage-tint)   120%); }
+
+  .sys__rule { height: 3px; border-radius: 2px; }
+  .sys__rule--ground { background: var(--ink-strong); width: 28px; }
+  .sys__rule--coral  { background: var(--coral); }
+  .sys__rule--cobalt { background: var(--cobalt); }
+  .sys__rule--sage   { background: var(--sage); }
+
+  .sys__mono {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-mute);
+  }
+  .sys__mark {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 56px; line-height: 1; letter-spacing: -0.03em;
+  }
+  .sys__mark--ground { font-size: 24px; color: var(--ink-strong); font-style: italic; }
+  .sys__mark--coral  { color: var(--coral); }
+  .sys__mark--cobalt { color: var(--cobalt); }
+  .sys__mark--sage   { color: var(--sage); }
+
+  .sys__name {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 19px; color: var(--ink-strong); letter-spacing: -0.01em;
+  }
+  .sys__role { color: var(--ink-soft); font-size: 13.5px; font-style: italic; }
+  .sys__signs { display: grid; gap: 6px; margin-top: 6px;
+                font-family: var(--font-mono); font-size: 11px;
+                color: var(--ink-soft); letter-spacing: 0.04em; }
+  .sys__signs span::before { content: "·  "; color: var(--ink-faint); }
+
+  /* ============================================================
+     3 — Mockup screens (real-ish thumbnails)
+     ============================================================ */
+  .mock-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+  }
+  .mock-pair-head {
+    grid-column: 1 / -1;
+    display: flex; align-items: baseline; gap: 14px;
+    margin: 18px 0 4px;
+    padding: 8px 12px; border-radius: 4px;
+  }
+  .mock-pair-head[data-tone="ground"]  { background: var(--page-subtle); }
+  .mock-pair-head[data-tone="coral"]   { background: var(--coral-tint); }
+  .mock-pair-head[data-tone="cobalt"]  { background: var(--cobalt-tint); }
+  .mock-pair-head[data-tone="sage"]    { background: var(--sage-tint); }
+  .mock-pair-head__bar { width: 22px; height: 3px; border-radius: 2px; }
+  .mock-pair-head[data-tone="ground"]  .mock-pair-head__bar { background: var(--ink-strong); }
+  .mock-pair-head[data-tone="coral"]   .mock-pair-head__bar { background: var(--coral); }
+  .mock-pair-head[data-tone="cobalt"]  .mock-pair-head__bar { background: var(--cobalt); }
+  .mock-pair-head[data-tone="sage"]    .mock-pair-head__bar { background: var(--sage); }
+  .mock-pair-head__name {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-soft);
+  }
+  .mock-pair-head__note { color: var(--ink-mute); font-size: 12px; font-style: italic; }
+
+  .mock {
+    background: var(--surface); border: 0.5px solid var(--border);
+    border-radius: 6px; padding: 18px 20px 20px; min-height: 360px;
+    display: flex; flex-direction: column; position: relative; overflow: hidden;
+  }
+  /* Grounding mocks override the page surface to a slightly different tone */
+  .mock[data-tone="ground"]  { background: #FCFBF6; }
+  .mock[data-tone="coral"]   .mock__edge { background: var(--coral); }
+  .mock[data-tone="cobalt"]  .mock__edge { background: var(--cobalt); }
+  .mock[data-tone="sage"]    .mock__edge { background: var(--sage); }
+  .mock[data-tone="ground"]  .mock__edge { background: var(--ink-strong); }
+
+  /* The thin vertical accent on the left edge — a cluster signal that
+     persists from setup into every question screen in the cluster. */
+  .mock__edge {
+    position: absolute; left: 0; top: 16px; bottom: 16px; width: 2px;
+    border-radius: 2px;
+  }
+  .mock[data-tone="ground"] .mock__edge { width: 1px; opacity: 0.5; }
+
+  .mock__row-meta {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--ink-mute);
+  }
+  .mock__row-meta b { font-weight: 500; }
+  .mock__cnum {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 11px; letter-spacing: 0.02em;
+    padding: 2px 6px; border-radius: 3px;
+  }
+  .mock[data-tone="coral"]  .mock__cnum { color: #fff; background: var(--coral); }
+  .mock[data-tone="cobalt"] .mock__cnum { color: #fff; background: var(--cobalt); }
+  .mock[data-tone="sage"]   .mock__cnum { color: #fff; background: var(--sage); }
+  .mock[data-tone="ground"] .mock__cnum { color: var(--ink-strong); background: transparent;
+                                          border: 0.5px solid var(--ink-mute); font-style: italic; }
+
+  .mock__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 20px; line-height: 1.15; letter-spacing: -0.01em;
+    color: var(--ink-strong); margin: 4px 0 6px; text-wrap: balance;
+  }
+  .mock__sub {
+    font-size: 12.5px; color: var(--ink-soft); margin: 0 0 12px;
+    font-style: italic;
+  }
+
+  /* The lede block, recoloured per cluster */
+  .mock__lede {
+    background: var(--surface-deep); padding: 10px 12px; border-radius: 0 4px 4px 0;
+    font-size: 11px; line-height: 1.5; color: var(--ink-soft);
+    margin: 0 0 12px;
+  }
+  .mock[data-tone="coral"]  .mock__lede { border-left: 2.5px solid var(--coral); }
+  .mock[data-tone="cobalt"] .mock__lede { border-left: 2.5px solid var(--cobalt); }
+  .mock[data-tone="sage"]   .mock__lede { border-left: 2.5px solid var(--sage); }
+  .mock[data-tone="ground"] .mock__lede {
+    border-left: 0; background: transparent;
+    border-top: 0.5px solid var(--ink-strong);
+    border-bottom: 0.5px solid var(--ink-strong);
+    padding: 12px 0; margin: 0 0 14px;
+  }
+
+  /* A small "diagram" stand-in for setup1 mockups */
+  .mock__diagram {
+    background: var(--surface-deep); border-radius: 3px;
+    height: 78px; display: grid; place-items: center;
+    margin: 0 0 12px; position: relative; overflow: hidden;
+  }
+  .mock[data-tone="coral"]  .mock__diagram { background: linear-gradient(120deg, var(--coral-tint), var(--surface-deep)); }
+  .mock[data-tone="cobalt"] .mock__diagram { background: linear-gradient(120deg, var(--cobalt-tint), var(--surface-deep)); }
+  .mock[data-tone="sage"]   .mock__diagram { background: linear-gradient(120deg, var(--sage-tint), var(--surface-deep)); }
+  .mock__diagram-label {
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.06em;
+    color: var(--ink-mute); text-transform: uppercase;
+  }
+
+  /* The 4-pattern grid stand-in for setup2 mockups */
+  .mock__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px;
+                margin: 0 0 12px; }
+  .mock__grid-item {
+    display: grid; grid-template-columns: 18px 1fr; gap: 6px;
+    padding-top: 6px; border-top: 0.5px solid var(--border-soft);
+  }
+  .mock__grid-num {
+    font-family: var(--font-mono); font-size: 9.5px; padding-top: 2px;
+  }
+  .mock[data-tone="coral"]  .mock__grid-num { color: var(--coral); }
+  .mock[data-tone="cobalt"] .mock__grid-num { color: var(--cobalt); }
+  .mock[data-tone="sage"]   .mock__grid-num { color: var(--sage); }
+  .mock[data-tone="ground"] .mock__grid-num { color: var(--ink-strong); font-style: italic; }
+  .mock__grid-line {
+    height: 5px; border-radius: 2px; background: var(--border-soft);
+  }
+  .mock__grid-line + .mock__grid-line { margin-top: 3px; width: 78%; }
+
+  /* Body text stand-in */
+  .mock__body { margin-top: auto; display: grid; gap: 4px; }
+  .mock__body div { height: 4.5px; background: var(--border-soft); border-radius: 2px; }
+  .mock__body div:nth-child(1) { width: 100%; }
+  .mock__body div:nth-child(2) { width: 92%; }
+  .mock__body div:nth-child(3) { width: 86%; }
+
+  /* The closing callout (different per cluster) */
+  .mock__close {
+    margin-top: 10px; padding: 6px 8px; border-radius: 3px;
+    font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.05em;
+    color: var(--ink-soft); text-transform: uppercase;
+  }
+  .mock[data-tone="coral"]  .mock__close { background: var(--coral-tint);   color: var(--coral-deep); }
+  .mock[data-tone="cobalt"] .mock__close { background: var(--cobalt-tint);  color: var(--cobalt-deep); }
+  .mock[data-tone="sage"]   .mock__close { background: var(--sage-tint);    color: var(--sage-deep); }
+  .mock[data-tone="ground"] .mock__close { background: transparent; color: var(--ink-mute);
+                                           border-top: 0.5px solid var(--border); padding-top: 8px;
+                                           border-radius: 0; font-style: italic; text-transform: none; }
+
+  /* Grounding-specific layout: wide indent, no left edge accent, marginalia */
+  .mock--ground .mock__title { font-size: 22px; }
+  .mock--ground .mock__diagram { display: none; }
+  .mock--ground .mock__grid { grid-template-columns: 1fr 1fr 1fr; }
+
+  /* ============================================================
+     4 — Element sample row (vocabulary close-ups)
+     ============================================================ */
+  .voc {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  .voc__card {
+    background: var(--surface); border: 0.5px solid var(--border); border-radius: 6px;
+    padding: 20px;
+  }
+  .voc__head { display: flex; align-items: center; justify-content: space-between;
+               margin-bottom: 14px; }
+  .voc__head .small-caps { margin: 0; }
+  .voc__swatch { width: 18px; height: 18px; border-radius: 50%; }
+  .voc__swatch--coral  { background: var(--coral); }
+  .voc__swatch--cobalt { background: var(--cobalt); }
+  .voc__swatch--sage   { background: var(--sage); }
+  .voc__swatch--ground { background: var(--ink-strong); }
+
+  .voc__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 17px; color: var(--ink-strong); margin: 0 0 6px;
+  }
+  .voc__role { color: var(--ink-soft); font-size: 13px; margin: 0 0 14px; font-style: italic; }
+  .voc__list { margin: 0; padding: 0; list-style: none;
+               font-size: 12.5px; color: var(--ink); }
+  .voc__list li { padding: 6px 0; border-top: 0.5px solid var(--border-soft);
+                  display: grid; grid-template-columns: 76px 1fr; gap: 8px; }
+  .voc__list li:first-child { border-top: 0; }
+  .voc__list b { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em;
+                 color: var(--ink-mute); text-transform: uppercase; font-weight: 500;
+                 padding-top: 2px; }
+
+  /* ============================================================
+     5 — Variants block (Light / Medium / Strong)
+     ============================================================ */
+  .levels {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+  }
+  .level {
+    background: var(--surface); border: 0.5px solid var(--border); border-radius: 6px;
+    padding: 22px;
+  }
+  .level--rec { border-color: var(--coral); position: relative;
+                box-shadow: 0 0 0 2px var(--coral-tint); }
+  .level__badge {
+    position: absolute; top: -10px; right: 16px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; background: var(--coral); color: #fff;
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .level__name {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-mute); margin: 0 0 6px;
+  }
+  .level__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 18px; color: var(--ink-strong); margin: 0 0 10px;
+  }
+  .level p { font-size: 13.5px; color: var(--ink); }
+  .level__includes { margin: 12px 0 0; padding: 0; list-style: none;
+                     font-size: 12.5px; color: var(--ink-soft); }
+  .level__includes li { padding: 4px 0 4px 16px; position: relative; }
+  .level__includes li::before { content: "+"; position: absolute; left: 0;
+                                color: var(--coral); font-family: var(--font-mono); }
+
+  /* ============================================================
+     6 — Notes block
+     ============================================================ */
+  .notes {
+    background: var(--surface-deep); border-left: 3px solid var(--ink-mute);
+    padding: 22px 24px; border-radius: 0 6px 6px 0;
+  }
+  .notes h3 {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin: 0 0 12px;
+  }
+  .notes ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--ink); }
+  .notes li { margin-bottom: 8px; line-height: 1.55; }
+  .notes code { font-family: var(--font-mono); font-size: 12px;
+                background: var(--surface); padding: 1px 5px; border-radius: 3px;
+                border: 0.5px solid var(--border); }
+
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <p class="doc-kicker">PV-ACF · Expert Validation · Design proposal</p>
+  <h1 class="doc-title">Giving each cluster's introductory screens — and the two grounding screens — their own identity.</h1>
+  <p class="doc-lede">
+    The eight introductory screens currently inherit the same vocabulary as the questionnaire questions:
+    coral kicker, coral-bordered lede panel, numbered fourgap grid, italic closer. As a respondent moves
+    from c1-setup1 through to a question and back into c2-setup1, nothing in the page tells them
+    which cluster they are in — or that they have stopped answering and started reading orientation again.
+    This proposal sets out <em>a system that makes each cluster, and the grounding screens, immediately recognisable</em>
+    without re-writing any of the content.
+  </p>
+
+  <!-- ============================================================
+       SECTION 1 — Diagnosis
+       ============================================================ -->
+  <section>
+    <header class="section-head">
+      <span class="section-num">01</span>
+      <h2 class="section-title">What is making the eight screens read alike</h2>
+    </header>
+    <p class="section-sub">
+      Looking at the eight screens side by side, they share five visual moves in the same order. The
+      pattern is good — but it is the <em>same</em> pattern eight times, and the same pattern the
+      questions use, so no single screen has a distinctive shape.
+    </p>
+
+    <div class="diag">
+      <div class="diag__copy">
+        <p>
+          A respondent's eye is currently looking for one thing first: <strong>"is this a question I have
+          to answer, or is this reading?"</strong> The setup screens and the question screens share
+          enough vocabulary that the answer requires reading the kicker line every time.
+        </p>
+        <p>
+          Five ingredients are shared across all eight screens (and most of the question screens too):
+        </p>
+        <ul class="diag__list">
+          <li><span class="mono">01</span><span><b>Coral kicker</b> — same chrome accent as the question card's left bar.</span></li>
+          <li><span class="mono">02</span><span><b>Display title + tagline</b> — same scale on every screen.</span></li>
+          <li><span class="mono">03</span><span><b>Coral-bordered lede panel</b> — same border colour, same surface tint.</span></li>
+          <li><span class="mono">04</span><span><b>Numbered fourgap grid</b> — same numerals, same coral colour, same rule above each.</span></li>
+          <li><span class="mono">05</span><span><b>Italic lede-panel closer</b> — same coral-deep type.</span></li>
+        </ul>
+      </div>
+
+      <div class="stack" aria-label="Schematic of the shared template across the eight screens">
+        <div class="stack__row"><span class="stack__tag">G1</span>          <span class="stack__bar">kicker · title · lede · fourgap · closer</span></div>
+        <div class="stack__row"><span class="stack__tag">G2</span>          <span class="stack__bar">kicker · title · lede · concept-strip · closer</span></div>
+        <div class="stack__row"><span class="stack__tag">C1·1</span>        <span class="stack__bar">kicker · title · lede · diagram · body</span></div>
+        <div class="stack__row"><span class="stack__tag">C1·2</span>        <span class="stack__bar">kicker · title · lede · fourgap · closer</span></div>
+        <div class="stack__row"><span class="stack__tag">C2·1</span>        <span class="stack__bar">kicker · title · lede · diagram · body</span></div>
+        <div class="stack__row"><span class="stack__tag">C2·2</span>        <span class="stack__bar">kicker · title · lede · fourgap · closer</span></div>
+        <div class="stack__row"><span class="stack__tag">C3·1</span>        <span class="stack__bar">kicker · title · lede · diagram · body</span></div>
+        <div class="stack__row"><span class="stack__tag">C3·2</span>        <span class="stack__bar">kicker · title · lede · instgrid · closer</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 2 — Proposed identity system
+       ============================================================ -->
+  <section>
+    <header class="section-head">
+      <span class="section-num">02</span>
+      <h2 class="section-title">A four-identity system</h2>
+    </header>
+    <p class="section-sub">
+      Three cluster identities, each anchored on one of the platform's existing accents
+      (<span class="mono">coral · cobalt · sage</span>), plus a fourth "grounding" identity that
+      deliberately uses no accent — to mark it as <em>preamble</em> rather than chapter.
+      The palette is already in <code>styles.css</code>; nothing new is added.
+    </p>
+
+    <div class="sys">
+
+      <!-- Grounding column -->
+      <div class="sys__col" data-tone="ground">
+        <div class="sys__rule sys__rule--ground"></div>
+        <p class="sys__mono">Grounding · platform-wide</p>
+        <div class="sys__mark sys__mark--ground">— prologue —</div>
+        <div class="sys__name">No cluster, no number</div>
+        <p class="sys__role">G1 and G2 sit before the questionnaire. They are not a cluster; they should not pretend to be one.</p>
+        <div class="sys__signs">
+          <span>ink-strong type, no accent colour</span>
+          <span>thin upper + lower rules instead of a left bar</span>
+          <span>wider measure (1040px)</span>
+          <span>display set one size larger</span>
+          <span>letter-numbered grid (a · b · c)</span>
+        </div>
+      </div>
+
+      <!-- Cluster 1 column -->
+      <div class="sys__col" data-tone="coral">
+        <div class="sys__rule sys__rule--coral"></div>
+        <p class="sys__mono">Cluster 01 · Problem</p>
+        <div class="sys__mark sys__mark--coral">01</div>
+        <div class="sys__name">Coral</div>
+        <p class="sys__role">The incumbent. Cluster 1 keeps coral as its identity colour; the platform's existing chrome lives here.</p>
+        <div class="sys__signs">
+          <span>coral cluster badge (01) in title row</span>
+          <span>coral left edge persists onto question screens</span>
+          <span>three-levels diagram retains coral palette</span>
+          <span>numbered fourgap stays coral</span>
+        </div>
+      </div>
+
+      <!-- Cluster 2 column -->
+      <div class="sys__col" data-tone="cobalt">
+        <div class="sys__rule sys__rule--cobalt"></div>
+        <p class="sys__mono">Cluster 02 · Framework</p>
+        <div class="sys__mark sys__mark--cobalt">02</div>
+        <div class="sys__name">Cobalt</div>
+        <p class="sys__role">The framework is the architecture. Cobalt reads structural, blueprint, schematic — the right register for "what the framework looks like".</p>
+        <div class="sys__signs">
+          <span>cobalt cluster badge (02) in title row</span>
+          <span>cobalt left edge, cobalt lede border</span>
+          <span>framework-organisation diagram tinted cobalt</span>
+          <span>numbered fourgap in cobalt</span>
+        </div>
+      </div>
+
+      <!-- Cluster 3 column -->
+      <div class="sys__col" data-tone="sage">
+        <div class="sys__rule sys__rule--sage"></div>
+        <p class="sys__mono">Cluster 03 · Instruments</p>
+        <div class="sys__mark sys__mark--sage">03</div>
+        <div class="sys__name">Sage</div>
+        <p class="sys__role">The instruments are working objects. Sage already encodes "example/operational" elsewhere in the system — extend it.</p>
+        <div class="sys__signs">
+          <span>sage cluster badge (03) in title row</span>
+          <span>sage left edge, sage lede border</span>
+          <span>instrument-reading diagram tinted sage</span>
+          <span>CIW / AST / DMA / CPD badges in sage</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 3 — Vocabulary close-ups
+       ============================================================ -->
+  <section>
+    <header class="section-head">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Per-identity vocabulary</h2>
+    </header>
+    <p class="section-sub">
+      Four small repeatable moves carry the identity. Same anatomy, different values per cluster — so
+      respondents learn the system once and recognise it everywhere afterwards.
+    </p>
+
+    <div class="voc">
+
+      <!-- Grounding vocab -->
+      <div class="voc__card">
+        <div class="voc__head">
+          <p class="small-caps">Grounding</p>
+          <span class="voc__swatch voc__swatch--ground"></span>
+        </div>
+        <h3 class="voc__title">No accent, more air</h3>
+        <p class="voc__role">G1 · G2</p>
+        <ul class="voc__list">
+          <li><b>Mark</b><span>Italic word <em>"prologue"</em> set in display; no number, no badge</span></li>
+          <li><b>Edge</b><span>No left edge accent</span></li>
+          <li><b>Lede</b><span>Two thin ink rules, top and bottom — no coloured border</span></li>
+          <li><b>Grid</b><span>Lettered (a · b · c), not numbered</span></li>
+          <li><b>Measure</b><span>1040px (vs 880px in clusters)</span></li>
+        </ul>
+      </div>
+
+      <!-- Cluster 1 vocab -->
+      <div class="voc__card">
+        <div class="voc__head">
+          <p class="small-caps">Cluster 01 · Problem</p>
+          <span class="voc__swatch voc__swatch--coral"></span>
+        </div>
+        <h3 class="voc__title">Coral · the incumbent</h3>
+        <p class="voc__role">c1-setup1 · c1-setup2 · c1-q*</p>
+        <ul class="voc__list">
+          <li><b>Mark</b><span>Solid coral pill: "01 · PROBLEM"</span></li>
+          <li><b>Edge</b><span>Coral 2px left edge — persists onto every C1 question</span></li>
+          <li><b>Lede</b><span>Coral 3px left border (current)</span></li>
+          <li><b>Grid</b><span>Numerals in coral (current)</span></li>
+          <li><b>Closer</b><span>Coral-tint background, coral-deep italic (current)</span></li>
+        </ul>
+      </div>
+
+      <!-- Cluster 2 vocab -->
+      <div class="voc__card">
+        <div class="voc__head">
+          <p class="small-caps">Cluster 02 · Framework</p>
+          <span class="voc__swatch voc__swatch--cobalt"></span>
+        </div>
+        <h3 class="voc__title">Cobalt · the architecture</h3>
+        <p class="voc__role">c2-setup1 · c2-setup2 · c2-q*</p>
+        <ul class="voc__list">
+          <li><b>Mark</b><span>Solid cobalt pill: "02 · FRAMEWORK"</span></li>
+          <li><b>Edge</b><span>Cobalt 2px left edge across the cluster</span></li>
+          <li><b>Lede</b><span>Cobalt 3px left border, cobalt-tint surface</span></li>
+          <li><b>Grid</b><span>Numerals in cobalt</span></li>
+          <li><b>Closer</b><span>Cobalt-tint background, cobalt-deep italic</span></li>
+        </ul>
+      </div>
+
+      <!-- Cluster 3 vocab -->
+      <div class="voc__card">
+        <div class="voc__head">
+          <p class="small-caps">Cluster 03 · Instruments</p>
+          <span class="voc__swatch voc__swatch--sage"></span>
+        </div>
+        <h3 class="voc__title">Sage · the working objects</h3>
+        <p class="voc__role">c3-setup1 · c3-setup2 · c3-{ciw,ast,dma,cpd}</p>
+        <ul class="voc__list">
+          <li><b>Mark</b><span>Solid sage pill: "03 · INSTRUMENTS"</span></li>
+          <li><b>Edge</b><span>Sage 2px left edge across the cluster</span></li>
+          <li><b>Lede</b><span>Sage 3px left border, sage-tint surface</span></li>
+          <li><b>Grid</b><span>Numerals in sage; CIW/AST/DMA/CPD badges sage-tinted</span></li>
+          <li><b>Closer</b><span>Sage-tint background, sage-deep italic</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 4 — Mockups of the eight screens
+       ============================================================ -->
+  <section>
+    <header class="section-head">
+      <span class="section-num">04</span>
+      <h2 class="section-title">All eight screens under the proposed system</h2>
+    </header>
+    <p class="section-sub">
+      Each pair shares its identity. The two screens inside a pair stay rhythmically related —
+      setup-1 is diagram-led, setup-2 is grid-led — but they no longer look identical to the screens of
+      the neighbouring cluster.
+    </p>
+
+    <div class="mock-grid">
+
+      <!-- ---------- Grounding pair ---------- -->
+      <div class="mock-pair-head" data-tone="ground">
+        <span class="mock-pair-head__bar"></span>
+        <span class="mock-pair-head__name">Grounding · G1 + G2</span>
+        <span class="mock-pair-head__note">Platform-wide preamble. No cluster number. No accent colour. Wider measure.</span>
+      </div>
+      <div class="mock mock--ground" data-tone="ground">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">G1</span>
+          <span><b>Grounding · 1 of 2</b></span>
+        </div>
+        <h3 class="mock__title">AI in public administration</h3>
+        <p class="mock__sub">Why governance concerns often extend beyond the system itself.</p>
+        <div class="mock__lede">A two-rule lede block — no coloured border. Reads as <em>front-matter</em> rather than cluster chrome.</div>
+        <div class="mock__grid">
+          <div class="mock__grid-item"><span class="mock__grid-num">a</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">b</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">c</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+        </div>
+        <div class="mock__close">Three registers, lettered — not numbered.</div>
+      </div>
+      <div class="mock mock--ground" data-tone="ground">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">G2</span>
+          <span><b>Grounding · 2 of 2</b></span>
+        </div>
+        <h3 class="mock__title">The framework you will evaluate</h3>
+        <p class="mock__sub">PV-ACF as a critical-deliberative framework, not another compliance checklist.</p>
+        <div class="mock__lede">A second two-rule lede block — the grounding signature, applied consistently across both screens.</div>
+        <div class="mock__body"><div></div><div></div><div></div></div>
+        <div class="mock__close">Concept strip continues, set in mono — the calm preamble register.</div>
+      </div>
+
+      <!-- ---------- Cluster 1 pair ---------- -->
+      <div class="mock-pair-head" data-tone="coral">
+        <span class="mock-pair-head__bar"></span>
+        <span class="mock-pair-head__name">Cluster 01 · Problem</span>
+        <span class="mock-pair-head__note">Coral identity, "01 · PROBLEM" badge. Setup-1 diagram-led, setup-2 grid-led.</span>
+      </div>
+      <div class="mock" data-tone="coral">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">01</span>
+          <span><b>Problem</b></span>
+          <span>·  Introductory setup · 1 of 2</span>
+        </div>
+        <h3 class="mock__title">When the deployment isn't the whole story</h3>
+        <p class="mock__sub">Three levels the cluster's questions span.</p>
+        <div class="mock__lede">Coral-bordered lede block (current). Reused exactly — no rework needed.</div>
+        <div class="mock__diagram"><span class="mock__diagram-label">three-levels-diagram</span></div>
+        <div class="mock__body"><div></div><div></div><div></div></div>
+      </div>
+      <div class="mock" data-tone="coral">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">01</span>
+          <span><b>Problem</b></span>
+          <span>·  Introductory setup · 2 of 2</span>
+        </div>
+        <h3 class="mock__title">What this cluster will ask you to judge</h3>
+        <p class="mock__sub">Four patterns to recognise — or not — from your direct experience.</p>
+        <div class="mock__lede">Lede continues, coral border.</div>
+        <div class="mock__grid">
+          <div class="mock__grid-item"><span class="mock__grid-num">01</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">02</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">03</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">04</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+        </div>
+        <div class="mock__close">Italic closer · coral-deep · current</div>
+      </div>
+
+      <!-- ---------- Cluster 2 pair ---------- -->
+      <div class="mock-pair-head" data-tone="cobalt">
+        <span class="mock-pair-head__bar"></span>
+        <span class="mock-pair-head__name">Cluster 02 · Framework</span>
+        <span class="mock-pair-head__note">Re-coloured to cobalt. Lede border, fourgap numerals, edge accent — all shift.</span>
+      </div>
+      <div class="mock" data-tone="cobalt">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">02</span>
+          <span><b>Framework</b></span>
+          <span>·  Introductory setup · 1 of 2</span>
+        </div>
+        <h3 class="mock__title">How the framework is organised</h3>
+        <p class="mock__sub">A two-layer structure for governing AI deployments across their lifecycle.</p>
+        <div class="mock__lede">Cobalt-bordered lede — same anatomy, new colour. Eye now reads "different chapter".</div>
+        <div class="mock__diagram"><span class="mock__diagram-label">framework-organisation-diagram</span></div>
+        <div class="mock__body"><div></div><div></div><div></div></div>
+      </div>
+      <div class="mock" data-tone="cobalt">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">02</span>
+          <span><b>Framework</b></span>
+          <span>·  Introductory setup · 2 of 2</span>
+        </div>
+        <h3 class="mock__title">What the framework pays attention to</h3>
+        <p class="mock__sub">The governance conditions that are often weak, absent, or difficult to sustain.</p>
+        <div class="mock__lede">Cobalt lede continues. The four-gap grid below also uses cobalt numerals.</div>
+        <div class="mock__grid">
+          <div class="mock__grid-item"><span class="mock__grid-num">01</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">02</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">03</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">04</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+        </div>
+        <div class="mock__close">Italic closer · cobalt-deep</div>
+      </div>
+
+      <!-- ---------- Cluster 3 pair ---------- -->
+      <div class="mock-pair-head" data-tone="sage">
+        <span class="mock-pair-head__bar"></span>
+        <span class="mock-pair-head__name">Cluster 03 · Instruments</span>
+        <span class="mock-pair-head__note">Re-coloured to sage. Instrument badges (CIW/AST/DMA/CPD) carry sage too.</span>
+      </div>
+      <div class="mock" data-tone="sage">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">03</span>
+          <span><b>Instruments</b></span>
+          <span>·  Introductory setup · 1 of 2</span>
+        </div>
+        <h3 class="mock__title">How to read an instrument here</h3>
+        <p class="mock__sub">Specified form, institutional configuration, expert judgement.</p>
+        <div class="mock__lede">Sage-bordered lede. The three-tier instrument-reading diagram fits this hue naturally.</div>
+        <div class="mock__diagram"><span class="mock__diagram-label">instrument-reading-diagram</span></div>
+        <div class="mock__body"><div></div><div></div><div></div></div>
+      </div>
+      <div class="mock" data-tone="sage">
+        <div class="mock__edge"></div>
+        <div class="mock__row-meta">
+          <span class="mock__cnum">03</span>
+          <span><b>Instruments</b></span>
+          <span>·  Introductory setup · 2 of 2</span>
+        </div>
+        <h3 class="mock__title">What you will inspect</h3>
+        <p class="mock__sub">Four operational objects, one repeated answer pattern.</p>
+        <div class="mock__lede">Sage lede continues. Stage labels and instrument badges read sage.</div>
+        <div class="mock__grid">
+          <div class="mock__grid-item"><span class="mock__grid-num">CIW</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">AST</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">DMA</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+          <div class="mock__grid-item"><span class="mock__grid-num">CPD</span><span><div class="mock__grid-line"></div><div class="mock__grid-line"></div></span></div>
+        </div>
+        <div class="mock__close">Italic closer · sage-deep</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 5 — Three intervention levels
+       ============================================================ -->
+  <section>
+    <header class="section-head">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Three ways to land the system — light, medium, strong</h2>
+    </header>
+    <p class="section-sub">
+      Same vocabulary; different commitment. Pick one and the eight setup screens look different by
+      design, not by accident.
+    </p>
+
+    <div class="levels">
+
+      <div class="level">
+        <p class="level__name">Option A · Light</p>
+        <h3 class="level__title">Colour only</h3>
+        <p>Re-colour the lede border, the fourgap numerals, and the closer per cluster. No badge,
+           no edge accent, no measure change. The smallest change that still differentiates the four
+           identities at a glance.</p>
+        <ul class="level__includes">
+          <li>Coral / cobalt / sage swap on lede + grid + closer</li>
+          <li>Grounding loses the coral border, gets the two-rule treatment</li>
+        </ul>
+      </div>
+
+      <div class="level level--rec">
+        <span class="level__badge">Recommended</span>
+        <p class="level__name">Option B · Medium</p>
+        <h3 class="level__title">Colour + cluster badge + edge accent</h3>
+        <p>Everything in A, plus a small <b>"01 · PROBLEM"</b> / <b>"02 · FRAMEWORK"</b> / <b>"03 · INSTRUMENTS"</b> badge in the
+           title row, and a 2px coloured left edge that persists from setup screens into every question
+           inside the cluster. Recognition is instant; the cluster colour now indexes the whole journey.</p>
+        <ul class="level__includes">
+          <li>Cluster badge in title row of every screen in the cluster</li>
+          <li>2px coloured left edge on the main column, all the way through</li>
+          <li>Grounding gets <em>"— prologue —"</em> mark and wider measure</li>
+        </ul>
+      </div>
+
+      <div class="level">
+        <p class="level__name">Option C · Strong</p>
+        <h3 class="level__title">Colour + badge + edge + question-screen accents</h3>
+        <p>Everything in B, plus the question screens in each cluster pick up the cluster colour where they
+           currently use coral — q-card left bar, kicker, selected pill, focus ring. The cluster colour
+           becomes the dominant chrome for an entire run of screens. Strongest signal, biggest change.</p>
+        <ul class="level__includes">
+          <li>Question screens re-colour to cluster accent (coral / cobalt / sage)</li>
+          <li>Right-rail affordance kickers re-colour too</li>
+          <li>Step progress dot in the topbar uses the cluster colour for the active cluster</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 6 — Implementation notes
+       ============================================================ -->
+  <section>
+    <header class="section-head">
+      <span class="section-num">06</span>
+      <h2 class="section-title">If you pick a direction, here is what changes</h2>
+    </header>
+
+    <div class="notes">
+      <h3>Files affected</h3>
+      <ul>
+        <li><code>styles.css</code> — add <code>--cluster-accent</code>, <code>--cluster-accent-deep</code>, <code>--cluster-accent-tint</code> as scoped tokens (set via <code>[data-cluster]</code> on the root <code>.main</code>).</li>
+        <li><code>styles-phase-a.css</code> — change <code>.lede-panel</code>, <code>.fourgap__num</code>, <code>.kicker--coral</code>, <code>.lede-panel--italic</code> to read from <code>var(--cluster-accent)</code> instead of <code>var(--coral)</code>.</li>
+        <li><code>shell.jsx</code> — stamp <code>data-cluster="problem|framework|instruments|grounding"</code> on the root <code>.main</code> based on the active screen's <code>stepId</code>.</li>
+        <li><code>screens-problem-setup.jsx</code> · <code>screens-framework-setup.jsx</code> · <code>screens-instruments-setup.jsx</code> · <code>screens-orientation.jsx</code> — add the cluster badge component to the title row; remove the hard-coded <code>kicker--coral</code> (it will read from the cluster token).</li>
+        <li>Diagrams: pass an <code>accent</code> prop (default coral) so <code>FrameworkOrganisationDiagram</code> and <code>InstrumentReadingDiagram</code> can be tinted cobalt/sage without code changes to their geometry.</li>
+      </ul>
+    </div>
+
+    <div class="notes" style="margin-top: 18px;">
+      <h3>Tokens to add</h3>
+      <ul>
+        <li><code>[data-cluster="problem"]      { --cluster-accent: var(--coral);  --cluster-accent-deep: var(--coral-deep);  --cluster-accent-tint: var(--coral-tint);  }</code></li>
+        <li><code>[data-cluster="framework"]    { --cluster-accent: var(--cobalt); --cluster-accent-deep: var(--cobalt-deep); --cluster-accent-tint: var(--cobalt-tint); }</code></li>
+        <li><code>[data-cluster="instruments"]  { --cluster-accent: var(--sage);   --cluster-accent-deep: var(--sage-deep);   --cluster-accent-tint: var(--sage-tint);   }</code></li>
+        <li><code>[data-cluster="grounding"]    { --cluster-accent: var(--ink-strong); --cluster-accent-deep: var(--ink-strong); --cluster-accent-tint: transparent; }</code> — and the grounding layout opts <em>out</em> of the lede-panel left border with a modifier class.</li>
+      </ul>
+    </div>
+
+    <div class="notes" style="margin-top: 18px;">
+      <h3>Open questions for you</h3>
+      <ul>
+        <li><b>Should the question screens re-colour with the cluster (Option C), or stay coral?</b> Re-colouring is the strongest signal — but coral is currently the platform's identity colour, so the change carries weight.</li>
+        <li><b>Cluster 4 (Submit / Templates) — does it want its own identity too?</b> Saffron would complete the palette; if you intend C4 to feel like wrap-up, no accent (like grounding) is the other option.</li>
+        <li><b>Should the cluster badge sit inline with the location string in the topbar as well?</b> The topbar already says "Problem · Introductory setup · 1 of 2" — making "01" coloured there reinforces identity without consuming column space.</li>
+        <li><b>For grounding's wider measure</b> — 1040px is a suggestion; if it feels too generous, 960px still differentiates from the 880px cluster measure.</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

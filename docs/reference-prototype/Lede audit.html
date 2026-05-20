@@ -1,0 +1,1395 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=1280"/>
+<title>PV-ACF · Lede paragraph — audit &amp; proposals</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --page: #FBF8F1;
+  --page-subtle: #F4EFE3;
+  --surface: #FFFFFF;
+  --surface-deep: #F8F4EA;
+  --ink-strong: #1A1816;
+  --ink: #2C2A26;
+  --ink-soft: #5F5C54;
+  --ink-mute: #8A867C;
+  --ink-faint: #BFBBB0;
+  --coral: #B8472E;
+  --coral-deep: #712B13;
+  --coral-tint: #FAECE7;
+  --saffron-tint: #F8EBC8;
+  --border: #E5E0D2;
+  --border-soft: #EDE8DA;
+  --rule-warm: #B8472E;
+
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --space-9: 96px;
+
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px;
+
+  --font-display: "GFS Neohellenic", "Helvetica Neue", system-ui, serif;
+  --font-body:    "IBM Plex Sans", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--page); }
+body {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* -------------------- page shell -------------------- */
+.sheet {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-7) var(--space-9);
+}
+.sheet > * + * { margin-top: var(--space-8); }
+
+.brief {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: var(--space-7);
+  align-items: end;
+}
+.brief__kicker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--coral);
+  margin: 0 0 var(--space-3);
+}
+.brief h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--ink-strong);
+  margin: 0 0 var(--space-4);
+  max-width: 22ch;
+}
+.brief__sub {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--coral-deep);
+  margin: 0;
+  max-width: 60ch;
+}
+.brief__meta {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  text-align: right;
+}
+.brief__meta strong { color: var(--ink-strong); font-weight: 500; }
+
+/* -------------------- section chrome -------------------- */
+.section__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 0.5px solid var(--border);
+  margin-bottom: var(--space-6);
+}
+.section__num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.section__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  color: var(--ink-strong);
+  margin: 0;
+}
+.section__sub {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 15px;
+  margin: 0 0 0 auto;
+  max-width: 48ch;
+  text-align: right;
+}
+
+/* -------------------- inventory grid -------------------- */
+.inv {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+.inv__cell {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-5) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.inv__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.inv__title-block { min-width: 0; flex: 1; }
+.inv__title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--coral);
+  text-transform: uppercase;
+  margin: 0 0 var(--space-1);
+}
+.inv__label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-strong);
+  margin: 0;
+}
+.inv__where {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-mute);
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+}
+.inv__tags {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  flex-shrink: 0;
+  max-width: 180px;
+  justify-content: flex-end;
+}
+.tag {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  background: var(--surface-deep);
+  border: 0.5px solid var(--border);
+  border-radius: 2px;
+  padding: 2px 6px;
+}
+.tag--coral { color: var(--coral); border-color: var(--coral); background: var(--coral-tint); }
+.tag--mute  { color: var(--ink-soft); }
+
+.inv__sample {
+  background: var(--page);
+  border: 0.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  min-height: 132px;
+  display: flex;
+  align-items: center;
+}
+.inv__notes {
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.inv__notes strong { color: var(--ink); font-weight: 500; }
+.inv__notes code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--coral-deep);
+  background: var(--coral-tint);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+/* -------- the actual current samples (recreated from styles.css) -------- */
+
+/* 1 — .lede-panel */
+.smp-lede-panel {
+  background: var(--surface-deep);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5) var(--space-6);
+}
+.smp-lede-panel p { font-size: 15.5px; line-height: 1.65; color: var(--ink); margin: 0; }
+
+/* 2 — .lede-panel--grounding */
+.smp-lede-panel-grounding {
+  background: var(--surface-deep);
+  border-left: 3px solid var(--ink-mute);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5) var(--space-6);
+}
+.smp-lede-panel-grounding p { font-size: 15.5px; line-height: 1.65; color: var(--ink); margin: 0; }
+
+/* 3 — .lede-panel--italic */
+.smp-lede-panel-italic {
+  background: var(--surface-deep);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5) var(--space-6);
+}
+.smp-lede-panel-italic p {
+  font-style: italic; color: var(--coral-deep); font-size: 15px; line-height: 1.65; margin: 0;
+}
+.smp-lede-panel-italic em { font-style: normal; color: var(--coral-deep); }
+
+/* 4 — .lede (plain) */
+.smp-lede-plain p { font-size: 15.5px; line-height: 1.65; color: var(--ink); margin: 0; max-width: 640px; }
+
+/* 5 — .setup-header__intro */
+.smp-setup-intro p { font-size: 16px; line-height: 1.65; color: var(--ink); margin: 0; max-width: 760px; }
+
+/* 6 — .q-card__descriptor */
+.smp-q-descriptor p {
+  font-style: italic; color: var(--ink-soft); font-size: 14.5px; line-height: 1.55; margin: 0;
+}
+
+/* 7 — .how-intro (Welcome) */
+.smp-how-intro p { font-size: 15px; line-height: 1.65; color: var(--ink); margin: 0; max-width: 60ch; }
+.smp-how-intro strong { color: var(--ink-strong); font-weight: 600; }
+
+/* 8 — .grounding-closer */
+.smp-closer p { font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); margin: 0; font-style: italic; }
+
+/* -------------------- background-surface grid -------------------- */
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+.bg-cell {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  min-height: 380px;
+}
+.bg-cell__chip {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+}
+.bg-cell__chip code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--coral-deep);
+}
+.bg-cell__swatch {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border-radius: 2px;
+}
+.bg-cell__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.1;
+  color: var(--ink-strong);
+  margin: var(--space-2) 0 0;
+}
+.bg-cell__desc {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.bg-cell__desc code,
+.bg-cell__list code,
+.bg-cell__warn code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--coral-deep);
+  background: var(--coral-tint);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+.bg-cell__list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 4px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.bg-cell__warn {
+  margin-top: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding-top: var(--space-3);
+  border-top: 0.5px dashed var(--border);
+}
+.bg-cell__warn strong { color: var(--ink); font-weight: 600; }
+
+.bg-summary {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-7);
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+.bg-summary__num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 88px;
+  line-height: 0.85;
+  letter-spacing: -0.02em;
+  color: var(--coral);
+}
+.bg-summary h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--ink-strong);
+  margin: 0 0 var(--space-3);
+}
+.bg-summary p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 70ch;
+}
+.bg-summary p + p { margin-top: var(--space-3); }
+.bg-summary strong { color: var(--ink); font-weight: 600; }
+
+/* -------------------- inconsistency callout -------------------- */
+.flag-strip {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+.flag-strip__num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 64px;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+  color: var(--coral);
+}
+.flag-strip__num-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-top: var(--space-3);
+}
+.flag-strip__list { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+.flag-strip__list li {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink);
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+.flag-strip__list li::before {
+  content: "";
+  display: block;
+  width: 6px; height: 6px;
+  background: var(--coral);
+  border-radius: 50%;
+  margin-top: 8px;
+}
+.flag-strip__list strong { color: var(--ink-strong); font-weight: 600; }
+.flag-strip__list code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--coral-deep);
+  background: var(--coral-tint);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+/* -------------------- direction cards -------------------- */
+.dirs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+.dir {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-6) var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-4);
+  min-width: 0;
+}
+.dir__header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 0.5px solid var(--border-soft);
+}
+.dir__label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--coral);
+  text-transform: uppercase;
+  margin: 0 0 4px;
+}
+.dir__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  color: var(--ink-strong);
+  margin: 0;
+}
+.dir__tag {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  border: 0.5px solid var(--border);
+  border-radius: 2px;
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+.dir__pitch {
+  font-style: italic;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--coral-deep);
+  margin: 0;
+}
+
+.dir__sample {
+  background: var(--page);
+  border-radius: var(--radius-md);
+  padding: var(--space-6) var(--space-5);
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+}
+
+.dir__props { display: flex; flex-direction: column; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.dir__props li {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  display: grid; grid-template-columns: 80px 1fr; gap: var(--space-3);
+}
+.dir__props li span:first-child { color: var(--ink-mute); letter-spacing: 0.04em; }
+.dir__props li code { color: var(--coral-deep); }
+
+.dir__trade {
+  font-size: 12.5px; line-height: 1.55; color: var(--ink-soft);
+  margin: 0; padding-top: var(--space-3); border-top: 0.5px solid var(--border-soft);
+}
+.dir__trade strong { color: var(--ink); font-weight: 600; }
+
+/* ---- DIRECTION A — Quiet typography ---- */
+.A-sample {
+  width: 100%;
+}
+.A-lede {
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--ink);
+  max-width: 60ch;
+  margin: 0;
+  text-wrap: pretty;
+}
+.A-lede + .A-lede { margin-top: var(--space-4); }
+.A-lede--closer {
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 15.5px;
+}
+
+/* ---- DIRECTION B — Hairline rule ---- */
+.B-sample { width: 100%; }
+.B-lede {
+  font-family: var(--font-body);
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: var(--ink);
+  max-width: 60ch;
+  padding-left: var(--space-5);
+  border-left: 1px solid var(--coral);
+  margin: 0;
+  text-wrap: pretty;
+}
+.B-lede--closer {
+  border-left-color: var(--ink-faint);
+  color: var(--ink-soft);
+  font-style: italic;
+  font-size: 15px;
+  margin-top: var(--space-5);
+}
+
+/* ---- DIRECTION C — Editorial drop ---- */
+.C-sample { width: 100%; }
+.C-lede {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  color: var(--ink-strong);
+  max-width: 32ch;
+  margin: 0;
+  position: relative;
+  text-wrap: pretty;
+}
+.C-lede::before {
+  content: "";
+  display: block;
+  width: 32px;
+  height: 2px;
+  background: var(--coral);
+  margin-bottom: var(--space-4);
+}
+.C-lede--closer {
+  font-size: 18px;
+  font-style: italic;
+  color: var(--ink-soft);
+  margin-top: var(--space-5);
+}
+.C-lede--closer::before { background: var(--ink-faint); }
+
+/* ---- DIRECTION D — Stay the course (current .lede-panel applied globally) ---- */
+.dirs--second-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: var(--space-5);
+}
+.D-sample { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); }
+.D-lede {
+  background: var(--surface-deep);
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--space-5) var(--space-6);
+}
+.D-lede p { font-size: 15.5px; line-height: 1.65; color: var(--ink); margin: 0; }
+.D-lede--closer p {
+  font-style: italic;
+  color: var(--coral-deep);
+  font-size: 15px;
+}
+.D-lede--closer em { font-style: normal; color: var(--coral-deep); }
+
+/* ---- DIRECTION E — Strengthen the panel ---- */
+.E-sample { width: 100%; display: flex; flex-direction: column; gap: var(--space-4); }
+.E-lede {
+  background: var(--coral-tint);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+}
+.E-lede p {
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--coral-deep);
+  margin: 0;
+}
+.E-lede--closer {
+  background: var(--page-subtle);
+}
+.E-lede--closer p {
+  font-style: normal;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+}
+
+/* -------------------- application matrix -------------------- */
+.matrix {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.matrix table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.matrix th, .matrix td {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  vertical-align: top;
+  border-bottom: 0.5px solid var(--border-soft);
+}
+.matrix th {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  background: var(--surface-deep);
+  font-weight: 500;
+}
+.matrix tr:last-child td { border-bottom: 0; }
+.matrix td:first-child {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  width: 240px;
+}
+.matrix td strong { color: var(--ink-strong); font-weight: 600; }
+.matrix td.use {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--ink);
+}
+.matrix td.role {
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 12.5px;
+  width: 220px;
+}
+.matrix td.dir {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--coral);
+  width: 200px;
+  letter-spacing: 0.04em;
+}
+.matrix td.dir.dev { color: var(--saffron-deep, #A56F12); }
+
+/* -------------------- deviations strip -------------------- */
+.dev-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+.dev-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex; flex-direction: column; gap: var(--space-3);
+  border-top: 3px solid var(--saffron-tint);
+}
+.dev-card__where {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+}
+.dev-card__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.15;
+  color: var(--ink-strong);
+  margin: 0;
+}
+.dev-card__why {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+.dev-card__why strong { color: var(--ink); font-weight: 600; }
+
+/* -------------------- footer rec -------------------- */
+.rec {
+  background: var(--coral-tint);
+  border: 0.5px solid var(--coral);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-7);
+}
+.rec__label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--coral);
+  text-transform: uppercase;
+  margin: 0 0 var(--space-3);
+}
+.rec h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--ink-strong);
+  margin: 0 0 var(--space-3);
+  max-width: 30ch;
+}
+.rec p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--coral-deep);
+  margin: 0;
+  max-width: 70ch;
+}
+.rec p + p { margin-top: var(--space-3); }
+.rec strong { color: var(--ink-strong); font-weight: 600; }
+.rec__list,
+.rec__opts {
+  margin: var(--space-3) 0 0;
+  padding: 0 0 0 var(--space-5);
+  max-width: 70ch;
+}
+.rec__list li,
+.rec__opts li {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--coral-deep);
+  margin: 0 0 var(--space-2);
+}
+.rec__list li strong,
+.rec__opts li strong { color: var(--ink-strong); font-weight: 600; }
+.rec__close {
+  margin-top: var(--space-4) !important;
+  padding-top: var(--space-4);
+  border-top: 0.5px solid var(--coral);
+  font-style: italic;
+}
+
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <!-- ============ BRIEF ============ -->
+  <header class="brief">
+    <div>
+      <div class="brief__kicker">Design audit · Opening paragraph</div>
+      <h1>The opening paragraph appears in eight different costumes.</h1>
+      <p class="brief__sub">
+        On every screen, the title is followed by a short italic subtitle and then — on most screens — a substantive opening paragraph. That second paragraph (the <em>lede</em>) is the element that has drifted. Eight visual variants are currently in production. This sheet inventories them, names what is inconsistent, and proposes three unified directions.
+      </p>
+    </div>
+    <div class="brief__meta">
+      Scope · <strong>31 screens</strong><br>
+      Variants found · <strong>8</strong><br>
+      Background surfaces · <strong>3</strong><br>
+      Proposed directions · <strong>5</strong><br>
+      Deviations preserved · <strong>2</strong>
+    </div>
+  </header>
+
+  <!-- ============ SECTION 1 — INVENTORY ============ -->
+  <section>
+    <div class="section__head">
+      <span class="section__num">01 — Inventory</span>
+      <h2 class="section__title">What is on the screens today</h2>
+      <p class="section__sub">Each card is recreated from the live styles, using the same tokens the prototype renders with. Hover over to confirm.</p>
+    </div>
+
+    <div class="inv">
+
+      <!-- 1 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">A · Lede panel · coral</p>
+            <p class="inv__label">.lede-panel</p>
+            <p class="inv__where">C1 / C2 setup · primary opening paragraph above the diagram</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag tag--coral">PANEL</span>
+            <span class="tag">15.5px</span>
+            <span class="tag">CORAL 3PX</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-lede-panel">
+            <p>Public administrations across Europe are increasingly using AI systems to support, route, prioritise, or partly automate decisions about entitlements, eligibility, service access, inspection, and contestation.</p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>Container:</strong> deep-cream surface, 3 px coral left rule, right-rounded. The "official" lede.</p>
+      </article>
+
+      <!-- 2 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">B · Lede panel · grounding</p>
+            <p class="inv__label">.lede-panel<span style="color:var(--ink-faint)">.</span>--grounding</p>
+            <p class="inv__where">G1 / G2 grounding · same container, muted rule</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag tag--coral">PANEL</span>
+            <span class="tag">15.5px</span>
+            <span class="tag">GREY 3PX</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-lede-panel-grounding">
+            <p>This platform reviews the Public-Value AI Co-production Framework, or PV-ACF. The framework is designed for AI governance in public administration, where technical performance is only one part of the question.</p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>Same container; left rule swaps to <code>--ink-mute</code>.</strong> The only signal that this is "grounding territory, not yet the framework" is a 3-pixel colour change most users will miss.</p>
+      </article>
+
+      <!-- 3 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">C · Lede panel · italic / closer</p>
+            <p class="inv__label">.lede-panel<span style="color:var(--ink-faint)">.</span>--italic</p>
+            <p class="inv__where">C1 / C2 setup · transitional callout after the diagram</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag tag--coral">PANEL</span>
+            <span class="tag">15px</span>
+            <span class="tag">ITALIC</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-lede-panel-italic">
+            <p><em>This cluster does not ask you to evaluate the framework. It asks whether the problem the framework claims to address is the problem you have actually seen in practice.</em></p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>Same container, italic body, coral-deep ink.</strong> A different rhetorical register (closing / contemplative) carried by the same visual chrome — the reader cannot tell why this one is italic and the others are roman.</p>
+      </article>
+
+      <!-- 4 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">D · Lede · naked paragraph</p>
+            <p class="inv__label">.lede</p>
+            <p class="inv__where">Submit · Thanks · Interview · opening paragraph below tagline</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag">NO PANEL</span>
+            <span class="tag">15.5px</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-lede-plain">
+            <p>Take a moment to review what you have entered. Your final answers will be locked once you submit, but free navigation in the reference library remains open afterwards.</p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>No container, no rule.</strong> Same conceptual role as A and B, but visually has none of their signal — reads as ordinary body text.</p>
+      </article>
+
+      <!-- 5 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">E · Setup-header intro</p>
+            <p class="inv__label">.setup-header__intro</p>
+            <p class="inv__where">Cluster setup screens (templates) · second paragraph below tagline</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag">NO PANEL</span>
+            <span class="tag">16px</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-setup-intro">
+            <p>Before judging the framework, you will judge the problem it claims to address. This cluster runs lighter — short rating items with optional written responses — so the entry into the review is gentler.</p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>16 px, no container.</strong> A third treatment of the same conceptual element — half a pixel larger than D, no other distinction.</p>
+      </article>
+
+      <!-- 6 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">F · Welcome how-intro</p>
+            <p class="inv__label">.how-intro</p>
+            <p class="inv__where">Welcome · single-line lead under the "How this works" H2</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag">NO PANEL</span>
+            <span class="tag">15px</span>
+            <span class="tag">60CH</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-how-intro">
+            <p>The review is structured around <strong>four claim-clusters</strong>, plus a short profile and a brief grounding step before the first question. You can interrupt at any point.</p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>15 px, bolder strongs, 60ch cap.</strong> Fourth treatment, fourth size.</p>
+      </article>
+
+      <!-- 7 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">G · Question-card descriptor</p>
+            <p class="inv__label">.q-card__descriptor</p>
+            <p class="inv__where">Every question card · italic line under the question stem</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag">IN CARD</span>
+            <span class="tag">14.5px</span>
+            <span class="tag">ITALIC</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-q-descriptor">
+            <p>This question asks about your direct experience with AI deployments rather than your general view of the sector. Each gap is rated separately.</p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>Lives inside the question card, italic, ink-soft.</strong> Same rhetorical job (lede), different room — defensible because it's in-card scaffolding, but worth a coherence pass.</p>
+      </article>
+
+      <!-- 8 -->
+      <article class="inv__cell">
+        <header class="inv__header">
+          <div class="inv__title-block">
+            <p class="inv__title">H · Grounding closer</p>
+            <p class="inv__label">.grounding-closer</p>
+            <p class="inv__where">G2 · small reflective line at the bottom</p>
+          </div>
+          <div class="inv__tags">
+            <span class="tag">NO PANEL</span>
+            <span class="tag">13.5px</span>
+            <span class="tag">ITALIC</span>
+          </div>
+        </header>
+        <div class="inv__sample">
+          <div class="smp-closer">
+            <p>The next screens begin the review with the first claim-cluster.</p>
+          </div>
+        </div>
+        <p class="inv__notes"><strong>Italic, ink-soft, 13.5 px.</strong> The closer role is treated three different ways across the system — italic panel (C), small italic line (H), and italic in-card descriptor (G).</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ SECTION 1.5 — BACKGROUND ============ -->
+  <section>
+    <div class="section__head">
+      <span class="section__num">01b — Background surface</span>
+      <h2 class="section__title">The lede sits on three different surfaces</h2>
+      <p class="section__sub">A second axis of drift that compounds the first. Same conceptual paragraph, three different backgrounds depending on which screen you happen to be on.</p>
+    </div>
+
+    <div class="bg-grid">
+      <article class="bg-cell" style="background: var(--page);">
+        <div class="bg-cell__chip">
+          <span class="bg-cell__swatch" style="background:#FBF8F1; border:0.5px solid var(--border);"></span>
+          <span class="bg-cell__hex">#FBF8F1 · <code>--page</code></span>
+        </div>
+        <h4 class="bg-cell__name">Cream page</h4>
+        <p class="bg-cell__desc">The default body surface. The lede inherits this when no panel is wrapped around it.</p>
+        <ul class="bg-cell__list">
+          <li><code>.lede</code> · Submit, Thanks, Interview</li>
+          <li><code>.setup-header__intro</code> · cluster setup</li>
+          <li><code>.tagline</code> · every title screen</li>
+          <li><code>.grounding-closer</code> · G2 close</li>
+          <li><code>.how-intro</code> · Welcome</li>
+        </ul>
+      </article>
+
+      <article class="bg-cell" style="background: var(--surface-deep);">
+        <div class="bg-cell__chip">
+          <span class="bg-cell__swatch" style="background:#F8F4EA; border:0.5px solid var(--border);"></span>
+          <span class="bg-cell__hex">#F8F4EA · <code>--surface-deep</code></span>
+        </div>
+        <h4 class="bg-cell__name">Cream-deep panel</h4>
+        <p class="bg-cell__desc">A hair darker than the page. The <code>.lede-panel</code> family paints itself in this colour, with a coloured left rule on top.</p>
+        <ul class="bg-cell__list">
+          <li><code>.lede-panel</code> · C1 / C2 setup</li>
+          <li><code>.lede-panel--grounding</code> · G1 / G2</li>
+          <li><code>.lede-panel--italic</code> · closer callouts</li>
+          <li><code>.lede-panel--closer</code> · G1 close</li>
+        </ul>
+        <p class="bg-cell__warn"><strong>Note.</strong> The contrast against the page is only ~3 luminance steps — readable as "a panel" up close, but in screenshots and at distance it looks like the page is showing through unevenly.</p>
+      </article>
+
+      <article class="bg-cell" style="background: var(--surface);">
+        <div class="bg-cell__chip">
+          <span class="bg-cell__swatch" style="background:#FFFFFF; border:0.5px solid var(--border);"></span>
+          <span class="bg-cell__hex">#FFFFFF · <code>--surface</code></span>
+        </div>
+        <h4 class="bg-cell__name">White card</h4>
+        <p class="bg-cell__desc">Every <code>.q-card</code> and <code>.inst-panel</code> is white. Anything lede-shaped inside one sits on white.</p>
+        <ul class="bg-cell__list">
+          <li><code>.q-card__descriptor</code> · italic line under the question stem</li>
+          <li><code>.inst-panel__kicker</code> + body · instrument-as-object panel</li>
+        </ul>
+        <p class="bg-cell__warn"><strong>Defensible deviation.</strong> These are <em>in-card scaffolding</em>, not the screen's primary lede — they inherit the card's surface by definition, and should keep doing so.</p>
+      </article>
+    </div>
+
+    <div class="bg-summary">
+      <div class="bg-summary__num">3</div>
+      <div>
+        <h4>Three surfaces, one element.</h4>
+        <p>The cream-page vs. cream-deep choice is the visible split — the difference between them is small enough that it doesn't read as "a chosen container," it reads as a rendering bug or a stale CSS rule. White-card is a different conversation: it's the card's surface, not the lede's, and the lede inside is legitimately a different element (it supports a question stem, not the screen).</p>
+        <p><strong>The simplest fix is to retire the cream-deep panel altogether.</strong> All three proposed directions (A, B, C) do this — none of them paint a background; the lede inherits the page. The cream-deep surface stays available for the right rail and other contexts where it earns its keep, but the lede stops competing with them.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 2 — WHAT'S WRONG ============ -->
+  <section>
+    <div class="section__head">
+      <span class="section__num">02 — The drift</span>
+      <h2 class="section__title">Why this reads as inconsistent</h2>
+    </div>
+
+    <div class="flag-strip">
+      <div>
+        <div class="flag-strip__num">5</div>
+        <div class="flag-strip__num-label">font sizes</div>
+        <div style="margin-top: var(--space-6);" class="flag-strip__num">3</div>
+        <div class="flag-strip__num-label">container treatments</div>
+      </div>
+      <ul class="flag-strip__list">
+        <li><strong>Five sizes for the same role.</strong> 13.5 px, 14.5 px, 15 px, 15.5 px, 16 px — none deliberate. Each one feels like the right pixel-perfect choice in isolation; together they look like a system that nobody owns.</li>
+        <li><strong>The container changes meaning every time it appears.</strong> On C1/C2 setup the panel signals "this is the framing." On grounding it signals nothing (rule colour shifts, body identical). On submit it disappears entirely. Same paragraph role, three different visual claims.</li>
+        <li><strong>Italic is doing two jobs at once.</strong> It signals (a) "this is the one-line headline subtitle" — the <code>.tagline</code> — and also (b) "this is a closing/contemplative paragraph" — <code>.lede-panel--italic</code> and <code>.grounding-closer</code>. The reader cannot decode which one is which.</li>
+        <li><strong>The coral left rule is overloaded.</strong> It marks the lede panel and is also the active step indicator, the percent-time bar fill, and the relevance banner border. The lede has stopped being distinctive.</li>
+        <li><strong>Closer paragraphs are a phantom system.</strong> Three different classes do the same closer-paragraph job (<code>--italic</code>, <code>--closer</code>, <code>grounding-closer</code>) and they don't look alike.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 3 — DIRECTIONS ============ -->
+  <section>
+    <div class="section__head">
+      <span class="section__num">03 — Five directions</span>
+      <h2 class="section__title">One element, five ways to settle it</h2>
+      <p class="section__sub">Same opening paragraph, same closer underneath, treated five different ways — from "keep what we have, apply everywhere" through to a bolder editorial register. Pick a direction and it replaces eight classes with one (plus a closer modifier).</p>
+    </div>
+
+    <div class="dirs">
+
+      <!-- DIRECTION A -->
+      <article class="dir">
+        <header class="dir__header">
+          <div>
+            <p class="dir__label">Direction A</p>
+            <h3 class="dir__name">Quiet typography</h3>
+          </div>
+          <span class="dir__tag">Conservative</span>
+        </header>
+        <p class="dir__pitch">Drop the container entirely. The lede is one larger roman paragraph, measured tighter than body. Trust the type.</p>
+        <div class="dir__sample">
+          <div class="A-sample">
+            <p class="A-lede">
+              Public administrations across Europe are increasingly using AI systems to support, route, prioritise, or partly automate decisions about entitlements, eligibility, service access, inspection, and contestation. The question is no longer whether such systems perform well, but how they become governable in public institutions.
+            </p>
+            <p class="A-lede A-lede--closer">
+              This cluster does not ask you to evaluate the framework. It asks whether the problem the framework claims to address is the problem you have actually seen in practice.
+            </p>
+          </div>
+        </div>
+        <ul class="dir__props">
+          <li><span>Font</span><span>IBM Plex Sans · 400</span></li>
+          <li><span>Size</span><span>17 px / 1.7</span></li>
+          <li><span>Measure</span><span>60 ch</span></li>
+          <li><span>Colour</span><span><code>--ink</code> · closer <code>--ink-soft</code></span></li>
+          <li><span>Chrome</span><span>none</span></li>
+        </ul>
+        <p class="dir__trade"><strong>Trade-off.</strong> Cleanest, lowest noise floor, ages well. Loses the "here is the framing" signal the coral panel currently provides — relies on placement (directly under the title) to do that work.</p>
+      </article>
+
+      <!-- DIRECTION B -->
+      <article class="dir">
+        <header class="dir__header">
+          <div>
+            <p class="dir__label">Direction B</p>
+            <h3 class="dir__name">Hairline rule</h3>
+          </div>
+          <span class="dir__tag">Refined</span>
+        </header>
+        <p class="dir__pitch">Keep the coral signal but strip it down: a single 1 px left rule, no background. Closer paragraphs reuse the form with a faint rule.</p>
+        <div class="dir__sample">
+          <div class="B-sample">
+            <p class="B-lede">
+              Public administrations across Europe are increasingly using AI systems to support, route, prioritise, or partly automate decisions about entitlements, eligibility, service access, inspection, and contestation. The question is no longer whether such systems perform well, but how they become governable in public institutions.
+            </p>
+            <p class="B-lede B-lede--closer">
+              This cluster does not ask you to evaluate the framework. It asks whether the problem the framework claims to address is the problem you have actually seen in practice.
+            </p>
+          </div>
+        </div>
+        <ul class="dir__props">
+          <li><span>Font</span><span>IBM Plex Sans · 400</span></li>
+          <li><span>Size</span><span>16.5 px / 1.7</span></li>
+          <li><span>Measure</span><span>60 ch</span></li>
+          <li><span>Rule</span><span>1 px <code>--coral</code> · 24 px gutter</span></li>
+          <li><span>Closer</span><span>same rule in <code>--ink-faint</code>, italic</span></li>
+        </ul>
+        <p class="dir__trade"><strong>Trade-off.</strong> Keeps a visual marker without the heavy panel. The closer becomes a recognisable second form of the same primitive, which solves the phantom-closer problem.</p>
+      </article>
+
+      <!-- DIRECTION C -->
+      <article class="dir">
+        <header class="dir__header">
+          <div>
+            <p class="dir__label">Direction C</p>
+            <h3 class="dir__name">Editorial drop</h3>
+          </div>
+          <span class="dir__tag">Bolder</span>
+        </header>
+        <p class="dir__pitch">Make the lede a typographic statement. Display family, larger size, short coral mark — reads like the opening of an essay.</p>
+        <div class="dir__sample">
+          <div class="C-sample">
+            <p class="C-lede">
+              Public administrations across Europe are increasingly using AI systems to support, route, prioritise, or partly automate decisions about entitlements, eligibility, service access, inspection, and contestation.
+            </p>
+            <p class="C-lede C-lede--closer">
+              This cluster does not ask you to evaluate the framework. It asks whether the problem the framework claims to address is the problem you have actually seen in practice.
+            </p>
+          </div>
+        </div>
+        <ul class="dir__props">
+          <li><span>Font</span><span>GFS Neohellenic · 400</span></li>
+          <li><span>Size</span><span>22 px / 1.4</span></li>
+          <li><span>Measure</span><span>32 ch</span></li>
+          <li><span>Mark</span><span>32 × 2 px coral, 16 px above</span></li>
+          <li><span>Closer</span><span>18 px italic, faint mark</span></li>
+        </ul>
+        <p class="dir__trade"><strong>Trade-off.</strong> Strongest editorial voice, matches the thesis register most directly. Costs vertical space and demands that lede copy be edited shorter — at 22 px, anything over four lines becomes a brick.</p>
+      </article>
+
+    </div>
+
+    <!-- second row — keep / strengthen -->
+    <div class="dirs dirs--second-row">
+
+      <!-- DIRECTION D — stay the course -->
+      <article class="dir dir--stay">
+        <header class="dir__header">
+          <div>
+            <p class="dir__label">Direction D</p>
+            <h3 class="dir__name">Keep the panel — apply everywhere</h3>
+          </div>
+          <span class="dir__tag">Stay the course</span>
+        </header>
+        <p class="dir__pitch">Take the current <code style="font-family:var(--font-mono);font-size:13px;color:var(--coral-deep);background:var(--coral-tint);padding:0 4px;border-radius:2px;">.lede-panel</code> from C1 / C2 setup and apply it as the single lede primitive on every screen. Retire the naked variants instead of the panelled ones.</p>
+        <div class="dir__sample">
+          <div class="D-sample">
+            <div class="D-lede">
+              <p>Public administrations across Europe are increasingly using AI systems to support, route, prioritise, or partly automate decisions about entitlements, eligibility, service access, inspection, and contestation. The question is no longer whether such systems perform well, but how they become governable in public institutions.</p>
+            </div>
+            <div class="D-lede D-lede--closer">
+              <p><em>This cluster does not ask you to evaluate the framework. It asks whether the problem the framework claims to address is the problem you have actually seen in practice.</em></p>
+            </div>
+          </div>
+        </div>
+        <ul class="dir__props">
+          <li><span>Font</span><span>IBM Plex Sans · 400</span></li>
+          <li><span>Size</span><span>15.5 px / 1.65</span></li>
+          <li><span>Surface</span><span><code>--surface-deep</code></span></li>
+          <li><span>Rule</span><span>3 px <code>--coral</code> left</span></li>
+          <li><span>Closer</span><span>same panel, italic, coral-deep</span></li>
+        </ul>
+        <p class="dir__trade"><strong>Trade-off.</strong> Zero net design change for the screens that already use the panel; the other screens come up to meet them. Costs nothing in vocabulary the system has already established. Risk: the cream-deep contrast against the page is faint, so the panel still doesn't read distinctly at first glance.</p>
+      </article>
+
+      <!-- DIRECTION E — strengthen the panel -->
+      <article class="dir dir--strong">
+        <header class="dir__header">
+          <div>
+            <p class="dir__label">Direction E</p>
+            <h3 class="dir__name">Strengthen the panel</h3>
+          </div>
+          <span class="dir__tag">Heavier</span>
+        </header>
+        <p class="dir__pitch">Keep the panel concept but make it actually read as one. Deeper background, no left rule, larger padding, italic body. The lede becomes an unmistakable framing block.</p>
+        <div class="dir__sample">
+          <div class="E-sample">
+            <div class="E-lede">
+              <p>Public administrations across Europe are increasingly using AI systems to support, route, prioritise, or partly automate decisions about entitlements, eligibility, service access, inspection, and contestation. The question is no longer whether such systems perform well, but how they become governable in public institutions.</p>
+            </div>
+            <div class="E-lede E-lede--closer">
+              <p>This cluster does not ask you to evaluate the framework. It asks whether the problem the framework claims to address is the problem you have actually seen in practice.</p>
+            </div>
+          </div>
+        </div>
+        <ul class="dir__props">
+          <li><span>Font</span><span>IBM Plex Sans · 400</span></li>
+          <li><span>Size</span><span>16 px / 1.7, italic</span></li>
+          <li><span>Surface</span><span><code>--coral-tint</code></span></li>
+          <li><span>Rule</span><span>none — type+colour carry it</span></li>
+          <li><span>Closer</span><span><code>--page-subtle</code>, roman</span></li>
+        </ul>
+        <p class="dir__trade"><strong>Trade-off.</strong> The lede stops apologising for being there. Coral-tint is already used for relevance banners and active-step glow, so reusing it for the lede coheres with the chrome palette. Risk: stronger panels claim more visual weight per screen — fine for setup/grounding pages, may overpower question screens.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ SECTION 4 — APPLICATION MATRIX ============ -->
+  <section>
+    <div class="section__head">
+      <span class="section__num">04 — Where each treatment lands</span>
+      <h2 class="section__title">Replacing the eight classes</h2>
+      <p class="section__sub">Whichever direction is chosen, the same primitive plus a closer modifier covers six of the eight current variants. Two stay as deliberate deviations (right column).</p>
+    </div>
+
+    <div class="matrix">
+      <table>
+        <thead>
+          <tr>
+            <th>Current class</th>
+            <th>Where it appears</th>
+            <th>Role</th>
+            <th>Mapping</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>.lede-panel</code></td>
+            <td class="use">C1 / C2 setup · opening paragraph</td>
+            <td class="role">Primary lede</td>
+            <td class="dir">→ <strong>lede</strong> (chosen direction)</td>
+          </tr>
+          <tr>
+            <td><code>.lede-panel--grounding</code></td>
+            <td class="use">G1 / G2 grounding · opening paragraph</td>
+            <td class="role">Primary lede</td>
+            <td class="dir">→ <strong>lede</strong></td>
+          </tr>
+          <tr>
+            <td><code>.lede-panel--italic</code></td>
+            <td class="use">C1 / C2 setup · transitional callout</td>
+            <td class="role">Closer</td>
+            <td class="dir">→ <strong>lede --closer</strong></td>
+          </tr>
+          <tr>
+            <td><code>.lede-panel--closer</code></td>
+            <td class="use">G1 · closing reflection</td>
+            <td class="role">Closer</td>
+            <td class="dir">→ <strong>lede --closer</strong></td>
+          </tr>
+          <tr>
+            <td><code>.lede</code></td>
+            <td class="use">Submit · Thanks · Interview</td>
+            <td class="role">Primary lede</td>
+            <td class="dir">→ <strong>lede</strong></td>
+          </tr>
+          <tr>
+            <td><code>.setup-header__intro</code></td>
+            <td class="use">Cluster setup screens (templates)</td>
+            <td class="role">Primary lede</td>
+            <td class="dir">→ <strong>lede</strong></td>
+          </tr>
+          <tr>
+            <td><code>.grounding-closer</code></td>
+            <td class="use">G2 · closing line</td>
+            <td class="role">Closer</td>
+            <td class="dir">→ <strong>lede --closer</strong></td>
+          </tr>
+          <tr>
+            <td><code>.how-intro</code></td>
+            <td class="use">Welcome · "How this works" lead</td>
+            <td class="role">Section lead (in a different section, not a screen lede)</td>
+            <td class="dir dev">↳ <strong>deviation kept</strong></td>
+          </tr>
+          <tr>
+            <td><code>.q-card__descriptor</code></td>
+            <td class="use">Every question card</td>
+            <td class="role">In-card descriptor — supports the question stem, not the screen</td>
+            <td class="dir dev">↳ <strong>deviation kept</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 5 — DEVIATIONS ============ -->
+  <section>
+    <div class="section__head">
+      <span class="section__num">05 — Deviations that should stay</span>
+      <h2 class="section__title">Two places where the lede should not apply</h2>
+    </div>
+
+    <div class="dev-grid">
+
+      <article class="dev-card">
+        <div class="dev-card__where">Question screens · in-card</div>
+        <h4 class="dev-card__name">Keep <code style="font-family:var(--font-mono);font-size:14px;color:var(--coral-deep);background:var(--coral-tint);padding:0 4px;border-radius:2px;">.q-card__descriptor</code> separate</h4>
+        <p class="dev-card__why">It sits <strong>inside</strong> the question card, supporting the question stem. Promoting it to the unified lede would put two ledes on the same screen — the cluster lede above and the question lede inside — which collapses the visual hierarchy the card depends on. Leave it as in-card italic scaffolding.</p>
+      </article>
+
+      <article class="dev-card">
+        <div class="dev-card__where">Welcome · "How this works"</div>
+        <h4 class="dev-card__name">Keep <code style="font-family:var(--font-mono);font-size:14px;color:var(--coral-deep);background:var(--coral-tint);padding:0 4px;border-radius:2px;">.how-intro</code> as a section lead</h4>
+        <p class="dev-card__why">Welcome has its own page-level lede already (the substantive tagline at the top). <code style="font-family:var(--font-mono);font-size:12.5px;color:var(--coral-deep);background:var(--coral-tint);padding:0 4px;border-radius:2px;">.how-intro</code> introduces a downstream section, not the screen. Apply the unified lede at the top, and let this remain a section lead at body-text register.</p>
+      </article>
+
+      <article class="dev-card">
+        <div class="dev-card__where">Thank-you</div>
+        <h4 class="dev-card__name">May warrant a softer cadence</h4>
+        <p class="dev-card__why">The final screen reads as resolution, not framing. Direction B's hairline can stay; Direction C's editorial mark may feel too declarative when the user has already submitted. Consider dropping to the <strong>closer modifier only</strong> on Thanks, with no primary lede above it.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ============ SECTION 6 — RECOMMENDATION ============ -->
+  <section>
+    <div class="rec">
+      <p class="rec__label">Choosing between them</p>
+      <h3>This is a genuine choice between five legitimate directions — not a foregone conclusion.</h3>
+      <p>
+        An earlier draft of this audit recommended Direction B. That was a designer's reflex toward "less chrome" rather than a system requirement — worth flagging so the choice isn't made by default.
+      </p>
+      <p>
+        <strong>The two axes that actually decide it.</strong>
+      </p>
+      <ol class="rec__list">
+        <li><strong>How loud should the lede be?</strong> A and B are quiet — they trust the position under the title to do the framing work. D and E are loud — they give the lede its own surface, so the reader cannot mistake it for body text. C is loudest in voice but smallest in chrome.</li>
+        <li><strong>Where does the change risk land?</strong> D is the safest — half the screens already render this way; the change is "extend, don't replace." A, B, C and E are larger interventions: every panelled screen has to be re-rendered and every naked screen gets visual weight it currently doesn't have.</li>
+      </ol>
+      <p>
+        <strong>Three honest recommendations, depending on appetite:</strong>
+      </p>
+      <ul class="rec__opts">
+        <li><strong>Lowest-risk:</strong> Direction D. Apply the existing panel everywhere; the system already speaks this dialect. The faint contrast against the page is a real concern, but solvable later with one token change.</li>
+        <li><strong>Most distinctive:</strong> Direction E. Coral-tint reuses a colour already in chrome, the panel finally reads as a panel, italic body signals "framing voice." Best fit if the lede should claim screen space deliberately.</li>
+        <li><strong>Most editorial:</strong> Direction C on G1 / G2 only, paired with B everywhere else. Treats grounding as a set-piece and the rest of the platform as workmanlike. This was the original recommendation and remains a reasonable composite — but it is the heaviest intervention.</li>
+      </ul>
+      <p class="rec__close">
+        Tell me which axis matters more and I'll wire it in. If "stay the course" is the right call, D is one CSS sweep away.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+</body>
+</html>

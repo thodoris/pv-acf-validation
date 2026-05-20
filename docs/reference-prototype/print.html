@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=1320"/>
+<title>PV-ACF · Expert Review — Print all 31 screens</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=GFS+Neohellenic:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&display=swap&subset=greek,latin" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css?v=15"/>
+<link rel="stylesheet" href="styles-phase-a.css?v=15"/>
+
+<style>
+  /* ----------------------------------------------------------------------
+     Print canvas — one A4 portrait page per screen, whole screen visible.
+
+     Strategy
+     --------
+     Each screen renders at its natural 1280-px design width into a
+     .page-frame__inner box, then we measure that inner box's height and
+     apply a CSS `transform: scale()` so it fits inside a standard A4
+     portrait page (210 × 297 mm ≈ 794 × 1123 px at 96 dpi).
+
+     Pros: works with any browser's "Save as PDF" dialog at default A4
+     paper size — no custom paper sizes, no margin tweaks needed.
+     Cons: very tall screens scale down further than short ones, so the
+     overall scale isn't uniform across pages. This is the right trade for
+     "whole screen visible within a PDF page".
+     ---------------------------------------------------------------------- */
+
+  :root {
+    --page-w: 210mm;
+    --page-h: 297mm;
+    /* px-equivalent used by the JS scaler (96 dpi assumption — print engines
+       generally honour this for CSS-mm sizing) */
+    --page-w-px: 794;
+    --page-h-px: 1123;
+    --design-w: 1280;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #ECEAE2;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body {
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    color: #1A1816;
+  }
+
+  /* ---- on-screen header (hidden when printing) ---- */
+  .sheet-header {
+    max-width: 880px;
+    margin: 32px auto 24px;
+    padding: 0 24px;
+    color: #5F5C54;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .sheet-header h1 {
+    font: 700 28px "GFS Neohellenic", serif;
+    color: #1A1816;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+  .sheet-header .tip {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: #FAECE7;
+    border-radius: 8px;
+    border: 0.5px solid #B8472E;
+    color: #712B13;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .sheet-header .tip code {
+    font-family: "IBM Plex Mono", monospace;
+    background: rgba(255,255,255,0.7);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+  .sheet-header em { color: #712B13; font-style: normal; font-weight: 600; }
+
+  /* ---- page-sized frame (one per PDF page) ---- */
+  .page-frame {
+    width: var(--page-w);
+    height: var(--page-h);
+    margin: 0 auto 14px;
+    background: #FBF8F1;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;            /* clip if JS hasn't scaled yet */
+    isolation: isolate;
+    break-after: page;
+    page-break-after: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .page-frame:last-of-type {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* The natural-size canvas the app paints into; transformed to fit. */
+  .page-frame__inner {
+    position: absolute;
+    top: 0; left: 0;
+    width: calc(var(--design-w) * 1px);
+    transform-origin: top left;
+    /* JS sets the scale once content is measured. Default to a width-fit
+       so something sensible shows even before measurement. */
+    transform: scale(calc(var(--page-w-px) / var(--design-w)));
+    background: #FBF8F1;
+  }
+  .page-frame[data-scaled="true"] .page-frame__inner {
+    /* JS writes a CSS variable per-frame. We use BOTH transform: scale and
+       zoom for redundancy: transform handles screen rendering precisely
+       (sub-pixel, GPU-accelerated), while zoom is more reliably honored by
+       Chromium's print engine when generating the PDF. With both applied,
+       the visible footprint is the same on screen and in print. */
+    transform: scale(var(--frame-scale, 1));
+  }
+  /* Print-only: switch to zoom rather than transform. Transform-scaled
+     content can be clipped or mis-laid by the PDF engine because the
+     element retains its natural-size box for layout purposes; zoom
+     re-flows at the new size, giving the print engine the correct
+     painted dimensions to clip against. */
+  @media print {
+    .page-frame[data-scaled="true"] .page-frame__inner {
+      transform: none;
+      zoom: var(--frame-scale, 1);
+    }
+  }
+
+  /* ---- per-frame caption ---- */
+  .page-frame__caption {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    z-index: 9999;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    color: #5F5C54;
+    background: rgba(255,255,255,0.92);
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 0.5px solid #E5E0D2;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+
+  /* ---- per-frame app overrides ---- */
+  /* Topbar in print mode should not be sticky — every frame must start at top. */
+  .page-frame .topbar {
+    position: relative !important;
+    top: auto !important;
+  }
+  /* The right rail must show all its content; never height-capped. */
+  .page-frame .rail {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    align-self: stretch;
+  }
+  /* Hide overlays, drawers, FABs, tweaks panel — they're not part of the screen. */
+  .page-frame .overlay,
+  .page-frame .tools-fab,
+  .page-frame .twk-panel,
+  .twk-panel,
+  .twk-tab {
+    display: none !important;
+  }
+  .page-frame .q-actions { opacity: 0.85; }
+
+  /* ---- print rules ---- */
+  @media print {
+    body { background: white !important; padding: 0; }
+    .sheet-header,
+    .scaler-progress { display: none !important; }
+    .page-frame {
+      box-shadow: none;
+      margin: 0 !important;
+    }
+    .page-frame__caption {
+      background: transparent;
+      border: 0;
+    }
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* ---- progress indicator while we mount + scale ---- */
+  .scaler-progress {
+    position: fixed;
+    right: 18px; bottom: 18px;
+    z-index: 99999;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    background: rgba(26,24,22,0.9);
+    color: #FBF8F1;
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  }
+  .scaler-progress[data-state="ready"] {
+    background: #1F8A5B;
+  }
+</style>
+
+<!-- React + Babel pinned per project convention -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="200" height="200" fill="#FBF8F1"/>
+    <g transform="translate(28,30)">
+      <rect width="144" height="6" rx="2" fill="#B8472E"/>
+      <rect y="14" width="144" height="120" rx="6" fill="#FFFFFF" stroke="#E5E0D2"/>
+      <rect x="12" y="30" width="48" height="4" fill="#8A867C"/>
+      <rect x="12" y="42" width="80" height="8" fill="#1A1816"/>
+      <rect x="12" y="64" width="120" height="3" fill="#E5E0D2"/>
+      <rect x="12" y="72" width="100" height="3" fill="#E5E0D2"/>
+      <rect x="12" y="80" width="110" height="3" fill="#E5E0D2"/>
+    </g>
+    <text x="100" y="180" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="#5F5C54">31 SCREENS · PV-ACF</text>
+  </svg>
+</template>
+
+<div class="sheet-header">
+  <h1>PV-ACF Expert Review · All 31 screens — print sheet</h1>
+  <p>
+    Every screen of the current cluster-based spine, mounted live from the prototype source,
+    each scaled to fit a single <strong>A4 portrait</strong> page so the whole screen is visible.
+    Drawers, overlays and the Tweaks panel are <em>hidden</em>; the right rail's contextual
+    affordances are <em>fully expanded</em> for each screen.
+  </p>
+  <div class="tip">
+    <strong>To save as PDF:</strong> wait for the green “READY” badge in the bottom-right
+    (fonts loaded + every frame scaled), then press <code>Cmd&nbsp;+&nbsp;P</code> (Mac) or
+    <code>Ctrl&nbsp;+&nbsp;P</code> (Windows). In the print dialog → Destination
+    <code>Save as PDF</code>, Paper size <code>A4</code>, Margins <em>None</em>, headers &amp; footers off.
+    Each frame prints on its own page; nothing is clipped.
+  </div>
+</div>
+
+<!-- The 31 frames — one per current screen id. -->
+<div class="page-frame"><span class="page-frame__caption">01 · Welcome</span><div class="page-frame__inner" data-mount="welcome"></div></div>
+<div class="page-frame"><span class="page-frame__caption">02 · Profile</span><div class="page-frame__inner" data-mount="profile"></div></div>
+<div class="page-frame"><span class="page-frame__caption">03 · Grounding G1 · AI in public administration</span><div class="page-frame__inner" data-mount="g1"></div></div>
+<div class="page-frame"><span class="page-frame__caption">04 · Grounding G2 · The framework you will evaluate</span><div class="page-frame__inner" data-mount="g2"></div></div>
+
+<div class="page-frame"><span class="page-frame__caption">05 · Cluster 1 — When the deployment isn't the whole story</span><div class="page-frame__inner" data-mount="c1-setup1"></div></div>
+<div class="page-frame"><span class="page-frame__caption">06 · Cluster 1 — What this cluster will ask you to judge</span><div class="page-frame__inner" data-mount="c1-setup2"></div></div>
+<div class="page-frame"><span class="page-frame__caption">07 · Q1.1 · Solution-first adoption</span><div class="page-frame__inner" data-mount="c1-q1"></div></div>
+<div class="page-frame"><span class="page-frame__caption">08 · Q1.2 · Institutional reshaping</span><div class="page-frame__inner" data-mount="c1-q2"></div></div>
+<div class="page-frame"><span class="page-frame__caption">09 · Q1.3 / Q1.4 · Strategy-level priorities (paired)</span><div class="page-frame__inner" data-mount="c1-q3q4"></div></div>
+<div class="page-frame"><span class="page-frame__caption">10 · Q1.5 · Are the layers connected</span><div class="page-frame__inner" data-mount="c1-q5"></div></div>
+<div class="page-frame"><span class="page-frame__caption">11 · Q1.6 · What existing checks examine</span><div class="page-frame__inner" data-mount="c1-q6"></div></div>
+<div class="page-frame"><span class="page-frame__caption">12 · Q1.7 · Is a recognise-and-name framework warranted</span><div class="page-frame__inner" data-mount="c1-q7"></div></div>
+<div class="page-frame"><span class="page-frame__caption">13 · Q1.8 · Have generative AI tools changed the picture</span><div class="page-frame__inner" data-mount="c1-q8"></div></div>
+
+<div class="page-frame"><span class="page-frame__caption">14 · Cluster 2 — How the framework is organised</span><div class="page-frame__inner" data-mount="c2-setup1"></div></div>
+<div class="page-frame"><span class="page-frame__caption">15 · Cluster 2 — What the framework pays attention to</span><div class="page-frame__inner" data-mount="c2-setup2"></div></div>
+<div class="page-frame"><span class="page-frame__caption">16 · Q2.1 · The two-layer structure</span><div class="page-frame__inner" data-mount="c2-q1"></div></div>
+<div class="page-frame"><span class="page-frame__caption">17 · Q2.2 · Governance as a recurring cycle</span><div class="page-frame__inner" data-mount="c2-q2"></div></div>
+<div class="page-frame"><span class="page-frame__caption">18 · Q2.3 · Are these the right four structural governance gaps</span><div class="page-frame__inner" data-mount="c2-q3"></div></div>
+<div class="page-frame"><span class="page-frame__caption">19 · Q2.4 · Recognising the four structural governance gaps in practice</span><div class="page-frame__inner" data-mount="c2-q4"></div></div>
+<div class="page-frame"><span class="page-frame__caption">20 · Q2.5 · Bringing structural conditions back into view</span><div class="page-frame__inner" data-mount="c2-q6"></div></div>
+<div class="page-frame"><span class="page-frame__caption">21 · Q2.6 · Generative LLM Gate · stopping condition</span><div class="page-frame__inner" data-mount="c2-q7"></div></div>
+
+<div class="page-frame"><span class="page-frame__caption">22 · Cluster 3 — How to read an instrument here</span><div class="page-frame__inner" data-mount="c3-setup1"></div></div>
+<div class="page-frame"><span class="page-frame__caption">23 · Cluster 3 — What you will inspect</span><div class="page-frame__inner" data-mount="c3-setup2"></div></div>
+<div class="page-frame"><span class="page-frame__caption">24 · CIW · Contextual Integrity Worksheet</span><div class="page-frame__inner" data-mount="c3-ciw"></div></div>
+<div class="page-frame"><span class="page-frame__caption">25 · AST · Architecture Selection Tool</span><div class="page-frame__inner" data-mount="c3-ast"></div></div>
+<div class="page-frame"><span class="page-frame__caption">26 · DMA · Discretion Migration Analysis</span><div class="page-frame__inner" data-mount="c3-dma"></div></div>
+<div class="page-frame"><span class="page-frame__caption">27 · CPD · Contestation Pathway Design</span><div class="page-frame__inner" data-mount="c3-cpd"></div></div>
+
+<div class="page-frame"><span class="page-frame__caption">28 · Cluster 4 — Close · setup</span><div class="page-frame__inner" data-mount="c4-setup"></div></div>
+<div class="page-frame"><span class="page-frame__caption">29 · Q4.1 + Q4.2 · Catch-all (required) + meta-feedback (optional)</span><div class="page-frame__inner" data-mount="c4-close"></div></div>
+
+<div class="page-frame"><span class="page-frame__caption">30 · Optional follow-up · Interview willingness</span><div class="page-frame__inner" data-mount="interview"></div></div>
+<div class="page-frame"><span class="page-frame__caption">31 · Submit · Review &amp; confirm</span><div class="page-frame__inner" data-mount="submit"></div></div>
+<div class="page-frame"><span class="page-frame__caption">32 · Thank you</span><div class="page-frame__inner" data-mount="thanks"></div></div>
+
+<div class="scaler-progress" id="scaler-progress">Mounting…</div>
+
+<!-- Hidden root so app.jsx's auto-mount block doesn't run a stray instance. -->
+<div id="root" data-skip-mount="true" style="display:none"></div>
+
+<!-- Same source order as index.html -->
+<script src="content.js?v=33"></script>
+<script type="text/babel" src="tweaks-panel.jsx?v=33"></script>
+<script type="text/babel" src="shell.jsx?v=33"></script>
+<script type="text/babel" src="screens.jsx?v=33"></script>
+<script type="text/babel" src="screens-orientation.jsx?v=33"></script>
+<script type="text/babel" src="screens-submit.jsx?v=33"></script>
+<script type="text/babel" src="screens-templates.jsx?v=33"></script>
+<!-- Framework-organisation diagram (Cluster 2). animations.jsx must precede it. -->
+<script type="text/babel" src="diagrams/animations.jsx?v=33"></script>
+<script type="text/babel" src="diagrams/framework-organisation-diagram.jsx?v=33"></script>
+<!-- Three-levels diagram (Cluster 1). -->
+<script type="text/babel" src="diagrams/three-levels-diagram.jsx?v=33"></script>
+<!-- Instrument-reading diagram (Cluster 3). -->
+<script type="text/babel" src="diagrams/instrument-reading-diagram.jsx?v=33"></script>
+<script type="text/babel" src="screens-problem-setup.jsx?v=33"></script>
+<script type="text/babel" src="screens-framework-setup.jsx?v=33"></script>
+<script type="text/babel" src="screens-instruments-setup.jsx?v=33"></script>
+<script type="text/babel" src="overlays.jsx?v=33"></script>
+<script type="text/babel" src="app.jsx?v=33"></script>
+
+<script type="text/babel">
+  (function () {
+    const SCREEN_IDS = [
+      "welcome", "profile",
+      "g1", "g2",
+      "c1-setup1", "c1-setup2", "c1-q1", "c1-q2", "c1-q3q4", "c1-q5", "c1-q6", "c1-q7", "c1-q8",
+      "c2-setup1", "c2-setup2", "c2-q1", "c2-q2", "c2-q3", "c2-q4", "c2-q6", "c2-q7",
+      "c3-setup1", "c3-setup2", "c3-ciw", "c3-ast", "c3-dma", "c3-cpd",
+      "c4-setup", "c4-close",
+      "interview", "submit", "thanks",
+    ];
+
+    // CSS px we have available per A4-portrait page.
+    // Read directly from the CSS vars so a tweak in one place updates both.
+    const cs = getComputedStyle(document.documentElement);
+    const PAGE_W = parseFloat(cs.getPropertyValue("--page-w-px")) || 794;
+    const PAGE_H = parseFloat(cs.getPropertyValue("--page-h-px")) || 1123;
+    const DESIGN_W = parseFloat(cs.getPropertyValue("--design-w")) || 1280;
+
+    const progressEl = document.getElementById("scaler-progress");
+    const setProgress = (msg, state) => {
+      if (!progressEl) return;
+      progressEl.textContent = msg;
+      if (state) progressEl.setAttribute("data-state", state); else progressEl.removeAttribute("data-state");
+    };
+
+    function scaleFrame(frame) {
+      const inner = frame.querySelector(".page-frame__inner");
+      if (!inner) return;
+      // Temporarily clear any transform AND zoom so we can measure natural height.
+      inner.style.transform = "none";
+      inner.style.zoom = "";
+      inner.style.width = DESIGN_W + "px";
+      // Use the max of bounding-rect height and scrollHeight: scrollHeight
+      // picks up any descendant content that extends below the inner's own
+      // box. The tallest screens (submit's review + consent-recap + actions
+      // stack) are exactly where a missed pixel becomes a missing element.
+      const naturalH = Math.max(
+        inner.getBoundingClientRect().height,
+        inner.scrollHeight
+      );
+      // Safety factor: A4 px conversion is nominal (96 dpi assumption); print
+      // engines may render at different DPI or apply their own scaling on top
+      // (default "Scale: 100%" can shift a few px). 0.92 leaves ~90px vertical
+      // headroom — robust to dpi mismatch and late layout shift, while keeping
+      // most screens close to full-page size.
+      const SAFETY = 0.92;
+      const scale = Math.min(
+        (PAGE_W * SAFETY) / DESIGN_W,
+        (PAGE_H * SAFETY) / Math.max(naturalH, 1)
+      );
+      // Use a CSS var so both screen (transform) and print (zoom) pick it up.
+      frame.style.setProperty("--frame-scale", String(scale));
+      frame.setAttribute("data-scaled", "true");
+      inner.style.transform = ""; // let the CSS rule take over
+    }
+
+    function scaleAll() {
+      document.querySelectorAll(".page-frame").forEach(scaleFrame);
+    }
+
+    function mountAll() {
+      if (!window.__App) { setTimeout(mountAll, 100); return; }
+      setProgress("Mounting 31 screens…");
+      SCREEN_IDS.forEach((id) => {
+        const el = document.querySelector(`[data-mount="${id}"]`);
+        if (!el) return;
+        ReactDOM.createRoot(el).render(
+          <window.__App initialScreen={id} printMode={true}/>
+        );
+      });
+
+      // Give React + fonts a moment to settle, then scale once.
+      // Then re-scale a couple of times (fonts often resolve late, which
+      // changes natural height).
+      const passes = [600, 1400, 2800];
+      passes.forEach((t, i) => {
+        setTimeout(() => {
+          scaleAll();
+          if (i === passes.length - 1) {
+            setProgress("Ready · Cmd/Ctrl + P", "ready");
+            document.title = "PV-ACF · All 31 screens · ready to print";
+          } else {
+            setProgress(`Scaling pass ${i + 1}/${passes.length}…`);
+          }
+        }, t);
+      });
+
+      // If fonts API is available, do one more pass once they're loaded.
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => {
+          setTimeout(scaleAll, 100);
+        });
+      }
+
+      // ResizeObserver per inner: if natural height changes later (late image
+      // mounts, font fallbacks resolving, React still settling, dynamic
+      // diagrams), debounce-rescale the whole sheet. This is what prevents the
+      // "bottom of one page slipped past A4" symptom that survives static
+      // timed passes.
+      if (typeof ResizeObserver !== "undefined") {
+        let pending = null;
+        const ro = new ResizeObserver(() => {
+          if (pending) cancelAnimationFrame(pending);
+          pending = requestAnimationFrame(() => {
+            scaleAll();
+            pending = null;
+          });
+        });
+        document.querySelectorAll(".page-frame__inner").forEach(el => ro.observe(el));
+      }
+
+      // And one more pass right before the user prints — guarantees fresh
+      // measurement even if something resized.
+      window.addEventListener("beforeprint", scaleAll);
+    }
+
+    mountAll();
+  })();
+</script>
+
+</body>
+</html>
