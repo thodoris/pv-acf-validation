@@ -7,9 +7,12 @@
   "scripts": {
     "dev": "vite",
     "start": "vite --open",
+    "start:review": "vite --open \"/?tweaks=1\"",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --open",
+    "preview:review": "vite preview --open \"/?tweaks=1\"",
     "view": "npm run build && npm run preview",
+    "view:review": "npm run build && npm run preview:review",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "e2e": "playwright test",

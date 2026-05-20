@@ -5,6 +5,7 @@
 import { useSessionStore } from '@/state/sessionStore';
 import { SCREENS, getScreen, isPhase1Screen, isPhase2Screen, type Screen, type ScreenId } from './screens';
 import { effectiveScreens, getVariant } from '@/content/variants';
+import { isReviewMode } from '@/dev/reviewMode';
 
 export type NavigationResult =
   | { ok: true; screen: Screen }
@@ -29,18 +30,24 @@ export function firstIncompletePhase1(completed: Set<ScreenId>): ScreenId | null
   return null;
 }
 
+export type NavigationOptions = {
+  /** Skip the F1 phase gate. Used by review mode (?tweaks=1) only. */
+  bypassGate?: boolean;
+};
+
 /** Resolves a candidate screen id against the F1 gate. Returns a verdict the
  *  router can act on. Pure — no store mutation. */
 export function resolveNavigation(
   candidate: ScreenId,
   completed: Set<ScreenId>,
+  opts: NavigationOptions = {},
 ): NavigationResult {
   const screen = getScreen(candidate);
   if (!screen) return { ok: false, reason: 'unknown', redirectTo: 'welcome' };
 
   // Welcome is always reachable. Phase 1 screens are always reachable. Phase 2
-  // requires Phase 1 complete.
-  if (isPhase2Screen(screen) && !isPhase1Complete(completed)) {
+  // requires Phase 1 complete — unless bypassGate (review mode).
+  if (!opts.bypassGate && isPhase2Screen(screen) && !isPhase1Complete(completed)) {
     const next = firstIncompletePhase1(completed);
     return { ok: false, reason: 'gated', redirectTo: next ?? 'welcome' };
   }
@@ -86,12 +93,14 @@ export function prev(): void {
   setScreen(prevScreen.id);
 }
 
-/** Jump to an arbitrary screen, subject to F1 gate. Returns the resolved
- *  result so callers can decide whether to redirect. Used by the URL sync
- *  layer and the dev-only Tweaks panel. */
-export function jumpTo(candidate: ScreenId): NavigationResult {
+/** Jump to an arbitrary screen, subject to F1 gate (or bypassed by review
+ *  mode). Returns the resolved result so callers can decide whether to
+ *  redirect. Used by the URL sync layer and the dev-only Tweaks panel. */
+export function jumpTo(candidate: ScreenId, opts: NavigationOptions = {}): NavigationResult {
   const { completedScreens, setScreen } = useSessionStore.getState();
-  const result = resolveNavigation(candidate, completedScreens);
+  const result = resolveNavigation(candidate, completedScreens, {
+    bypassGate: opts.bypassGate ?? isReviewMode(),
+  });
   if (result.ok) {
     setScreen(result.screen.id);
   } else {

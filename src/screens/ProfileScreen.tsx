@@ -10,6 +10,7 @@ import { CONTENT } from '@/content';
 import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore } from '@/state/answerStore';
 import { next, prev } from '@/routing/navigation';
+import { isReviewMode } from '@/dev/reviewMode';
 
 type ProfileValues = Record<string, string>;
 
@@ -35,7 +36,7 @@ export function ProfileScreen(): JSX.Element {
   );
 
   const onContinue = () => {
-    if (missingFields.length > 0) {
+    if (missingFields.length > 0 && !isReviewMode()) {
       setShowErrors(true);
       // Focus first missing field
       const firstMissing = missingFields[0];

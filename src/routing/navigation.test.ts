@@ -71,6 +71,12 @@ describe('F1 phase gate', () => {
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.redirectTo).toBe('g1');
     });
+
+    it('bypassGate option skips F1 enforcement (review mode)', () => {
+      const r = resolveNavigation('c3-ast', new Set(), { bypassGate: true });
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.screen.id).toBe('c3-ast');
+    });
   });
 });
 

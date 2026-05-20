@@ -7,6 +7,7 @@ import { useUrlSync } from './routing/urlSync';
 import { progressFor } from './routing/progress';
 import { requireScreen } from './routing/screens';
 import { CONTENT } from './content';
+import { TweaksPanel } from './dev/TweaksPanel';
 
 type OverlayKind = 'cards' | 'framework' | null;
 
@@ -109,6 +110,8 @@ export default function App(): JSX.Element {
           </aside>
         </div>
       )}
+
+      <TweaksPanel />
     </>
   );
 }

@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
 import { parseVariantId, type VariantId } from '@/content/variants';
 import { resolveNavigation } from './navigation';
+import { isReviewMode } from '@/dev/reviewMode';
 import type { ScreenId } from './screens';
 
 const SCREEN_PARAM = 's';
@@ -51,7 +52,9 @@ export function useUrlSync(): void {
       setVariant(fromUrl.variant);
     }
     if (fromUrl.screen) {
-      const result = resolveNavigation(fromUrl.screen, completedScreens);
+      const result = resolveNavigation(fromUrl.screen, completedScreens, {
+        bypassGate: isReviewMode(),
+      });
       const landing = result.ok ? result.screen.id : result.redirectTo;
       if (landing !== currentScreenId) setScreen(landing);
       writeUrl(landing, fromUrl.variant, true);
@@ -67,7 +70,11 @@ export function useUrlSync(): void {
     const onPop = () => {
       const fromUrl = readUrl();
       if (fromUrl.screen) {
-        const result = resolveNavigation(fromUrl.screen, useSessionStore.getState().completedScreens);
+        const result = resolveNavigation(
+          fromUrl.screen,
+          useSessionStore.getState().completedScreens,
+          { bypassGate: isReviewMode() },
+        );
         setScreen(result.ok ? result.screen.id : result.redirectTo);
       }
     };
