@@ -15,13 +15,28 @@ These override everything else:
 When picking up a task cold:
 
 1. `docs/user-brief/pvacf_platform_implementation_brief.md` — the governing brief (v2.0). Read in full.
-2. `docs/SOURCE_OF_TRUTH.md` — known discrepancies between prototype and design docs (prototype wins; do **not** silently align).
-3. The relevant prototype source under `docs/reference-prototype/` for whatever you are porting.
-4. The implementation plan at `C:/Users/thodo/.claude/plans/ok-this-repo-started-floofy-lynx.md`.
+2. `docs/ARCHITECTURE.md` — the approved implementation plan. The five locked architectural decisions, variant-readiness design, verification plan. **Binding.**
+3. `docs/decisions/` — ADR-style notes for tactical decisions made during implementation that are not in the plan. Read these to avoid re-litigating choices.
+4. `docs/SOURCE_OF_TRUTH.md` — known discrepancies between prototype and design docs (prototype wins; do **not** silently align).
+5. The relevant prototype source under `docs/reference-prototype/` for whatever you are porting.
+6. `git log` — phase-by-phase narrative of what was built and why.
 
 The handoff bundle docs at `docs/handoff/` are **historical references** — useful for understanding *intent*, not authoritative for what to build.
 
 The chat transcripts at `docs/design-history/` are inert. Do not consult them unless the user explicitly asks.
+
+## When to add an ADR
+
+Add a new entry to `docs/decisions/` (next sequential number, kebab-case slug)
+when you make a tactical choice that:
+
+- contradicts the plan in `docs/ARCHITECTURE.md`, or
+- materially extends the plan with something it did not anticipate, or
+- a future agent might otherwise re-litigate (e.g. a non-obvious library
+  workaround, a deliberate non-idiom).
+
+Skip ADRs for routine porting that just executes the plan. Commit messages
+already carry that narrative.
 
 ## Locked architectural decisions
 
