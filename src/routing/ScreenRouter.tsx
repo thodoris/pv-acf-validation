@@ -10,6 +10,7 @@ import { Placeholder } from '@/screens/placeholders';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { OrientG1, OrientG2 } from '@/screens/OrientationScreen';
+import { QuestionScreen } from '@/screens/QuestionScreen';
 import { ProblemSetup1, ProblemSetup2 } from '@/screens/setup/ProblemSetup';
 import { FrameworkSetup1, FrameworkSetup2 } from '@/screens/setup/FrameworkSetup';
 import {
@@ -70,7 +71,7 @@ function renderByKind(screen: Screen): JSX.Element {
         <Placeholder name="Cluster setup · (no cluster id)" />
       );
     case 'question':
-      return <Placeholder name={`Question · ${screen.id}`} />;
+      return <QuestionScreen screenId={screen.id} />;
     case 'paired':
       return <Placeholder name={`Paired question · ${screen.id}`} />;
     case 'close-pair':
