@@ -52,7 +52,6 @@ export const useAnswerStore = create<AnswerState>()(
         const existing = get().answers[id];
         if (existing) {
           if (import.meta.env.DEV) {
-            // eslint-disable-next-line no-console
             console.warn(
               `[answerStore] Second lockAnswer for "${id}" — ignored. ` +
                 `Answers are append-only after lock (F4).`,

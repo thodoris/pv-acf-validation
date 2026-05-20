@@ -12,11 +12,22 @@ export type GroundingId = 'g1' | 'g2';
 export type AffordanceKind =
   | 'scope'
   | 'source'
-  | 'rationale'
   | 'explanation'
-  | 'widget-trigger'
   | 'example'
-  | 'maturity';
+  | 'maturity'
+  | 'operable'
+  | 'video';
+
+export type AffordanceChip = {
+  num?: string;
+  label: string;
+};
+
+export type AffordanceVideo = {
+  title: string;
+  duration: string;
+  url?: string;
+};
 
 export type AffordanceDecl = {
   kind: AffordanceKind;
@@ -24,8 +35,8 @@ export type AffordanceDecl = {
   body?: string; // HTML
   items?: string[]; // HTML allowed in items
   footer?: string; // HTML
-  chips?: string[];
-  video?: string;
+  chips?: AffordanceChip[];
+  video?: AffordanceVideo;
   labelOverride?: string;
 };
 
