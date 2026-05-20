@@ -19,12 +19,22 @@ The **implemented prototype** at `docs/reference-prototype/` is authoritative fo
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
-npm run build
+npm start          # dev server + hot reload, opens browser at http://localhost:5173
+npm run view       # production build + preview server, opens browser
+npm run build      # production build only (writes dist/)
 npm run test       # Vitest (unit)
 npm run e2e        # Playwright (E2E)
 npm run lint
 ```
+
+### Quick-launch on Windows
+
+Two double-click wrappers live at the repo root:
+
+- `start.bat` — runs `npm start` (dev server, hot reload, opens browser)
+- `view.bat` — runs `npm run view` (production build, preview server, opens browser)
+
+Both auto-install dependencies on first run if `node_modules/` is missing.
 
 ## Dev-only URL parameters
 

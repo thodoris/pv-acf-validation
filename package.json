@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vite --open",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --open",
+    "view": "npm run build && npm run preview",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "e2e": "playwright test",
