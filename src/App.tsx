@@ -6,7 +6,8 @@ import { useSessionStore } from './state/sessionStore';
 import { useUrlSync } from './routing/urlSync';
 import { progressFor } from './routing/progress';
 import { requireScreen } from './routing/screens';
-import { CONTENT } from './content';
+import { CONTENT, isPairedQuestion } from './content';
+import { ReferenceOverlay } from './overlays/ReferenceOverlay';
 import { TweaksPanel } from './dev/TweaksPanel';
 
 type OverlayKind = 'cards' | 'framework' | null;
@@ -65,53 +66,27 @@ export default function App(): JSX.Element {
         {railOn && <Rail affordances={affordances} />}
       </div>
 
-      {/* TODO Phase 4h — ReferenceOverlay mounts here. Until then, a placeholder. */}
-      {overlayKind && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            zIndex: 80,
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <button
-            type="button"
-            aria-label="Close overlay"
-            onClick={() => setOverlayKind(null)}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(26,24,22,0.42)',
-              border: 0,
-              cursor: 'pointer',
-            }}
-          />
-          <aside
-            style={{
-              position: 'relative',
-              width: 560,
-              height: '100%',
-              background: 'var(--surface)',
-              padding: 32,
-            }}
-          >
-            <p style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase', fontSize: 12, letterSpacing: '0.08em' }}>
-              Reference overlay · placeholder
-            </p>
-            <h2 style={{ marginTop: 12 }}>{overlayKind === 'cards' ? 'Concept cards' : 'Whole framework'}</h2>
-            <p style={{ marginTop: 16, color: 'var(--ink-soft)' }}>
-              This consultation is not captured as response data. Real overlay arrives in Phase 4h.
-            </p>
-            <button type="button" onClick={() => setOverlayKind(null)} style={{ marginTop: 24 }}>
-              Close (Esc)
-            </button>
-          </aside>
-        </div>
-      )}
+      <ReferenceOverlay
+        kind={overlayKind}
+        onClose={() => setOverlayKind(null)}
+        contextRelevant={contextRelevantFor(screenId)}
+      />
 
       <TweaksPanel />
     </>
   );
+}
+
+/** "Concepts relevant to this screen ({contextRelevant}) are listed first" hint
+ *  shown in the overlay. Derived from the active screen — questions surface
+ *  their chapter, instruments surface their code, other screens omit the hint. */
+function contextRelevantFor(screenId: string): string | null {
+  const q = CONTENT.questions[screenId];
+  if (q) {
+    if (isPairedQuestion(q)) return q.chapter;
+    return q.chapter;
+  }
+  const inst = CONTENT.instruments.find((i) => i.id === screenId);
+  if (inst) return `Instrument · ${inst.code}`;
+  return null;
 }
