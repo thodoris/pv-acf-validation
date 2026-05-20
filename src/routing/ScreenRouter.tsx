@@ -7,6 +7,8 @@ import { useEffect } from 'react';
 import type { JSX } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
 import { Placeholder } from '@/screens/placeholders';
+import { WelcomeScreen } from '@/screens/WelcomeScreen';
+import { ProfileScreen } from '@/screens/ProfileScreen';
 import { requireScreen, type Screen } from './screens';
 
 export function ScreenRouter(): JSX.Element {
@@ -34,9 +36,9 @@ export function ScreenRouter(): JSX.Element {
 function renderByKind(screen: Screen): JSX.Element {
   switch (screen.kind) {
     case 'welcome':
-      return <Placeholder name="Welcome" body="Invitation, how-it-works, consent grid." />;
+      return <WelcomeScreen />;
     case 'profile':
-      return <Placeholder name="Profile" body="Name (optional), institution type, years in practice." />;
+      return <ProfileScreen />;
     case 'orient-1':
       return <Placeholder name="Grounding · g1 — AI in public administration" />;
     case 'orient-2':
