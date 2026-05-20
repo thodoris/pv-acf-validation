@@ -12,6 +12,8 @@ import { ProfileScreen } from '@/screens/ProfileScreen';
 import { OrientG1, OrientG2 } from '@/screens/OrientationScreen';
 import { QuestionScreen } from '@/screens/QuestionScreen';
 import { PairedQuestionScreen } from '@/screens/PairedQuestionScreen';
+import { InstrumentScreen } from '@/screens/InstrumentScreen';
+import type { InstrumentId } from '@/content';
 import { ProblemSetup1, ProblemSetup2 } from '@/screens/setup/ProblemSetup';
 import { FrameworkSetup1, FrameworkSetup2 } from '@/screens/setup/FrameworkSetup';
 import {
@@ -78,7 +80,7 @@ function renderByKind(screen: Screen): JSX.Element {
     case 'close-pair':
       return <Placeholder name="Close · Q4.1 + Q4.2" />;
     case 'instrument':
-      return <Placeholder name={`Instrument · ${screen.id}`} />;
+      return <InstrumentScreen screenId={screen.id as InstrumentId} />;
     case 'interview':
       return <Placeholder name="Interview willingness" />;
     case 'submit':
