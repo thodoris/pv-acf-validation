@@ -13,6 +13,10 @@ import { OrientG1, OrientG2 } from '@/screens/OrientationScreen';
 import { QuestionScreen } from '@/screens/QuestionScreen';
 import { PairedQuestionScreen } from '@/screens/PairedQuestionScreen';
 import { InstrumentScreen } from '@/screens/InstrumentScreen';
+import { ClosePairScreen } from '@/screens/ClosePairScreen';
+import { InterviewScreen } from '@/screens/InterviewScreen';
+import { SubmitScreen } from '@/screens/SubmitScreen';
+import { ThanksScreen } from '@/screens/ThanksScreen';
 import type { InstrumentId } from '@/content';
 import { ProblemSetup1, ProblemSetup2 } from '@/screens/setup/ProblemSetup';
 import { FrameworkSetup1, FrameworkSetup2 } from '@/screens/setup/FrameworkSetup';
@@ -78,14 +82,14 @@ function renderByKind(screen: Screen): JSX.Element {
     case 'paired':
       return <PairedQuestionScreen screenId={screen.id} />;
     case 'close-pair':
-      return <Placeholder name="Close · Q4.1 + Q4.2" />;
+      return <ClosePairScreen />;
     case 'instrument':
       return <InstrumentScreen screenId={screen.id as InstrumentId} />;
     case 'interview':
-      return <Placeholder name="Interview willingness" />;
+      return <InterviewScreen />;
     case 'submit':
-      return <Placeholder name="Submit and seal" />;
+      return <SubmitScreen />;
     case 'thanks':
-      return <Placeholder name="Thank you" body="Sealed. 30-day withdrawal window." />;
+      return <ThanksScreen />;
   }
 }
