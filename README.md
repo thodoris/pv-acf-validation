@@ -58,6 +58,40 @@ mode is detected only from the URL — production never mounts the panel.
 - `?v=full` (default) or `?v=short` — questionnaire variant. SHORT is architecturally supported but not currently populated.
 - `?s=<screenId>` — deep-link to a specific screen (subject to F1 phase gate).
 
+## Deploy
+
+Production URL: **https://validation.thodoris.net/** (custom domain, served via Firebase Hosting).
+Default Firebase URLs (`https://pv-acf-questionnaire.web.app/` and `https://pv-acf-questionnaire.firebaseapp.com/`) serve the same `live` channel.
+
+### Auto-deploy on push to main
+
+GitHub Actions deploys on every push to `main` ([.github/workflows/deploy-firebase.yml](.github/workflows/deploy-firebase.yml)):
+install deps → write `.env.local` from repo Secrets → `npm test` → `npm run build` → `firebase deploy --only hosting`.
+A failing test aborts the deploy.
+
+### Manual re-deploy
+
+GitHub → repo → **Actions** → "Deploy to Firebase Hosting (production)" → **Run workflow** (uses the latest `main`). Useful when nothing has changed in code (e.g. after flipping App Check enforcement in the Firebase Console).
+
+### Skip the deploy on a particular push
+
+Append `[skip ci]` (or `[ci skip]`) to the commit subject line. The commit pushes; the workflow doesn't run. Use for env/doc-only changes that don't affect the production bundle.
+
+### Local deploy (rare — bypasses the test gate; prefer CI)
+
+```bash
+npm run deploy   # tsc --noEmit && vite build && firebase deploy --only hosting
+```
+
+Requires `firebase login` once.
+
+### Secrets the workflow needs
+
+In GitHub → repo → Settings → Secrets and variables → Actions:
+
+- `FIREBASE_SERVICE_ACCOUNT_PV_ACF_QUESTIONNAIRE` — JSON for a deploy-only service account with `roles/firebasehosting.admin`. Created automatically by `firebase init hosting:github`.
+- The seven build-time `VITE_*` variables — see [.env.example](.env.example) for the full list.
+
 ## Plan + decisions
 
 The build plan is at `C:/Users/thodo/.claude/plans/ok-this-repo-started-floofy-lynx.md` (outside the repo).

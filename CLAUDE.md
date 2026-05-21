@@ -105,7 +105,26 @@ The sealed payload is written to Firestore on submit. Write happens in `SubmitSc
 
 ## App Check (anti-bot)
 
-Firebase App Check is initialized in `src/lib/firebase.ts` with the reCAPTCHA v3 provider (site key in `VITE_FIREBASE_APPCHECK_SITE_KEY`). Tokens attach automatically to every Firestore + Auth request. **Enforcement is configured in the Firebase Console, not in code** — toggling enforcement on rejects unverified requests server-side; until then, tokens are observed-only. For local dev, the file sets `self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` so the SDK logs a debug token in the browser console; register that token once in Console → App Check → Apps → Manage debug tokens.
+Firebase App Check is initialized in `src/lib/firebase.ts` with the reCAPTCHA v3 provider (site key in `VITE_FIREBASE_APPCHECK_SITE_KEY`). Tokens attach automatically to every Firestore + Auth request. **Enforcement is configured in the Firebase Console, not in code** — toggling enforcement on rejects unverified requests server-side; until then, tokens are observed-only. For local dev, the file sets `self.FIREBASE_APPCHECK_DEBUG_TOKEN` to either the pinned `VITE_FIREBASE_APPCHECK_DEBUG_TOKEN` (if set in `.env.local`) or `true` (auto-generate + log to console). Pinned tokens are pre-registered in Console → App Check → Manage debug tokens, so every local browser/profile/machine sharing the same `.env.local` reuses them without re-registration.
+
+## Deployment / CI
+
+Production is served by Firebase Hosting at **`validation.thodoris.net`** (custom domain), with the default `pv-acf-questionnaire.web.app` and `*.firebaseapp.com` URLs serving the same `live` channel.
+
+**Auto-deploy on push to `main`** via GitHub Actions ([.github/workflows/deploy-firebase.yml](./.github/workflows/deploy-firebase.yml)). The workflow installs deps, writes `.env.local` from repo Secrets, runs `npm test` (gate), builds, and calls `FirebaseExtended/action-hosting-deploy@v0` on the `live` channel. Concurrency is queued (`cancel-in-progress: false`) so overlapping pushes don't race.
+
+**Secrets in GitHub → repo → Settings → Secrets and variables → Actions:**
+
+- `FIREBASE_SERVICE_ACCOUNT_PV_ACF_QUESTIONNAIRE` — deploy-only service account JSON, `roles/firebasehosting.admin` only. Created via `firebase init hosting:github`.
+- Seven build-time `VITE_*` vars (see `.env.example`).
+
+**Skip a deploy** with `[skip ci]` in the commit subject. The commit pushes; the workflow doesn't run. Used for env-only or docs-only changes that don't affect the production bundle.
+
+**Manual re-deploy** via GitHub Actions UI → workflow → "Run workflow" — uses latest `main` without needing a code change. Useful for redeploying after a Console-only flag flip (e.g. enabling App Check enforcement).
+
+**No PR previews.** `firebase init hosting:github` generates `firebase-hosting-pull-request.yml` for PR previews; that file was deliberately deleted because it inherits no env-var injection step (previews would build with empty Firebase config). If preview deploys become desirable later, port the `.env.local` write step from the production workflow before keeping the PR file.
+
+**Lint is intentionally NOT in CI** today — two pre-existing errors in `src/content/content.test.ts` (unrelated to Firebase) would block every deploy. When those are fixed, add `npm run lint` to the workflow.
 
 ## Admin route (`/admin`)
 
