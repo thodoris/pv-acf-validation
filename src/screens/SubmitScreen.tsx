@@ -7,6 +7,7 @@ import { useState } from 'react';
 import type { JSX } from 'react';
 import { Icon } from '@/shell/Icon';
 import { useAnswerStore } from '@/state/answerStore';
+import { useSessionStore } from '@/state/sessionStore';
 import { next } from '@/routing/navigation';
 
 type StatusKind = 'ok' | 'neutral';
@@ -74,14 +75,22 @@ const SUMMARY_ROWS: SummaryRow[] = [
 export function SubmitScreen(): JSX.Element {
   const [confirmed, setConfirmed] = useState(false);
   const answerCount = useAnswerStore((s) => Object.keys(s.answers).length);
+  const variant = useSessionStore((s) => s.variant);
 
   const onSubmit = () => {
     if (!confirmed) return;
     // Stub seal — real backend POST /seal is out of scope (brief §8).
     // The answers are already in localStorage; advancing to thanks reflects
-    // a successful seal.
+    // a successful seal. The payload includes `variant` so the eventual
+    // analyst can distinguish FULL from SHORT-path responses without
+    // having to infer it from missing answer keys.
     if (import.meta.env.DEV) {
-      console.info(`[submit] Sealing ${answerCount} answers (stub).`);
+      const sealPayload = {
+        variant,
+        answerCount,
+        answers: useAnswerStore.getState().answers,
+      };
+      console.info('[submit] Sealing (stub).', sealPayload);
     }
     next();
   };

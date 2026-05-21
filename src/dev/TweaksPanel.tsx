@@ -13,6 +13,7 @@ import type { JSX, ChangeEvent } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
 import { jumpTo } from '@/routing/navigation';
 import { SCREENS } from '@/routing/screens';
+import { effectiveScreens, getVariant } from '@/content/variants';
 import {
   useTweaksStore,
   type AffordanceMode,
@@ -29,9 +30,22 @@ export type TweaksPanelProps = {
 export function TweaksPanel({ onOpenOverlay }: TweaksPanelProps = {}): JSX.Element | null {
   const [collapsed, setCollapsed] = useState(false);
   const currentScreenId = useSessionStore((s) => s.currentScreenId);
+  const variantId = useSessionStore((s) => s.variant);
   const t = useTweaksStore();
 
   if (!isReviewMode()) return null;
+
+  // Build the picker options. Always list all 32 screens (the panel is a
+  // dev tool — reviewers must be able to inspect ones SHORT hides), but
+  // tag hidden ones with "(hidden in <variant>)" so the marker is honest.
+  const variant = getVariant(variantId);
+  const visibleIds = new Set(effectiveScreens(SCREENS, variant).map((s) => s.id));
+  const pickerOptions = SCREENS.map((s) => ({
+    value: s.id,
+    label: visibleIds.has(s.id)
+      ? `${s.id} · ${s.location}`
+      : `${s.id} · ${s.location}  (hidden in ${variantId})`,
+  }));
 
   return (
     <aside
@@ -107,7 +121,7 @@ export function TweaksPanel({ onOpenOverlay }: TweaksPanelProps = {}): JSX.Eleme
             <Select<string>
               label="Jump to screen"
               value={currentScreenId}
-              options={SCREENS.map((s) => ({ value: s.id, label: `${s.id} · ${s.location}` }))}
+              options={pickerOptions}
               onChange={(v) => jumpTo(v, { bypassGate: true })}
             />
           </Section>
