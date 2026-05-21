@@ -57,3 +57,4 @@ superseded entries — mark them and link forward.
 - [0003 — Diagram fallback for setup screens (SVG components deferred)](./0003-diagram-fallback.md)
 - [0004 — Profile + interview are dual-stored (sessionStore + answerStore)](./0004-profile-interview-dual-storage.md)
 - [0005 — Playwright runs with workers: 1 (no parallel)](./0005-playwright-workers-one.md)
+- [0006 — `meta` string replaced by structured `clusterPosition` + `registers`](./0006-meta-restructure-and-registers.md)

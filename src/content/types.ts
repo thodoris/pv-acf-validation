@@ -130,14 +130,6 @@ export type StandardQuestion = {
   kicker: string;
   chapter: string;
   tagline: string;
-  /**
-   * Legacy authored display string (e.g. "Question 2.5 of 6 · Judgment").
-   * Being phased out — `clusterPosition` + `registers` are the new
-   * structured source and the renderer composes the display string via
-   * `displayMeta()`. Kept here only during the F1–F3 transition window;
-   * removed in F4.
-   */
-  meta: string;
   clusterPosition: ClusterPosition;
   registers: Register[];
   question: string;
@@ -157,8 +149,6 @@ export type StandardQuestion = {
 export type PairedSubQuestion = {
   slot: string; // e.g. "Q1.3"
   tag: string;
-  /** Legacy display string; see StandardQuestion.meta. */
-  meta: string;
   clusterPosition: ClusterPosition;
   registers: Register[];
   question: string;
@@ -175,13 +165,6 @@ export type PairedQuestion = {
   kicker: string;
   chapter: string;
   tagline: string;
-  /**
-   * Wrapper-level legacy meta (e.g. "Questions 1.3 + 1.4 of 8"). Not
-   * read by any consumer today; kept for back-compat during the
-   * transition and removed in F4. Per-sub metas live on each
-   * `PairedSubQuestion.meta` and are the actively rendered fields.
-   */
-  meta: string;
   questions: PairedSubQuestion[];
   customAffs?: AffordanceDecl[];
 };

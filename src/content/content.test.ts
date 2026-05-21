@@ -1,12 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CONTENT, requireQuestion, requireInstrument, isPairedQuestion } from './index';
-import type { ClusterId } from './types';
-import type {
-  ClusterPosition,
-  Register,
-  StandardQuestion,
-  PairedSubQuestion,
-} from './types';
+import type { ClusterId, ClusterPosition, Register } from './types';
 
 describe('CONTENT shape', () => {
   it('has the six top-bar steps in order', () => {
@@ -69,78 +63,14 @@ describe('CONTENT shape', () => {
 });
 
 // ---------------------------------------------------------------------------
-// F1 drift-guard — until F4 deletes the authored `meta` string, every
-// question's authored display string must round-trip from its structured
-// fields. This catches accidental divergence while both encodings coexist.
-//
-// Comparison is case-insensitive on the register segments because c2-q4's
-// existing authored meta uses lowercase "recognition · judgment" while
-// every other dual-register question uses Title-Case ("Judgment · Recognition").
-// The renderer will Title-Case at display time in F2; F4 deletes the
-// authored string altogether, so the inconsistency resolves itself.
+// Structured-field integrity — invariants on `clusterPosition` and `registers`
+// that must hold regardless of variant. The F1 drift-guard tests (which
+// compared authored meta strings to structured fields) were removed in F4
+// once the authored `meta` field was deleted; only the structural invariants
+// below remain.
 // ---------------------------------------------------------------------------
 
-const CLUSTER_DIGIT: Record<ClusterId, number> = {
-  problem: 1,
-  framework: 2,
-  instruments: 3,
-  close: 4,
-};
-
-function composeLegacyMeta(
-  q: StandardQuestion,
-  isCluster4Catchall: boolean,
-): string {
-  const digit = CLUSTER_DIGIT[q.cluster];
-  const tag = `Question ${digit}.${q.clusterPosition.ordinal} of ${q.clusterPosition.totalInFull}`;
-  const segments: string[] = q.registers.map(titleCase);
-  if (isCluster4Catchall) {
-    // c4-q1 / c4-q2 carry their required/optional descriptor in the
-    // legacy meta — derived from open.required by the renderer in F4.
-    segments.push(q.open?.required ? 'Required' : 'Optional');
-  }
-  return segments.length > 0 ? `${tag} · ${segments.join(' · ')}` : tag;
-}
-
-function composeLegacySubMeta(sub: PairedSubQuestion): string {
-  // Sub-questions' meta is just the (single) register, Title-Cased.
-  return sub.registers.map(titleCase).join(' · ');
-}
-
-function titleCase(s: string): string {
-  return s.length === 0 ? s : s[0]!.toUpperCase() + s.slice(1);
-}
-
-function normaliseForCompare(s: string): string {
-  return s.toLowerCase();
-}
-
-describe('F1 drift-guard — authored meta == composed(structured)', () => {
-  it('every StandardQuestion meta matches its structured form', () => {
-    for (const [id, q] of Object.entries(CONTENT.questions)) {
-      if (isPairedQuestion(q)) continue;
-      const isC4 = id === 'c4-q1' || id === 'c4-q2';
-      const composed = composeLegacyMeta(q, isC4);
-      expect(
-        normaliseForCompare(q.meta),
-        `${id} — authored meta drifts from structured fields`,
-      ).toBe(normaliseForCompare(composed));
-    }
-  });
-
-  it('every PairedSubQuestion meta matches its structured form', () => {
-    for (const [id, q] of Object.entries(CONTENT.questions)) {
-      if (!isPairedQuestion(q)) continue;
-      for (const sub of q.questions) {
-        const composed = composeLegacySubMeta(sub);
-        expect(
-          normaliseForCompare(sub.meta),
-          `${id}/${sub.slot} — authored sub-meta drifts from structured fields`,
-        ).toBe(normaliseForCompare(composed));
-      }
-    }
-  });
-
+describe('Question structured fields — invariants', () => {
   it('clusterPosition.ordinal is unique within each cluster', () => {
     const seen: Record<string, Set<number>> = {};
     for (const [id, q] of Object.entries(CONTENT.questions)) {

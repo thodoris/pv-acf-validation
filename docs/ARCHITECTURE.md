@@ -219,6 +219,14 @@ To be ready without implementing SHORT now:
 
 This costs us essentially nothing now: a string field on `sessionStore`, a URL param parser, and three helper functions (`effectiveScreens`, `effectiveRequired`, `assertNoPartialPairHiding`). It buys you the ability to introduce SHORT in a future session by populating `VARIANTS.short` and nothing else.
 
+> **Update (2026-05-21).** The infrastructure is now actually consumable end-to-end:
+>
+> - Display labels are no longer authored. The previously hand-written `meta` string per question (e.g. `"Question 2.5 of 6 · Judgment"`) was replaced by structured `clusterPosition: { ordinal, totalInFull }` + `registers: Register[]` fields. The renderer composes the display string at render time via `src/content/displayMeta.ts`, recomputing the visible "X of N" from `effectiveScreens(variant)`. See [ADR 0006](./decisions/0006-meta-restructure-and-registers.md) and [SOURCE_OF_TRUTH row 11](./SOURCE_OF_TRUTH.md).
+> - Cluster-4 `Required` / `Optional` badges are derived from `effectiveRequired()` on `open`, so SHORT that relaxes c4-q1 automatically renders "Optional" with no content edit.
+> - `effectiveRequired()` is consumed by the screens themselves once F5 lands.
+>
+> Populating SHORT now reduces to adding `hiddenScreens` and `requiredOverrides` to `VARIANTS.short` in `variants.ts`; no further plumbing is required.
+
 ---
 
 ## Proposal (c) — Session store / Answer store split

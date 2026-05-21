@@ -155,13 +155,17 @@ function instrumentAffordances(inst: Instrument): AffordanceDecl[] {
 }
 
 function closePairAffordances(): AffordanceDecl[] {
+  // The Required/Optional descriptor is rendered by displayMeta on the
+  // question card itself (derived from effectiveRequired), so it does not
+  // belong in the affordance-card title as well — would duplicate, and
+  // would drift under a SHORT variant that relaxes c4-q1.open.
   const out: AffordanceDecl[] = [];
   const q1 = CONTENT.questions['c4-q1'];
   const q2 = CONTENT.questions['c4-q2'];
   if (q1 && !isPairedQuestion(q1) && q1.scopeNote) {
     out.push({
       kind: 'scope',
-      title: 'Q4.1 · Required · Coverage catch-all',
+      title: 'Q4.1 · Coverage catch-all',
       body: `<p>${q1.subtitle}</p>`,
       items: q1.scopeNote,
     });
@@ -169,7 +173,7 @@ function closePairAffordances(): AffordanceDecl[] {
   if (q2 && !isPairedQuestion(q2) && q2.scopeNote) {
     out.push({
       kind: 'scope',
-      title: 'Q4.2 · Optional · Questionnaire & platform',
+      title: 'Q4.2 · Questionnaire & platform',
       body: `<p>${q2.subtitle}</p>`,
       items: q2.scopeNote,
     });
