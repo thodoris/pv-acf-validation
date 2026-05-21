@@ -5,6 +5,7 @@
 import type { JSX } from 'react';
 import { NavButtons } from '@/shell/NavButtons';
 import { DiagramSlot } from './DiagramSlot';
+import { InstrumentReadingDiagram } from './diagrams/InstrumentReadingDiagram';
 import { SetupPreview } from './SetupPreview';
 import { clusterPreview } from './clusterPreview';
 
@@ -70,22 +71,7 @@ export function InstrumentsSetup1(): JSX.Element {
           size="full"
           caption="Three tiers, top to bottom: framework specifies → institution configures → you judge."
           componentName="instrument-reading-diagram"
-          placeholder={
-            <ul className="diagram-ph__propos">
-              <li>
-                <strong>1.</strong> The framework specifies the instrument's form
-                (structure · prompts · analytical questions)
-              </li>
-              <li>
-                <strong>2.</strong> The institution configures it for deployment (roles ·
-                records · sector calibration · oversight routes · verification)
-              </li>
-              <li>
-                <strong>3.</strong> You judge the resulting working object (distinctive
-                analytical work · practical applicability)
-              </li>
-            </ul>
-          }
+          diagram={<InstrumentReadingDiagram size="full" />}
         />
 
         <p className="ird-caption">
