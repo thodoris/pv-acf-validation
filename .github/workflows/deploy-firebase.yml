@@ -1,0 +1,71 @@
+name: Deploy to Firebase Hosting (production)
+
+# Auto-deploy on every push to main. The `live` channel of project
+# pv-acf-questionnaire is served simultaneously at:
+#   · https://pv-acf-questionnaire.web.app/
+#   · https://pv-acf-questionnaire.firebaseapp.com/
+#   · https://validation.thodoris.net/        (custom domain, already authorized)
+#
+# Manual trigger (workflow_dispatch) lets you re-deploy without a code change.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Don't race: queue overlapping deploys instead of cancelling in flight.
+concurrency:
+  group: firebase-deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write .env.local from repo secrets
+        # Build-time vars consumed by Vite's `import.meta.env.VITE_*`. The
+        # Firebase config values are public by design (they ship in the
+        # bundled JS); storing them as Secrets just keeps the workflow file
+        # one consistent shape.
+        run: |
+          cat > .env.local <<'EOF'
+          VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET=${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_ADMIN_EMAIL=${{ secrets.VITE_ADMIN_EMAIL }}
+          EOF
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build production bundle
+        # `npm run build` runs `tsc --noEmit && vite build`, so typecheck is
+        # included. Output lands in dist/, which firebase.json points at.
+        run: npm run build
+
+      - name: Deploy to Firebase Hosting (live)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_PV_ACF_QUESTIONNAIRE }}
+          channelId: live
+          projectId: pv-acf-questionnaire
