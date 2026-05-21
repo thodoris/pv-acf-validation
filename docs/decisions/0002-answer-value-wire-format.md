@@ -51,6 +51,19 @@ export type AnswerValue =
 
 ## Consequences
 
-- **The backend integration (deferred per brief §8) inherits this contract.** When a real `POST /seal` lands, the payload it ships is `{ [questionId]: LockedAnswer }` where `LockedAnswer = { questionId, value: AnswerValue, lockedAt, screenId, locale? }`. The backend either consumes the union directly (e.g. via a TS-compatible Python/Go schema) or projects each variant into normalised tables.
+- **The backend integration (deferred per brief §8) inherits this contract.** When a real `POST /seal` lands, the payload it ships wraps the answers map alongside session metadata:
+
+  ```ts
+  // The seal-stub assembly in src/screens/SubmitScreen.tsx (F6 of SHORT scaffolding)
+  // already emits this shape to the dev console:
+  {
+    variant: 'full' | 'short',       // active variant id; see ADR 0006
+    answerCount: number,
+    answers: Record<QuestionId, LockedAnswer>,
+  }
+  ```
+
+  where `LockedAnswer = { questionId, value: AnswerValue, lockedAt, screenId, locale? }`. The backend either consumes the union directly (e.g. via a TS-compatible Python/Go schema) or projects each variant into normalised tables.
+- **The `variant` field is variant-stable.** Persistence keys are `QuestionId` strings (`c2-q5`, `c4-close`, etc.) and do **not** depend on which variant the reviewer took. A future SHORT-path reviewer who answers Q2.5 stores under the same `c2-q5` key as a FULL-path reviewer. Analysts use the top-level `variant` to disambiguate paths, not the answer keys themselves. See [ADR 0006](./0006-meta-restructure-and-registers.md) and [SOURCE_OF_TRUTH row 11](../SOURCE_OF_TRUTH.md).
 - **Backwards-compat on changes.** Adding a new `type` is non-breaking. Renaming or removing one would invalidate any locked answer in a returning reviewer's `localStorage`. If we ever rename a variant, also bump `useAnswerStore`'s `persist({ version })` and provide a migrate function.
 - **Locale field is reserved but unused.** `LockedAnswer.locale` exists for future per-response language detection (English vs Greek open text). No screen sets it today; safe to leave undefined.
