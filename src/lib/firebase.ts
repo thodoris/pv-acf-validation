@@ -28,15 +28,19 @@ const firebaseConfig = {
 };
 
 // App Check debug token — DEV ONLY.
-// reCAPTCHA v3 doesn't work on `localhost`, so for local dev we ask Firebase
-// to mint a debug token instead. On first run, the SDK logs the token to
-// the browser console; register it once in Firebase Console → App Check →
-// Apps → (web app) → Manage debug tokens. After that, all localhost runs
-// reuse that token transparently.
+// reCAPTCHA v3 doesn't work on `localhost`, so for local dev we hand
+// Firebase a debug token instead. If VITE_FIREBASE_APPCHECK_DEBUG_TOKEN is
+// set, we pin that exact UUID (already registered in Firebase Console →
+// App Check → Manage debug tokens) so every browser / profile / machine
+// with this .env.local reuses the same token — no per-device
+// re-registration. If unset, we pass `true` and let Firebase auto-generate
+// one (logged to DevTools console on first run for one-off registration).
 // MUST be set BEFORE initializeAppCheck().
 if (import.meta.env.DEV) {
-  (self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN =
-    true;
+  const pinnedDebugToken = import.meta.env.VITE_FIREBASE_APPCHECK_DEBUG_TOKEN;
+  (
+    self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean }
+  ).FIREBASE_APPCHECK_DEBUG_TOKEN = pinnedDebugToken || true;
 }
 
 export const app: FirebaseApp = initializeApp(firebaseConfig);
