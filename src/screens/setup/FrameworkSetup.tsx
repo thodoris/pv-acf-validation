@@ -5,6 +5,7 @@
 import type { JSX } from 'react';
 import { NavButtons } from '@/shell/NavButtons';
 import { DiagramSlot } from './DiagramSlot';
+import { FrameworkOrganisationDiagram } from './diagrams/FrameworkOrganisationDiagram';
 import { SetupPreview } from './SetupPreview';
 import { clusterPreview } from './clusterPreview';
 
@@ -60,27 +61,13 @@ export function FrameworkSetup1(): JSX.Element {
           size="full"
           caption="Framework organisation: two layers, recursive lifecycle, conditional Gate."
           componentName="framework-organisation-diagram"
-          placeholder={
-            <ul className="diagram-ph__propos">
-              <li>
-                <strong>1.</strong> Two layers — diagnostic layer feeds operational lifecycle
-              </li>
-              <li>
-                <strong>2.</strong> Five named stages — problem framing · design &amp;
-                procurement · oversight · public-value evaluation · continuation/discontinuation
-              </li>
-              <li>
-                <strong>3.</strong> Lifecycle re-runs (recursion · default-discontinuation)
-              </li>
-              <li>
-                <strong>4.</strong> Reference-back markers at Stages 1 / 2 / 3 / 5
-                (deliberately not 4)
-              </li>
-              <li>
-                <strong>5.</strong> Generative LLM Gate as a conditional checkpoint at
-                Stage 2
-              </li>
-            </ul>
+          diagram={
+            <FrameworkOrganisationDiagram
+              variant="linear"
+              size="full"
+              showGate
+              showRefBacks
+            />
           }
         />
 
