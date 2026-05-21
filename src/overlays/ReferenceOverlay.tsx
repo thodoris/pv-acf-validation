@@ -10,6 +10,7 @@ import { useEffect } from 'react';
 import type { JSX } from 'react';
 import { Icon } from '@/shell/Icon';
 import { CONTENT } from '@/content';
+import { FrameworkOrganisationDiagram } from '@/screens/setup/diagrams/FrameworkOrganisationDiagram';
 
 export type ReferenceOverlayKind = 'cards' | 'framework';
 export type ReferenceOverlayVariant = 'drawer' | 'fullscreen' | 'floating';
@@ -169,16 +170,13 @@ function FrameworkPresentation(): JSX.Element {
       </p>
 
       <div className="framework__diagram" aria-label="Schematic of the framework">
-        <div
-          className="mono"
-          style={{
-            padding: 'var(--space-4)',
-            color: 'var(--ink-mute)',
-            fontSize: 12,
-          }}
-        >
-          framework-organisation-diagram · placeholder
-        </div>
+        <FrameworkOrganisationDiagram
+          variant="linear"
+          size="medium"
+          autoplay
+          showGate
+          showRefBacks
+        />
       </div>
 
       <div
