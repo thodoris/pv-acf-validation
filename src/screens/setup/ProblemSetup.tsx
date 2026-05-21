@@ -5,6 +5,7 @@
 import type { JSX } from 'react';
 import { NavButtons } from '@/shell/NavButtons';
 import { DiagramSlot } from './DiagramSlot';
+import { ThreeLevelsDiagram } from './diagrams/ThreeLevelsDiagram';
 import { SetupPreview } from './SetupPreview';
 import { clusterPreview } from './clusterPreview';
 
@@ -55,7 +56,7 @@ export function ProblemSetup1(): JSX.Element {
           size="full"
           caption="Three levels Cluster 1's questions span: strategy, institution, deployment."
           componentName="three-levels-diagram"
-          placeholder={null}
+          diagram={<ThreeLevelsDiagram size="full" />}
         />
 
         <div className="fws__body">
