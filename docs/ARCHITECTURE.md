@@ -358,8 +358,8 @@ The brief §9 lists eight open items. The user has now closed items 1–5 (go wi
 
 Carried forward as architectural placeholders (not implemented in this sprint):
 
-1. **Data schema + data path** — separate workstream. Until settled, treat answer payloads as opaque `{questionId, value, lockedAt}` records. `POST /seal` is a stub.
-2. **Save-and-resume mechanism (F8)** — currently `localStorage` per browser. Cross-device resume via email link is open.
+1. ~~**Data schema + data path** — separate workstream. Until settled, treat answer payloads as opaque `{questionId, value, lockedAt}` records. `POST /seal` is a stub.~~ **Superseded 2026-05-21** by [ADR 0007 — Firebase: persistence, hosting, admin export](./decisions/0007-firebase-persistence-and-hosting.md). The seal payload now writes to Firestore on submit; SPA is served from Firebase Hosting; admin reads via Google Sign-In at `/admin` and exports to xlsx (browser or Node CLI).
+2. **Save-and-resume mechanism (F8)** — currently `localStorage` per browser. Cross-device resume via email link remains open (intentionally deferred; the Firestore write is one-shot at submit, not progressive).
 3. **Generic-uptake ratings layer** — not pre-empted. If introduced later, slots before Cluster 2 as a lighter sub-phase.
 4. **Questionnaire variants (FULL / SHORT)** — see *Variant-readiness* section below. FULL is implemented; SHORT is architecturally supported but not implemented.
 

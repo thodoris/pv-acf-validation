@@ -48,6 +48,7 @@ already carry that narrative.
 | Styles | Plain CSS files copied **verbatim** from prototype (`styles.css`, `styles-phase-a.css`). No CSS-in-JS. |
 | AST | Vanilla `<ast-explore>` Web Component kept as-is. Thin React wrapper `ExploreOverlay` mounts it imperatively. |
 | Fonts | Self-hosted woff2 with `unicode-range`. Preload Latin subsets only. |
+| Persistence + Hosting + Auth | Firebase: Firestore (`europe-west3`) for sealed submissions, Firebase Hosting for the SPA, Google Sign-In for the admin at `/admin`. See [ADR 0007](./docs/decisions/0007-firebase-persistence-and-hosting.md). |
 
 ## Hard rules for the AST (`<ast-explore>`)
 
@@ -98,9 +99,17 @@ If you're authoring a new answer-locking screen, follow this pattern. Don't extr
 
 See [ADR 0002 — AnswerValue wire format](./docs/decisions/0002-answer-value-wire-format.md) for the union shape each screen consumes.
 
+## Submission persistence (Firebase)
+
+The sealed payload is written to Firestore on submit. Write happens in `SubmitScreen.onSubmit` via `sealToFirestore(getSealedPayload())`; failure is surfaced as an inline Retry on the same screen, and the localStorage `pvacf:answers` map is preserved so retry replays cleanly. Schema: `{ variant, answerCount, answers, submittedAt: serverTimestamp(), userAgent }` per submission, auto-id, append-only (Firestore rules enforce `update/delete: if false`, mirroring the client-side F4 lock contract).
+
+## Admin route (`/admin`)
+
+Hidden Google-Sign-In page at `/admin`. No entry point in the questionnaire UI; reach it by typing the URL. Detection is via `isAdminRoute()` (`src/admin/adminMode.ts`) — a pure pathname check, mirroring `isReviewMode()`. `App.tsx` short-circuits to `<AdminPanel />` when true. Authorization is a single-email whitelist read from `VITE_ADMIN_EMAIL`. The admin can export all submissions to xlsx in-browser, or run `npm run export:firestore` for an offline backup via the Admin SDK service-account key.
+
 ## Out of scope
 
-- Backend (data path, schema, save-and-resume across devices). Treat answer payload as opaque.
+- ~~Backend (data path, schema, save-and-resume across devices). Treat answer payload as opaque.~~ **Superseded 2026-05-21** — Firestore persists sealed submissions; SPA on Firebase Hosting. See [ADR 0007](./docs/decisions/0007-firebase-persistence-and-hosting.md). Save-and-resume *across devices* remains out of scope (localStorage is still the only progressive store; the Firestore write is one-shot at submit).
 - `PLATFORM/design & adr/`, `PLATFORM/content and questions/`, `PLATFORM/AST Explore Tool/` — user's private working drafts. Do not consult.
 - Anything not in the plan file without sign-off.
 

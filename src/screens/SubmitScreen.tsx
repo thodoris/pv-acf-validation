@@ -1,14 +1,17 @@
 /* SubmitScreen — cluster-by-cluster summary + consent recap + final confirm.
-   On confirm: would post to /seal (stub for now per brief §8), then advances
-   to thanks. The summary copy is hand-curated (matches the prototype); a
-   data-derived summary keyed off answerStore is deferred. */
+   On confirm: writes the sealed payload to Firestore, then advances to thanks.
+   On write failure: shows an inline error with a Retry button; answers stay
+   in localStorage so a retry replays cleanly. The summary copy is hand-curated
+   (matches the prototype); a data-derived summary keyed off answerStore is
+   deferred. */
 
 import { useState } from 'react';
 import type { JSX } from 'react';
 import { Icon } from '@/shell/Icon';
 import { useAnswerStore } from '@/state/answerStore';
-import { useSessionStore } from '@/state/sessionStore';
 import { next } from '@/routing/navigation';
+import { getSealedPayload } from '@/state/sealPayload';
+import { sealToFirestore } from '@/lib/sealSubmission';
 
 type StatusKind = 'ok' | 'neutral';
 
@@ -20,6 +23,8 @@ type SummaryRow = {
   status: StatusKind;
   statusLabel: string;
 };
+
+type SubmitState = 'idle' | 'submitting' | 'error';
 
 const SUMMARY_ROWS: SummaryRow[] = [
   {
@@ -74,26 +79,33 @@ const SUMMARY_ROWS: SummaryRow[] = [
 
 export function SubmitScreen(): JSX.Element {
   const [confirmed, setConfirmed] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const answerCount = useAnswerStore((s) => Object.keys(s.answers).length);
-  const variant = useSessionStore((s) => s.variant);
 
-  const onSubmit = () => {
-    if (!confirmed) return;
-    // Stub seal — real backend POST /seal is out of scope (brief §8).
-    // The answers are already in localStorage; advancing to thanks reflects
-    // a successful seal. The payload includes `variant` so the eventual
-    // analyst can distinguish FULL from SHORT-path responses without
-    // having to infer it from missing answer keys.
-    if (import.meta.env.DEV) {
-      const sealPayload = {
-        variant,
-        answerCount,
-        answers: useAnswerStore.getState().answers,
-      };
-      console.info('[submit] Sealing (stub).', sealPayload);
+  const onSubmit = async () => {
+    if (!confirmed || submitState === 'submitting') return;
+    setSubmitState('submitting');
+    setErrorMsg(null);
+    try {
+      const payload = getSealedPayload();
+      const docId = await sealToFirestore(payload);
+      if (import.meta.env.DEV) {
+        console.info('[submit] Sealed.', { docId, payload });
+      }
+      next();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (import.meta.env.DEV) {
+        console.error('[submit] Firestore write failed.', err);
+      }
+      setErrorMsg(msg);
+      setSubmitState('error');
     }
-    next();
   };
+
+  const isSubmitting = submitState === 'submitting';
+  const isError = submitState === 'error';
 
   return (
     <div className="main">
@@ -150,6 +162,7 @@ export function SubmitScreen(): JSX.Element {
               type="checkbox"
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
+              disabled={isSubmitting}
             />
             <span className="check__box" aria-hidden="true" />
             <span>
@@ -163,12 +176,22 @@ export function SubmitScreen(): JSX.Element {
           <button
             type="button"
             className="btn btn--primary btn--lg"
-            disabled={!confirmed}
+            disabled={!confirmed || isSubmitting}
             onClick={onSubmit}
           >
-            Submit my responses <Icon name="chevron-right" size={16} />
+            {isSubmitting ? 'Sealing…' : isError ? 'Retry submission' : 'Submit my responses'}
+            {!isSubmitting && <Icon name="chevron-right" size={16} />}
           </button>
-          <span className="note-row">Once submitted, this form cannot be reopened.</span>
+          <span className="note-row">
+            {isError
+              ? 'Submission failed. Your answers are still saved locally — retry below.'
+              : 'Once submitted, this form cannot be reopened.'}
+          </span>
+          {isError && errorMsg && (
+            <div className="note-row" role="alert" style={{ color: 'var(--danger, #b00020)' }}>
+              <strong>Error:</strong> {errorMsg}
+            </div>
+          )}
         </div>
       </div>
     </div>

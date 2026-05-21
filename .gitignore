@@ -41,3 +41,21 @@ pnpm-debug.log*
 .env
 .env.local
 .env.*.local
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+firebase-admin-*.json
+service-account*.json
+# Service-account keys: catch Firebase's auto-generated filename pattern
+# (e.g. <project>-firebase-adminsdk-<hash>-<hash>.json) and any *-adminsdk-* variant
+*-firebase-adminsdk-*.json
+*-adminsdk-*.json
+
+# Exports produced by `npm run export:firestore` (CLI writes here)
+results/
+# Legacy export paths (CLI used to write to the project root; keep the
+# patterns gitignored so a stray run never gets committed)
+pvacf-submissions-*.xlsx
+pvacf-submissions-*.json
