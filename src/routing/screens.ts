@@ -124,7 +124,7 @@ export const SCREENS: Screen[] = [
     }),
   ),
 
-  // ---------- Cluster 2 · Framework (note: c2-q5 is skipped in prototype) ----------
+  // ---------- Cluster 2 · Framework (6 questions; prototype skipped c2-q5, we renumbered to a dense c2-q1…c2-q6 — see SOURCE_OF_TRUTH row 10) ----------
   {
     id: 'c2-setup1',
     stepId: 'framework',
@@ -143,7 +143,7 @@ export const SCREENS: Screen[] = [
     percentAtStart: 51,
     minutesAtStart: 27,
   },
-  ...(['c2-q1', 'c2-q2', 'c2-q3', 'c2-q4', 'c2-q6', 'c2-q7'] as const).map(
+  ...(['c2-q1', 'c2-q2', 'c2-q3', 'c2-q4', 'c2-q5', 'c2-q6'] as const).map(
     (id, i): Screen => ({
       id,
       stepId: 'framework',

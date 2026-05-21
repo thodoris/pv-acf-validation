@@ -311,7 +311,7 @@ I'll record these in `docs/SOURCE_OF_TRUTH.md` so the next agent doesn't try to 
 |---|---|---|---|
 | 1 | 5 grounding screens (`g1`…`g5`) | **2 grounding screens** (`g1`, `g2`) | Build 2. Brief is stale. |
 | 2 | `c1-setup` (1 screen) | `c1-setup1` + `c1-setup2` (2 screens) | Build 2. Same for c2/c3. |
-| 3 | `c2-q1`…`c2-q7` (7 questions) | **6 questions**; `c2-q5` is skipped | Build 6. |
+| 3 | `c2-q1`…`c2-q7` (7 questions) | **6 questions**; `c2-q5` is skipped | Build 6. (User later renumbered the IDs to a dense `c2-q1`…`c2-q6` on 2026-05-21 — diverges from the prototype's sparse IDs; see SOURCE_OF_TRUTH row 10.) |
 | 4 | `c4-q1` + `c4-q2` + `interview` as 3 distinct screens | `c4-close` pairs Q4.1 + Q4.2; interview is its own screen post-spine | Build the prototype's structure. |
 | 5 | "34-screen spine" | **~32 screens** by `SCREENS` array count | Final count from prototype; documented. |
 | 6 | Concept cards "context-aware" first | Feature **not implemented** in prototype | Carry forward as TODO. Don't silently add. |

@@ -36,9 +36,9 @@ describe('CONTENT shape', () => {
     expect(isPairedQuestion(requireQuestion('c1-q3q4'))).toBe(true);
   });
 
-  it('has 6 Cluster 2 questions (c2-q5 is skipped per prototype)', () => {
+  it('has 6 Cluster 2 questions (renumbered c2-q1…c2-q6; prototype skipped c2-q5)', () => {
     const c2 = Object.keys(CONTENT.questions).filter((k) => k.startsWith('c2-q'));
-    expect(c2.sort()).toEqual(['c2-q1', 'c2-q2', 'c2-q3', 'c2-q4', 'c2-q6', 'c2-q7']);
+    expect(c2.sort()).toEqual(['c2-q1', 'c2-q2', 'c2-q3', 'c2-q4', 'c2-q5', 'c2-q6']);
   });
 
   it('has 4 instruments in lifecycle order: CIW, AST, DMA, CPD', () => {

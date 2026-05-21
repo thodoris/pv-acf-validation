@@ -35,13 +35,14 @@ Per the user's brief §2: **prototype wins**. These items are deliberate, not bu
 |---|---|---|---|
 | 1 | 5 grounding screens (`g1`…`g5`) | 2 grounding screens (`g1`, `g2`) | Build 2. Brief is stale. |
 | 2 | `c1-setup` (1 screen) | `c1-setup1` + `c1-setup2` (2 screens) | Build 2. Same for c2 and c3 setups. |
-| 3 | `c2-q1`…`c2-q7` (7 questions) | 6 questions — `c2-q5` is skipped | Build 6. |
+| 3 | `c2-q1`…`c2-q7` (7 questions) | 6 questions — `c2-q5` is skipped | Build 6. **Note (2026-05-21):** the user later directed renumbering the IDs to a dense `c2-q1`…`c2-q6` to align IDs with the displayed `Question 2.x of 6` labels. See row 10. |
 | 4 | `c4-q1` + `c4-q2` + `interview` as 3 distinct screens | `c4-close` pairs Q4.1 + Q4.2; `interview` is its own screen post-spine | Build the prototype's structure. |
 | 5 | "34-screen spine" | ~32 screens by `SCREENS` array count | Final count comes from the prototype's `SCREENS` array. |
 | 6 | Concept cards "context-aware" (relevant cards first) | Feature **not implemented** in prototype | Carry forward as TODO. Do not silently add. |
 | 7 | Self-hosted woff2 fonts (preload Greek subsets) | Google Fonts CDN | User brief overrides — self-host woff2. Preload **Latin only**; Greek loaded on demand via `unicode-range`. |
 | 8 | Welcome consent checkbox — unchecked by default | **`defaultChecked` on the first checkbox** | Preserved verbatim from prototype. Looks like a UX smell (consent should not be pre-checked) but the prototype does this deliberately and the user has reviewed it. Do **not** change without sign-off. |
 | 9 | Three setup-1 SVG diagrams | **All three now ported** (`ThreeLevelsDiagram`, `InstrumentReadingDiagram`, `FrameworkOrganisationDiagram` under `src/screens/setup/diagrams/`) | See [ADR 0003](./decisions/0003-diagram-fallback.md) — now **Superseded**. `DiagramSlot` keeps the placeholder path as a defensive fallback for any future caller that omits the `diagram` prop. |
+| 10 | Sparse cluster-2 IDs: `c2-q1`…`c2-q4`, `c2-q6`, `c2-q7` (skipping `c2-q5`) | **Dense IDs: `c2-q1`…`c2-q6`** as of 2026-05-21 | User-directed renumber so screen IDs match the `Question 2.x of 6` labels shown in the meta line. The prior question stem for the new `c2-q5` ("Bringing structural conditions back into view") also had its trailing sub-question on cross-stage consistency removed in the same change. This is a deliberate divergence from the frozen prototype, not a porting error. |
 
 ## Deferred items (per user brief)
 

@@ -715,19 +715,23 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       ],
     },
 
-"c2-q6": {
+"c2-q5": {
       cluster: "framework",
       kicker: "Framework · Returning to the conditions",
       chapter: "Bringing structural conditions back into view",
       tagline: "Does the framework’s central structural commitment earn its place?",
-      meta: "Question 2.5 of 6 · judgment",
-      question: "In your judgement, does bringing structural conditions back into operational decisions meaningfully strengthen AI governance in practice? And does the mechanism appear consistently built into the framework across the lifecycle stages?",
-      subtitle: "At several points in the operational lifecycle, the framework asks practitioners to revisit the broader organisational and structural conditions identified in the diagnostic layer. The question is whether that revisiting does real work and stays consistent across the lifecycle.",
-      type: "open-only",
+      meta: "Question 2.5 of 6 · Judgment",
+      question: "In your judgement, is bringing structural conditions back into operational decisions a sound design move that meaningfully strengthens AI governance in practice?",
+      subtitle: "At several points in the operational lifecycle, the framework asks practitioners to revisit the broader organisational and structural conditions identified in the diagnostic layer. The question is whether the connective move-back is a sound mechanism that does real work — not whether it is evenly built across stages, which Q2.6 takes up.",
+      type: "rating + optional open",
+      rating: {
+        kind: "soundness", required: true,
+        options: ["A sound mechanism", "Broadly reasonable", "Uncertain", "A questionable mechanism", "Not a sound mechanism"],
+      },
       open: {
-        required: true,
-        label: "Where it works, where it thins",
-        prompt: "Where would this be most valuable in practice — and where, if anywhere, does it look like it would thin out or become a formality?",
+        required: false,
+        label: "Your view",
+        prompt: "If you wish, say where this would be most valuable in practice, or where it would thin out as a design move.",
       },
       // Rail overrides: SOURCES → EXAMPLE → DETAILED EXPLANATION. The
       // respondent reads where the move-back is built in, then what it
@@ -771,12 +775,12 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       ],
     },
 
-    "c2-q7": {
+    "c2-q6": {
       cluster: "framework",
       kicker: "Framework · The Generative LLM Gate",
       chapter: "A stopping condition rather than a score",
       tagline: "Cluster 2’s closer — the most counter-intuitive design choice.",
-      meta: "Question 2.6 of 6 · judgment",
+      meta: "Question 2.6 of 6 · Judgment",
       question: "In your judgement, is the framework justified in treating a closed generative model run on vendor-controlled infrastructure as a reason to stop or reconsider a deployment rather than a risk factor to be balanced against other safeguards?",
       subtitle: "When a deployment uses a generative LLM, the framework applies a dedicated governance checkpoint. Two conditions are treated as non-negotiable: whether the institution can meaningfully inspect the model, and whether it retains control over the infrastructure and data environment on which the system operates.",
       type: "rating + optional open",
