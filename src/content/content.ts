@@ -634,10 +634,10 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       meta: "Question 2.3 of 6 · Judgment",
       question: "In your judgement, how well do these four structural governance gaps capture the main conditions a framework like this needs to make visible?",
       subtitle: "The question is whether this set of four captures the main governance conditions a framework like this should help practitioners make visible — not whether each gap is always present.",
-      // Q2.3 is the cluster's first rating + required-open. The rating
-      // carries the headline judgment; the required open carries what
-      // specifically should be added, removed, reframed, or de-overlapped.
-      type: "rating + required open",
+      // The rating carries the headline judgment; the optional open is the
+      // place to name what specifically should be added, removed, reframed,
+      // or de-overlapped — invited but not compelled.
+      type: "rating + optional open",
       rating: {
         kind: "coverage", required: true,
         options: [
@@ -649,9 +649,9 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
         ],
       },
       open: {
-        required: true,
+        required: false,
         label: "What feels missing, unnecessary, overlapping, or misplaced",
-        prompt: "Name what feels missing, unnecessary, overlapping, or misplaced — and say why.",
+        prompt: "If you wish, name what feels missing, unnecessary, overlapping, or misplaced — and say why.",
       },
       // Rail overrides: SOURCES + SCOPE only — no DETAILED EXPLANATION on
       // this screen per Q2.3 content brief.
