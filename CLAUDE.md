@@ -70,6 +70,34 @@ The current questionnaire is the FULL variant. SHORT is architecturally supporte
 
 Variants can **never** add questions or change question types. Always-on screens (`welcome`, `profile`, `submit`, `thanks`) cannot be hidden by any variant.
 
+## Review mode (`?tweaks=1`)
+
+A dev-only URL flag toggling three behaviours simultaneously:
+
+- **Validation skipped on Continue.** Required-field checks return true regardless of input.
+- **F1 phase gate bypassed.** Direct `?s=c3-ast` lands on c3-ast without redirecting through Phase 1.
+- **TweaksPanel mounted** at bottom-right with a jump-to-screen picker for all 32 screens.
+
+Detection is via `isReviewMode()` (`src/dev/reviewMode.ts`), a pure read of `window.location.search`. Consumers: `ProfileScreen`, `QuestionScreen`, `PairedQuestionScreen`, `ClosePairScreen`, `InstrumentScreen`, `routing/navigation.ts:jumpTo`, `routing/urlSync.ts`. `<TweaksPanel />` is mounted unconditionally in `App.tsx` and short-circuits to null when the flag is absent.
+
+**Locked answers stay locked.** F4 is by construction (the `answerStore.lockAnswer` no-op contract), not a validation rule. Review mode cannot bypass it.
+
+**Launchers:** `npm start:review` / `view:review` and `start-review.bat` / `view-review.bat`.
+
+## Locked-answer hydration pattern
+
+Every screen that calls `lockAnswer` follows the same dance, repeated in `QuestionScreen.tsx`, `PairedQuestionScreen.tsx`, `InstrumentScreen.tsx`, `ClosePairScreen.tsx`:
+
+1. Read the existing locked answer at mount: `useAnswerStore((s) => s.getAnswer(screenId))`.
+2. **Hydrate local field state** from the `AnswerValue` discriminated union — a small `hydrateFromLocked(value)` helper private to each screen, since the variant shapes differ.
+3. Track `isLocked = Boolean(lockedAnswer)`.
+4. Pass `disabled={isLocked}` to every field; show a `<strong>Locked.</strong>` banner under the card on revisit.
+5. On Continue: if `isLocked`, skip validation + skip `lockAnswer` (it would be a no-op anyway) and just advance.
+
+If you're authoring a new answer-locking screen, follow this pattern. Don't extract into a shared hook yet — the variant shapes diverge enough that the abstraction would leak.
+
+See [ADR 0002 — AnswerValue wire format](./docs/decisions/0002-answer-value-wire-format.md) for the union shape each screen consumes.
+
 ## Out of scope
 
 - Backend (data path, schema, save-and-resume across devices). Treat answer payload as opaque.

@@ -40,6 +40,8 @@ Per the user's brief §2: **prototype wins**. These items are deliberate, not bu
 | 5 | "34-screen spine" | ~32 screens by `SCREENS` array count | Final count comes from the prototype's `SCREENS` array. |
 | 6 | Concept cards "context-aware" (relevant cards first) | Feature **not implemented** in prototype | Carry forward as TODO. Do not silently add. |
 | 7 | Self-hosted woff2 fonts (preload Greek subsets) | Google Fonts CDN | User brief overrides — self-host woff2. Preload **Latin only**; Greek loaded on demand via `unicode-range`. |
+| 8 | Welcome consent checkbox — unchecked by default | **`defaultChecked` on the first checkbox** | Preserved verbatim from prototype. Looks like a UX smell (consent should not be pre-checked) but the prototype does this deliberately and the user has reviewed it. Do **not** change without sign-off. |
+| 9 | Three setup-1 SVG diagrams (ThreeLevels, FrameworkOrganisation, InstrumentReading) | **Placeholder fallback** rendered via `DiagramSlot` | See [ADR 0003](./decisions/0003-diagram-fallback.md). The prototype itself falls back to the same placeholder when its diagram script fails to load; this is faithful, not a missing port. |
 
 ## Deferred items (per user brief)
 
