@@ -102,12 +102,44 @@ export type QuestionType =
   | 'open-only'
   | 'rating grid + single-select';
 
+/**
+ * Cognitive register the question reaches for. Display label is the
+ * Title-Cased form (`'judgment'` → `'Judgment'`); canonical storage is
+ * lowercase so equality checks are case-stable. A question may carry
+ * multiple registers (c1-q8 and c2-q4 are both judgment + recognition).
+ */
+export type Register = 'judgment' | 'recognition';
+
+/**
+ * The question's position within its cluster on the **FULL** spine.
+ * `ordinal` is 1-based; `totalInFull` is the count of question screens
+ * in this cluster under FULL. Both are authored, not derived — the
+ * renderer recomputes the *visible* position by counting non-hidden
+ * cluster members from `effectiveScreens()` at render time, so SHORT
+ * automatically reports the corrected "X of N". These authored numbers
+ * are the source of truth for FULL and a stability anchor across
+ * variant changes.
+ */
+export type ClusterPosition = {
+  ordinal: number;
+  totalInFull: number;
+};
+
 export type StandardQuestion = {
   cluster: ClusterId;
   kicker: string;
   chapter: string;
   tagline: string;
+  /**
+   * Legacy authored display string (e.g. "Question 2.5 of 6 · Judgment").
+   * Being phased out — `clusterPosition` + `registers` are the new
+   * structured source and the renderer composes the display string via
+   * `displayMeta()`. Kept here only during the F1–F3 transition window;
+   * removed in F4.
+   */
   meta: string;
+  clusterPosition: ClusterPosition;
+  registers: Register[];
   question: string;
   subtitle: string;
   type: QuestionType;
@@ -125,7 +157,10 @@ export type StandardQuestion = {
 export type PairedSubQuestion = {
   slot: string; // e.g. "Q1.3"
   tag: string;
+  /** Legacy display string; see StandardQuestion.meta. */
   meta: string;
+  clusterPosition: ClusterPosition;
+  registers: Register[];
   question: string;
   subtitle: string;
   rating?: Rating;
@@ -140,6 +175,12 @@ export type PairedQuestion = {
   kicker: string;
   chapter: string;
   tagline: string;
+  /**
+   * Wrapper-level legacy meta (e.g. "Questions 1.3 + 1.4 of 8"). Not
+   * read by any consumer today; kept for back-compat during the
+   * transition and removed in F4. Per-sub metas live on each
+   * `PairedSubQuestion.meta` and are the actively rendered fields.
+   */
   meta: string;
   questions: PairedSubQuestion[];
   customAffs?: AffordanceDecl[];
