@@ -1,6 +1,6 @@
 # 0003 — Diagram fallback for setup screens (SVG components deferred)
 
-- **Status:** Accepted · 2026-05-21
+- **Status:** Superseded · 2026-05-21 — all three diagrams now ported. `DiagramSlot` retains the placeholder path as a defensive fallback for callers that omit the `diagram` prop, but the three setup-1 screens (`c1-setup1`, `c2-setup1`, `c3-setup1`) now render real SVG components. See commits eb6f8c8 / ae78992 / 7f743f0.
 - **Touches:** `src/screens/setup/DiagramSlot.tsx`, the three setup-1 screens that consume it
 
 ## Context
