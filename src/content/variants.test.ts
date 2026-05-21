@@ -74,6 +74,33 @@ describe('variants', () => {
       const q = requireQuestion('c4-q1');
       expect(effectiveRequired(q, 'c4-q1', 'open', overrideVariant)).toBe(false);
     });
+
+    it('accepts a paired sub-question and reads its base required', () => {
+      const wrapper = requireQuestion('c1-q3q4');
+      if (!('questions' in wrapper)) throw new Error('expected paired');
+      const q13 = wrapper.questions[0]!; // Q1.3 — rating required, open optional
+      expect(effectiveRequired(q13, 'Q1.3', 'rating', VARIANTS.full)).toBe(true);
+      expect(effectiveRequired(q13, 'Q1.3', 'open', VARIANTS.full)).toBe(false);
+    });
+
+    it('applies override on a paired sub-question via slot key', () => {
+      const wrapper = requireQuestion('c1-q3q4');
+      if (!('questions' in wrapper)) throw new Error('expected paired');
+      const q13 = wrapper.questions[0]!;
+      const overrideVariant: VariantConfig = {
+        id: 'short',
+        label: 'short fixture',
+        requiredOverrides: { 'Q1.3': { rating: false } },
+      };
+      expect(effectiveRequired(q13, 'Q1.3', 'rating', overrideVariant)).toBe(false);
+    });
+
+    it('returns false on a PairedQuestion wrapper itself', () => {
+      const wrapper = requireQuestion('c1-q3q4');
+      // Wrapper has no top-level rating/open — required is always false here.
+      expect(effectiveRequired(wrapper, 'c1-q3q4', 'rating', VARIANTS.full)).toBe(false);
+      expect(effectiveRequired(wrapper, 'c1-q3q4', 'open', VARIANTS.full)).toBe(false);
+    });
   });
 
   describe('assertVariantInvariants', () => {
@@ -88,6 +115,27 @@ describe('variants', () => {
         hiddenScreens: ['welcome'],
       };
       expect(() => assertVariantInvariants(bad)).toThrow(/always-on/);
+    });
+
+    it('throws if a requiredOverrides key does not match any known id or slot', () => {
+      const bad: VariantConfig = {
+        id: 'short',
+        label: 'bad',
+        requiredOverrides: { 'c9-q99': { open: false } },
+      };
+      expect(() => assertVariantInvariants(bad)).toThrow(/does not match/);
+    });
+
+    it('accepts requiredOverrides for known StandardQuestion ids and sub slots', () => {
+      const good: VariantConfig = {
+        id: 'short',
+        label: 'good',
+        requiredOverrides: {
+          'c4-q1': { open: false },
+          'Q1.3': { rating: false },
+        },
+      };
+      expect(() => assertVariantInvariants(good)).not.toThrow();
     });
   });
 });

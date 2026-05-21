@@ -14,7 +14,7 @@ import { OpenResponse } from './fields/OpenResponse';
 import { CompositeSelect } from './fields/CompositeSelect';
 import { requireStandardQuestion, type QuestionId } from '@/content';
 import { displayMetaForStandard } from '@/content/displayMeta';
-import { getVariant } from '@/content/variants';
+import { effectiveRequired, getVariant } from '@/content/variants';
 import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
@@ -40,8 +40,13 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
   const [compositeVal, setCompositeVal] = useState<number | null>(initial.composite);
   const [showErrors, setShowErrors] = useState(false);
 
-  const ratingRequired = q.rating?.required ?? false;
-  const openRequired = q.open?.required ?? false;
+  // Required-ness consults the active variant so SHORT can relax fields
+  // declaratively via `requiredOverrides`. `composite.required` is not
+  // overridable by design — see VariantConfig JSDoc.
+  const ratingRequired = q.rating
+    ? effectiveRequired(q, screenId, 'rating', variant)
+    : false;
+  const openRequired = q.open ? effectiveRequired(q, screenId, 'open', variant) : false;
   const compositeRequired = q.composite?.required ?? false;
 
   const ratingAnswered = q.rating ? isStandardRatingAnswered(q.rating, rating) : true;

@@ -8,7 +8,7 @@ import { QuestionCard } from './fields/QuestionCard';
 import { OpenResponse } from './fields/OpenResponse';
 import { requireStandardQuestion } from '@/content';
 import { displayMetaForStandard } from '@/content/displayMeta';
-import { getVariant } from '@/content/variants';
+import { effectiveRequired, getVariant } from '@/content/variants';
 import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
@@ -32,6 +32,10 @@ export function ClosePairScreen(): JSX.Element {
   const [open2, setOpen2] = useState(initial.q2);
   const [showErrors, setShowErrors] = useState(false);
 
+  // Q4.1 is required by default but a SHORT variant may relax it via
+  // requiredOverrides['c4-q1'] — same path as displayMeta uses for the
+  // Required / Optional badge.
+  const q1Required = effectiveRequired(q1, 'c4-q1', 'open', variant);
   const q1Answered = open1.trim().length > 0;
 
   const onContinue = () => {
@@ -39,7 +43,7 @@ export function ClosePairScreen(): JSX.Element {
       next();
       return;
     }
-    if (!q1Answered && !isReviewMode()) {
+    if (q1Required && !q1Answered && !isReviewMode()) {
       setShowErrors(true);
       return;
     }
@@ -81,7 +85,7 @@ export function ClosePairScreen(): JSX.Element {
                 minHeight={220}
                 disabled={isLocked}
               />
-              {showErrors && !q1Answered && (
+              {showErrors && q1Required && !q1Answered && (
                 <div className="field__hint" style={{ color: 'var(--danger)' }}>
                   This open response is required.
                 </div>

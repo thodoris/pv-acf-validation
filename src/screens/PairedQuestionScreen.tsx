@@ -11,7 +11,7 @@ import { isStandardRatingAnswered } from './fields/ratingUtils';
 import { OpenResponse } from './fields/OpenResponse';
 import { requirePairedQuestion, type QuestionId } from '@/content';
 import { displayMetaForSub } from '@/content/displayMeta';
-import { getVariant } from '@/content/variants';
+import { effectiveRequired, getVariant } from '@/content/variants';
 import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
@@ -42,10 +42,16 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
     setAnswers((a) => ({ ...a, [slot]: { ...a[slot]!, ...patch } }));
 
   // Validation: every sub-question's required fields must be answered.
+  // Required-ness consults the active variant via the sub's slot
+  // (e.g. "Q1.3") as the override key — see VariantConfig JSDoc.
   const missingSlots = data.questions.filter((q) => {
     const a = answers[q.slot]!;
-    if (q.rating?.required && !isStandardRatingAnswered(q.rating, a.rating)) return true;
-    if (q.open?.required && !a.open.trim()) return true;
+    const ratingReq = q.rating
+      ? effectiveRequired(q, q.slot, 'rating', variant)
+      : false;
+    const openReq = q.open ? effectiveRequired(q, q.slot, 'open', variant) : false;
+    if (ratingReq && !isStandardRatingAnswered(q.rating!, a.rating)) return true;
+    if (openReq && !a.open.trim()) return true;
     return false;
   });
 
@@ -80,9 +86,15 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
 
         {data.questions.map((q) => {
           const a = answers[q.slot]!;
+          const ratingReq = q.rating
+            ? effectiveRequired(q, q.slot, 'rating', variant)
+            : false;
+          const openReq = q.open
+            ? effectiveRequired(q, q.slot, 'open', variant)
+            : false;
           const ratingMissing =
-            showErrors && q.rating?.required && !isStandardRatingAnswered(q.rating, a.rating);
-          const openMissing = showErrors && q.open?.required && !a.open.trim();
+            showErrors && ratingReq && !isStandardRatingAnswered(q.rating!, a.rating);
+          const openMissing = showErrors && openReq && !a.open.trim();
           const subDisplay = displayMetaForSub(screenId, q, variant);
           return (
             <QuestionCard
