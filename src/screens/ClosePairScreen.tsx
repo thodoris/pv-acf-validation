@@ -7,6 +7,9 @@ import { NavButtons } from '@/shell/NavButtons';
 import { QuestionCard } from './fields/QuestionCard';
 import { OpenResponse } from './fields/OpenResponse';
 import { requireStandardQuestion } from '@/content';
+import { displayMetaForStandard } from '@/content/displayMeta';
+import { getVariant } from '@/content/variants';
+import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
@@ -14,6 +17,11 @@ import { isReviewMode } from '@/dev/reviewMode';
 export function ClosePairScreen(): JSX.Element {
   const q1 = requireStandardQuestion('c4-q1');
   const q2 = requireStandardQuestion('c4-q2');
+
+  const variantId = useSessionStore((s) => s.variant);
+  const variant = getVariant(variantId);
+  const display1 = displayMetaForStandard(q1, 'c4-q1', variant);
+  const display2 = displayMetaForStandard(q2, 'c4-q2', variant);
 
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer('c4-close'));
@@ -58,8 +66,8 @@ export function ClosePairScreen(): JSX.Element {
 
         <QuestionCard
           slot="q41"
-          tag={q1.meta.split(' · ')[0]}
-          meta={q1.meta.split(' · ').slice(1).join(' · ')}
+          tag={display1.tag}
+          meta={display1.meta}
           question={q1.question}
           subtitle={q1.subtitle}
         >
@@ -85,8 +93,8 @@ export function ClosePairScreen(): JSX.Element {
         <div className="q-card--optional-wrap">
           <QuestionCard
             slot="q42"
-            tag={q2.meta.split(' · ')[0]}
-            meta={q2.meta.split(' · ').slice(1).join(' · ')}
+            tag={display2.tag}
+            meta={display2.meta}
             question={q2.question}
             subtitle={q2.subtitle}
           >

@@ -13,6 +13,9 @@ import { isStandardRatingAnswered } from './fields/ratingUtils';
 import { OpenResponse } from './fields/OpenResponse';
 import { CompositeSelect } from './fields/CompositeSelect';
 import { requireStandardQuestion, type QuestionId } from '@/content';
+import { displayMetaForStandard } from '@/content/displayMeta';
+import { getVariant } from '@/content/variants';
+import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
@@ -23,6 +26,9 @@ export type QuestionScreenProps = {
 
 export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
   const q = requireStandardQuestion(screenId);
+  const variantId = useSessionStore((s) => s.variant);
+  const variant = getVariant(variantId);
+  const display = displayMetaForStandard(q, screenId, variant);
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer(screenId));
   const isLocked = Boolean(lockedAnswer);
@@ -76,8 +82,8 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
         {q.tagline && <p className="tagline tagline--mute">{q.tagline}</p>}
 
         <QuestionCard
-          tag={q.meta.split(' · ')[0]}
-          meta={q.meta.split(' · ').slice(1).join(' · ')}
+          tag={display.tag}
+          meta={display.meta}
           question={q.question}
           subtitle={q.subtitle}
         >

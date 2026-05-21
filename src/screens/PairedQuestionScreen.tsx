@@ -10,6 +10,9 @@ import type { RatingValue } from './fields/RatingControl';
 import { isStandardRatingAnswered } from './fields/ratingUtils';
 import { OpenResponse } from './fields/OpenResponse';
 import { requirePairedQuestion, type QuestionId } from '@/content';
+import { displayMetaForSub } from '@/content/displayMeta';
+import { getVariant } from '@/content/variants';
+import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
@@ -25,6 +28,8 @@ type SubAnswerState = {
 
 export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): JSX.Element {
   const data = requirePairedQuestion(screenId);
+  const variantId = useSessionStore((s) => s.variant);
+  const variant = getVariant(variantId);
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer(screenId));
   const isLocked = Boolean(lockedAnswer);
@@ -78,12 +83,13 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
           const ratingMissing =
             showErrors && q.rating?.required && !isStandardRatingAnswered(q.rating, a.rating);
           const openMissing = showErrors && q.open?.required && !a.open.trim();
+          const subDisplay = displayMetaForSub(screenId, q, variant);
           return (
             <QuestionCard
               key={q.slot}
               slot={q.slot}
-              tag={q.tag}
-              meta={q.meta}
+              tag={subDisplay.tag}
+              meta={subDisplay.meta}
               question={q.question}
               subtitle={q.subtitle}
             >
