@@ -103,6 +103,10 @@ See [ADR 0002 — AnswerValue wire format](./docs/decisions/0002-answer-value-wi
 
 The sealed payload is written to Firestore on submit. Write happens in `SubmitScreen.onSubmit` via `sealToFirestore(getSealedPayload())`; failure is surfaced as an inline Retry on the same screen, and the localStorage `pvacf:answers` map is preserved so retry replays cleanly. Schema: `{ variant, answerCount, answers, submittedAt: serverTimestamp(), userAgent }` per submission, auto-id, append-only (Firestore rules enforce `update/delete: if false`, mirroring the client-side F4 lock contract).
 
+## App Check (anti-bot)
+
+Firebase App Check is initialized in `src/lib/firebase.ts` with the reCAPTCHA v3 provider (site key in `VITE_FIREBASE_APPCHECK_SITE_KEY`). Tokens attach automatically to every Firestore + Auth request. **Enforcement is configured in the Firebase Console, not in code** — toggling enforcement on rejects unverified requests server-side; until then, tokens are observed-only. For local dev, the file sets `self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` so the SDK logs a debug token in the browser console; register that token once in Console → App Check → Apps → Manage debug tokens.
+
 ## Admin route (`/admin`)
 
 Hidden Google-Sign-In page at `/admin`. No entry point in the questionnaire UI; reach it by typing the URL. Detection is via `isAdminRoute()` (`src/admin/adminMode.ts`) — a pure pathname check, mirroring `isReviewMode()`. `App.tsx` short-circuits to `<AdminPanel />` when true. Authorization is a single-email whitelist read from `VITE_ADMIN_EMAIL`. The admin can export all submissions to xlsx in-browser, or run `npm run export:firestore` for an offline backup via the Admin SDK service-account key.

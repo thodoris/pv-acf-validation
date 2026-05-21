@@ -36,3 +36,11 @@ The seal write is **awaited** (block-and-retry, not fire-and-forget). On Firesto
 - The SubmitScreen now has a network dependency. Offline reviewers see the Retry UI; this is the only screen with that property and it's intentional.
 - Anonymity is preserved: no auth on submit, no client identifier in the document. `userAgent` is the only triage hint and is informational only.
 - Export column order is keyed off the *union of observed question ids*, not SCREENS. If a clean, ordered re-export is ever needed, regenerate from the raw `answers` map in Firestore using a one-off script.
+
+## Amendment — 2026-05-22 — App Check (reCAPTCHA v3)
+
+Added Firebase App Check at app boot (`src/lib/firebase.ts`) with the reCAPTCHA v3 provider. The client mints a token per request and attaches it transparently to all Firestore + Auth traffic. Site key lives in `VITE_FIREBASE_APPCHECK_SITE_KEY`; init is conditional on its presence so a missing env var degrades gracefully to no-App-Check rather than a hard crash at module load.
+
+**Enforcement is deliberately left off** in the Firebase Console for the initial rollout — tokens are observed-only until the Console "Requests" graph confirms the client is minting valid tokens. Enforcement is toggled per-service (Firestore, Auth) in Console → App Check → APIs and requires no code change.
+
+Localhost development uses the SDK's debug-token mechanism (`self.FIREBASE_APPCHECK_DEBUG_TOKEN = true` set in DEV mode before `initializeAppCheck`). On first run the browser console logs a token; it's registered once in Console → App Check → Apps → Manage debug tokens and reused across subsequent localhost sessions.
