@@ -573,14 +573,18 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       kicker: "Framework · Recursive cycle",
       chapter: "AI governance as a recurring cycle",
       tagline: "The framework’s signature structural move, isolated.",
-      meta: "Question 2.2 of 6 · Judgment (grounded)",
-      question: "What would a recurring governance cycle like this need in order to work in public administration — and what would make it difficult in practice?",
-      subtitle: "The framework treats AI governance as something that must be revisited throughout a deployment's life, not approved once at the beginning and then left in place. A deployment continues only if it remains actively justifiable over time. The question is what a model like this would need in practice — and what would obstruct it — not whether it adds to review workload.",
-      type: "open-only",
+      meta: "Question 2.2 of 6 · Judgment",
+      question: "In your judgement, is it a sound structural commitment to treat AI governance as an ongoing review cycle in which a deployment is re-justified at each cycle rather than continuing automatically?",
+      subtitle: "The framework treats AI governance as an ongoing review cycle rather than a one-time approval: a deployment is expected to be re-justified over time rather than continuing automatically. The question asks whether this is a sound structural commitment — not whether it adds to review workload.",
+      type: "rating + optional open",
+      rating: {
+        kind: "soundness", required: true,
+        options: ["A sound commitment", "Broadly reasonable", "Uncertain", "A questionable commitment", "Not a sound commitment"],
+      },
       open: {
-        required: true,
-        label: "What would support it — and what would weaken it",
-        prompt: "What would a recurring model like this need in order to function meaningfully over time — and where would it struggle?",
+        required: false,
+        label: "Your view",
+        prompt: "If you wish, say what such a model would need to work in public administration, or where it would run into trouble.",
       },
       // Rail overrides: SOURCES → EXAMPLE → DETAILED EXPLANATION.
       // Deliberate departure from the default order — the respondent reads

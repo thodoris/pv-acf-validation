@@ -48,7 +48,7 @@ Per the user's brief §2: **prototype wins**. These items are deliberate, not bu
 The brief §9 lists eight open items. The user has closed items 1–5 (build as-is per prototype):
 
 - ~~Cluster 2 Q2.6 split~~ — closed.
-- ~~Cluster 2 Q2.2 open-only vs. rating-with-optional-open~~ — closed.
+- ~~Cluster 2 Q2.2 open-only vs. rating-with-optional-open~~ — closed; resolved as **rating + optional open** (2026-05-21), mirroring Q2.1's structure with a soundness scale on the recurring-cycle commitment.
 - ~~Cluster 3 Q3.8 (CPD applicability) scope-redirect~~ — closed.
 - ~~AST third question~~ — closed; AST considered complete.
 - ~~Explore-mode engagement capture on the AST~~ — closed; AST is explore-only.
