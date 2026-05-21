@@ -11,10 +11,23 @@ import { CONTENT, isPairedQuestion } from './content';
 import { ReferenceOverlay } from './overlays/ReferenceOverlay';
 import { TweaksPanel } from './dev/TweaksPanel';
 import { useTweaksStore } from './dev/tweaksStore';
+import { isAdminRoute } from './admin/adminMode';
+import { AdminPanel } from './admin/AdminPanel';
 
 type OverlayKind = 'cards' | 'framework' | null;
 
 export default function App(): JSX.Element {
+  // Hidden admin route — short-circuits the questionnaire entirely so no
+  // questionnaire-state hooks run on /admin. isAdminRoute() reads
+  // window.location once; the route can only change with a full reload, so a
+  // single top-level branch is safe (no Rules-of-Hooks ordering hazard).
+  if (isAdminRoute()) {
+    return <AdminPanel />;
+  }
+  return <QuestionnaireApp />;
+}
+
+function QuestionnaireApp(): JSX.Element {
   useUrlSync();
   const screenId = useSessionStore((s) => s.currentScreenId);
   const screen = requireScreen(screenId);
