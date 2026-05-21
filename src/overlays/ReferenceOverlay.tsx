@@ -12,18 +12,23 @@ import { Icon } from '@/shell/Icon';
 import { CONTENT } from '@/content';
 
 export type ReferenceOverlayKind = 'cards' | 'framework';
+export type ReferenceOverlayVariant = 'drawer' | 'fullscreen' | 'floating';
 
 export type ReferenceOverlayProps = {
   kind: ReferenceOverlayKind | null;
   onClose: () => void;
   /** Hint shown above the concept list — e.g. "Problem · M1 · Q1.1". */
   contextRelevant?: string | null;
+  /** Visual variant. Drawer is the production default; fullscreen and
+   *  floating are Tweaks-only alternates (brief §3). */
+  variant?: ReferenceOverlayVariant;
 };
 
 export function ReferenceOverlay({
   kind,
   onClose,
   contextRelevant,
+  variant = 'drawer',
 }: ReferenceOverlayProps): JSX.Element | null {
   // Trap Escape inside the overlay so it doesn't bubble to the App-level
   // keydown listener and toggle the overlay back open.
@@ -50,8 +55,15 @@ export function ReferenceOverlay({
       ? 'Reference · Concepts & terminology'
       : 'Reference · The whole framework';
 
+  const overlayClass =
+    variant === 'fullscreen'
+      ? 'overlay overlay--fullscreen'
+      : variant === 'floating'
+        ? 'overlay overlay--floating'
+        : 'overlay';
+
   return (
-    <div className="overlay" role="dialog" aria-modal="true" aria-label={title}>
+    <div className={overlayClass} role="dialog" aria-modal="true" aria-label={title}>
       <button
         type="button"
         className="overlay__backdrop"

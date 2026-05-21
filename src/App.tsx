@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { JSX } from 'react';
 import { TopBar, Rail, affordancesFor } from './shell';
+import { InlineExpanders, FloatingTools } from './shell/AffordanceVariants';
 import { ScreenRouter } from './routing/ScreenRouter';
 import { useSessionStore } from './state/sessionStore';
 import { useUrlSync } from './routing/urlSync';
@@ -9,6 +10,7 @@ import { requireScreen } from './routing/screens';
 import { CONTENT, isPairedQuestion } from './content';
 import { ReferenceOverlay } from './overlays/ReferenceOverlay';
 import { TweaksPanel } from './dev/TweaksPanel';
+import { useTweaksStore } from './dev/tweaksStore';
 
 type OverlayKind = 'cards' | 'framework' | null;
 
@@ -18,10 +20,16 @@ export default function App(): JSX.Element {
   const screen = requireScreen(screenId);
   const [overlayKind, setOverlayKind] = useState<OverlayKind>(null);
 
+  // Tweaks (review-mode only — defaults to production register otherwise).
+  const affordanceMode = useTweaksStore((s) => s.affordanceMode);
+  const overlayStyle = useTweaksStore((s) => s.overlayStyle);
+  const shellSide = useTweaksStore((s) => s.shellSide);
+
   const snap = progressFor(screenId);
   const affordances = affordancesFor(screenId);
-  const railOn = (screen.hasShell !== false) && affordances.length > 0;
+  const hasAffs = affordances.length > 0;
   const showShell = screen.hasShell !== false;
+  const railOn = showShell && affordanceMode === 'rail' && hasAffs;
 
   // Keyboard shortcuts: C / F open the two reference overlays; Esc closes.
   useEffect(() => {
@@ -43,7 +51,11 @@ export default function App(): JSX.Element {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const shellClass = !showShell || !railOn ? 'shell shell--no-rail' : 'shell';
+  const shellClass = !railOn
+    ? 'shell shell--no-rail'
+    : shellSide === 'left'
+      ? 'shell shell--rail-left'
+      : 'shell';
 
   return (
     <>
@@ -61,18 +73,26 @@ export default function App(): JSX.Element {
 
       <div className={shellClass}>
         <div style={{ position: 'relative' }}>
+          {showShell && affordanceMode === 'inline-expanders' && hasAffs && (
+            <InlineExpanders affordances={affordances} />
+          )}
           <ScreenRouter />
         </div>
         {railOn && <Rail affordances={affordances} />}
       </div>
 
+      {showShell && affordanceMode === 'floating-tools' && hasAffs && (
+        <FloatingTools affordances={affordances} />
+      )}
+
       <ReferenceOverlay
         kind={overlayKind}
         onClose={() => setOverlayKind(null)}
         contextRelevant={contextRelevantFor(screenId)}
+        variant={overlayStyle}
       />
 
-      <TweaksPanel />
+      <TweaksPanel onOpenOverlay={setOverlayKind} />
     </>
   );
 }
