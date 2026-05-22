@@ -4,6 +4,9 @@
   "description": "PV-ACF Expert Validation Platform — guided single-session expert review for the PV-ACF doctoral thesis framework.",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25"
+  },
   "scripts": {
     "dev": "vite",
     "start": "vite --open",
