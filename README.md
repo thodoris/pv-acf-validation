@@ -17,6 +17,8 @@ The **implemented prototype** at `docs/reference-prototype/` is authoritative fo
 
 ## Develop
 
+Requires **Node 24 LTS** (`.nvmrc` pins the major; `package.json` `engines` enforces `>=24.0.0 <25`). CI runs on the same line.
+
 ```bash
 npm install
 npm start          # dev server + hot reload, opens browser at http://localhost:5173

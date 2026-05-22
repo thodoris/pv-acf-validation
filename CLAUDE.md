@@ -42,7 +42,7 @@ already carry that narrative.
 
 | Decision | Value |
 |---|---|
-| Stack | Vite 5 + React 18 + TypeScript (strict) |
+| Stack | Vite 5 + React 18 + TypeScript (strict), Node 24 LTS (pinned via `.nvmrc` + `package.json` `engines`) |
 | State | Zustand — two stores: `sessionStore`, `answerStore` |
 | Routing | No router. Flat `SCREENS` array + URL sync `?s=<id>&v=<variant>` |
 | Styles | Plain CSS files copied **verbatim** from prototype (`styles.css`, `styles-phase-a.css`). No CSS-in-JS. |
