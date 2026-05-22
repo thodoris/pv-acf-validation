@@ -133,7 +133,7 @@ Hidden Google-Sign-In page at `/admin`. No entry point in the questionnaire UI; 
 ## Out of scope
 
 - ~~Backend (data path, schema, save-and-resume across devices). Treat answer payload as opaque.~~ **Superseded 2026-05-21** — Firestore persists sealed submissions; SPA on Firebase Hosting. See [ADR 0007](./docs/decisions/0007-firebase-persistence-and-hosting.md). Save-and-resume *across devices* remains out of scope (localStorage is still the only progressive store; the Firestore write is one-shot at submit).
-- `PLATFORM/design & adr/`, `PLATFORM/content and questions/`, `PLATFORM/AST Explore Tool/` — user's private working drafts. Do not consult.
+- `D:\Users\thodo\OneDrive\Learning\Phd\PhD Thesis\PLATFORM\design & adr\`, `D:\Users\thodo\OneDrive\Learning\Phd\PhD Thesis\PLATFORM\content and questions\`, `D:\Users\thodo\OneDrive\Learning\Phd\PhD Thesis\PLATFORM\AST Explore Tool\` — user's private working drafts (remain in OneDrive, separate from the repo at `E:\source\repos\personal\pv-acf`). Do not consult.
 - Anything not in the plan file without sign-off.
 
 ## When you find a discrepancy
