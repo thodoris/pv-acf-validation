@@ -1,13 +1,22 @@
-/* Answer store. Append-only after lock — F4 by construction.
+/* Answer store. Editable working store; immutability begins at Firestore seal.
    Persisted to localStorage (key: pvacf:answers).
 
-   Once `lockAnswer(questionId, value)` succeeds, subsequent calls for the same
-   id are silent no-ops (with a dev-only console warning). There is no
-   unlockAnswer / editAnswer. Locked answers are reviewable on Back, never
-   editable.
+   `lockAnswer(questionId, value)` saves or OVERWRITES the answer for a
+   question. The reviewer can revise any answer at any time before they
+   submit. `lockedAt` records the *latest* save (not the first), so the
+   admin export reads "when was this answer last touched" — the most
+   useful timestamp for downstream analysis.
+
+   Final immutability lives at the seal boundary:
+   - Client: `sessionStore.submittedAt` flips on successful `sealToFirestore`.
+     An App-level guard then redirects every screen request to the
+     terminal screen, so the answer-store is no longer reachable from the
+     UI. (See ADR 0009.)
+   - Server: Firestore rules at `responses/{docId}` enforce
+     `update/delete: if false` — sealed documents cannot be mutated.
 
    The AST widget's explore state lives entirely inside its shadow DOM and
-   never touches this store (F5 firewall). */
+   never touches this store (F5 firewall — independent of the lock contract). */
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
@@ -49,22 +58,24 @@ export const useAnswerStore = create<AnswerState>()(
       answers: {},
 
       lockAnswer: (id, value, screenId, locale) => {
-        const existing = get().answers[id];
-        if (existing) {
-          if (import.meta.env.DEV) {
-            console.warn(
-              `[answerStore] Second lockAnswer for "${id}" — ignored. ` +
-                `Answers are append-only after lock (F4).`,
-            );
-          }
-          return;
-        }
+        // Overwrite-safe: a second call for the same `id` replaces the
+        // previous value, updates `lockedAt` to "now", and refreshes the
+        // recorded `screenId` / `locale`. The reviewer can revise any
+        // answer until they submit. Final immutability is enforced at
+        // the seal boundary (sessionStore.submittedAt + Firestore rules).
+        //
+        // We OMIT `locale` from the stored object when it's undefined
+        // rather than writing it as `locale: undefined`. localStorage's
+        // JSON round-trip would drop it anyway, so this keeps the
+        // in-memory shape consistent with the rehydrated shape — and
+        // avoids putting `undefined` into Firestore (which would reject
+        // it without `ignoreUndefinedProperties: true`).
         const locked: LockedAnswer = {
           questionId: id,
           value,
           lockedAt: Date.now(),
           screenId,
-          locale,
+          ...(locale !== undefined ? { locale } : {}),
         };
         set((s) => ({ answers: { ...s.answers, [id]: locked } }));
       },

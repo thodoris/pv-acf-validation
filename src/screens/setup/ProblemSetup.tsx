@@ -19,8 +19,8 @@ const FOUR_PATTERNS_BLOCKS = [
     body: 'Whether organisations reshape themselves around AI systems once running — in how decisions get made, whose expertise counts, what priorities apply — or whether the institution stays much as it was.',
   },
   {
-    title: 'Upstream influence',
-    body: 'Whether the AI priorities your administration works within were set through an open process — or whether they arrived already shaped by technology firms and consulting relationships.',
+    title: 'Priority-setting influence',
+    body: 'Whether the AI priorities your administration works within were set through open deliberation, or arrived already shaped by technology firms, consulting relationships, or competitiveness agendas.',
   },
   {
     title: 'Existing governance checks',
@@ -39,33 +39,32 @@ export function ProblemSetup1(): JSX.Element {
         </div>
         <h1 className="h-display fws__title">When the deployment isn't the whole story</h1>
         <p className="tagline tagline--mute fws__tagline">
-          Three levels the cluster's questions span.
+          Start from the AI system, then trace backwards to the institution and the
+          strategy that made it possible.
         </p>
 
         <aside className="lede-panel">
           <p>
-            Before the framework arrives, Cluster 1 puts the problem to you. This screen
-            shows where the cluster's questions look: not only at the AI system itself,
-            but also at the institutional and strategic conditions surrounding it. The
-            next screen names the four patterns you will be asked to recognise.
+            Cluster 1 asks you to read AI deployments backwards. A problem visible at
+            the system level may have been shaped earlier — by institutional routines
+            that made the deployment operationally plausible, or by strategic priorities that determined
+            what kinds of projects became thinkable in the first place.
           </p>
         </aside>
 
         <DiagramSlot
           variant="three-levels"
           size="full"
-          caption="Three levels Cluster 1's questions span: strategy, institution, deployment."
+          caption="Trace-back direction: from visible deployment to institutional setting to strategic priorities."
           componentName="three-levels-diagram"
           diagram={<ThreeLevelsDiagram size="full" />}
         />
 
         <div className="fws__body">
           <p>
-            Practitioners sometimes find that a problem visible in an AI deployment
-            traces back to earlier decisions about procurement, about how the
-            institution was organised, or about strategic priorities decided before the
-            deployment was on the table. Cluster 1 asks how often you have seen this —
-            and what you make of it.
+            Cluster 1 asks whether this kind of trace-back is recognisable from your
+            own experience. The next screen names the specific patterns the cluster
+            will probe.
           </p>
         </div>
 
@@ -88,15 +87,15 @@ export function ProblemSetup2(): JSX.Element {
         </div>
         <h1 className="h-display fws__title">What this cluster will ask you to judge</h1>
         <p className="tagline tagline--mute fws__tagline">
-          Four patterns to recognise — or not — from your direct experience.
+          Four patterns to recognise — or challenge — from your direct experience.
         </p>
 
         <aside className="lede-panel">
           <p>
-            On the previous screen, you saw a picture of how AI governance problems can
-            connect across levels — strategy, institution, deployment. This screen
-            names what the cluster will ask you to look for: four patterns practitioners
-            may or may not recognise from their own work.
+            On the previous screen, you saw the trace-back move this cluster uses: start from a visible deployment, then ask what institutional and strategic conditions may have shaped it.
+          </p>  
+          <p> 
+            This screen names the patterns the cluster will ask you to look for. The questions are not asking whether PV-ACF is useful yet. They first ask whether the problem it responds to is recognisable in your own practice, scholarship, or governance experience.
           </p>
         </aside>
 
@@ -115,15 +114,13 @@ export function ProblemSetup2(): JSX.Element {
           </ol>
         </section>
 
-        <aside className="lede-panel lede-panel--italic">
+        
           <p>
             <em>
-              This cluster does not ask you to evaluate the framework. It asks how
-              often you have seen these patterns in your own work — and what you make
-              of them.
+             After these recognition questions, the cluster asks whether the levels are connected, whether a recognise-and-name framework would be useful, and whether generative AI changes the governance picture.
             </em>
           </p>
-        </aside>
+        
 
         {preview && <SetupPreview preview={preview} standalone uppercaseKind />}
 

@@ -9,8 +9,9 @@ import { useState } from 'react';
 import type { JSX } from 'react';
 import { Icon } from '@/shell/Icon';
 import { useAnswerStore } from '@/state/answerStore';
+import { useSessionStore } from '@/state/sessionStore';
 import { next } from '@/routing/navigation';
-import { getSealedPayload } from '@/state/sealPayload';
+import { getSealedPayload, sanitizeSealPayload } from '@/state/sealPayload';
 import { sealToFirestore } from '@/lib/sealSubmission';
 
 type StatusKind = 'ok' | 'neutral';
@@ -82,17 +83,46 @@ export function SubmitScreen(): JSX.Element {
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const answerCount = useAnswerStore((s) => Object.keys(s.answers).length);
+  // Acknowledgement-listing block: only rendered when the respondent gave
+  // a name on the Profile screen. The opt-in itself lives in sessionStore
+  // and is auto-reset to `false` whenever the name is cleared.
+  const profileName = useSessionStore((s) => s.profile?.name?.trim() ?? '');
+  const acknowledgeListing = useSessionStore((s) => s.acknowledgeListing);
+  const setAcknowledgeListing = useSessionStore((s) => s.setAcknowledgeListing);
+  const showAckBlock = profileName.length > 0;
 
   const onSubmit = async () => {
     if (!confirmed || submitState === 'submitting') return;
     setSubmitState('submitting');
     setErrorMsg(null);
     try {
-      const payload = getSealedPayload();
+      const raw = getSealedPayload();
+
+      // Last client-side safety net: per-screen guards should already have
+      // refused to lock anything over the limit. If a tampered store or
+      // legacy locked answer slipped through, clip the over-length values
+      // (and drop a malformed email) rather than dead-end the user — they
+      // cannot edit locked answers from here. Server-side enforcement
+      // (Firestore rules in Console) is the actual guarantee — see
+      // docs/decisions/0008-text-length-enforcement.md for the full
+      // picture.
+      const { payload, fixed } = sanitizeSealPayload(raw);
+      if (fixed.length > 0 && import.meta.env.DEV) {
+        console.warn(
+          '[submit] Sanitised over-limit values before seal — sent payload differs from store:',
+          fixed,
+        );
+      }
+
       const docId = await sealToFirestore(payload);
       if (import.meta.env.DEV) {
-        console.info('[submit] Sealed.', { docId, payload });
+        console.info('[submit] Sealed.', { docId, payload, fixed });
       }
+      // Stamp the session as submitted BEFORE navigating. The App-level
+      // guard reads this flag and short-circuits every subsequent screen
+      // request to the terminal screen — so by the time `next()` runs,
+      // any attempt to revisit a question screen will already be intercepted.
+      useSessionStore.getState().markSubmitted(docId);
       next();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -157,6 +187,31 @@ export function SubmitScreen(): JSX.Element {
             separately and is not analysed alongside your responses. You consented to
             this recording at the start of the session.
           </p>
+        </div>
+
+        {showAckBlock && (
+          <section className="ack-listing">
+            <div className="kicker kicker--mute">Acknowledgement listing</div>
+            <p className="ack-listing__note">
+              Optional. Applies only if you gave your name on the profile screen.
+            </p>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={acknowledgeListing}
+                onChange={(e) => setAcknowledgeListing(e.target.checked)}
+                disabled={isSubmitting}
+              />
+              <span className="check__box" aria-hidden="true" />
+              <span>
+                I agree that the name I gave on the profile screen may be listed in
+                the thesis' acknowledgement of expert reviewers.
+              </span>
+            </label>
+          </section>
+        )}
+
+        <div className="consent-recap consent-recap--final">
           <label className="check">
             <input
               type="checkbox"
@@ -197,3 +252,4 @@ export function SubmitScreen(): JSX.Element {
     </div>
   );
 }
+

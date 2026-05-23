@@ -1210,6 +1210,33 @@
   .fourgap__grid--triple { grid-template-columns: 1fr; }
 }
 
+/* G1 register cards: align the "What they ask:" label across all three
+   columns.
+
+   The outer .fourgap__grid stretches every <li> to the height of the
+   tallest (register 3, whose body is the longest). Each <li> is itself a
+   2-row grid (title row, body row). With the default `align-content`
+   (which behaves as `stretch` for auto-sized grid tracks), the inner
+   rows expand to fill the stretched height — that's what was inflating
+   the gap between title and body in the shorter cards.
+
+   `align-content: start` packs the rows to the top of the block, leaving
+   any extra height below the body instead of between title and body.
+   Then we ensure all three titles reserve the same vertical space (two
+   lines at line-height 1.2) so their bodies line up regardless of which
+   titles happen to wrap. Plus a small extra breathing space (~+3px) on
+   top of the existing 8px row-gap. */
+.fourgap__grid--triple .fourgap__block {
+  align-content: start;
+}
+.fourgap__grid--triple .fourgap__title {
+  min-height: 2.7em;
+  line-height: 1.2;
+}
+.fourgap__grid--triple .fourgap__body {
+  margin-top: 3px;
+}
+
 /* ---------- Concept-card strip (G2) ----------
    A lighter visual unit than a callout. Section title, tag-style
    chip list, and a small note. No card chrome.
@@ -1247,6 +1274,22 @@
   line-height: 1.55;
   color: var(--ink-mute);
   font-style: italic;
+  margin: 0;
+  max-width: 60ch;
+}
+
+/* Lightweight labelled orientation block — used on G2 for "Your role in
+   this review". No card chrome (intentionally lighter than the lede
+   panel or a closing callout); reads as a continuation of the body copy
+   with just a small kicker label above it. */
+.role-block {
+  margin: var(--space-6) 0 0;
+}
+.role-block .kicker { margin: 0 0 var(--space-2); }
+.role-block p {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
   margin: 0;
   max-width: 60ch;
 }

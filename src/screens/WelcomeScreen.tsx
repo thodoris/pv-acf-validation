@@ -13,9 +13,14 @@ type InfoOverlayKind = 'research' | 'ethics' | 'data' | null;
 
 export function WelcomeScreen(): JSX.Element {
   const [infoOverlay, setInfoOverlay] = useState<InfoOverlayKind>(null);
+  // GDPR Art. 7 / Recital 32: consent cannot be inferred from a pre-ticked
+  // box. The consent checkbox starts unchecked and the Begin button is
+  // disabled until the reviewer actively ticks it.
+  const [consentTicked, setConsentTicked] = useState(false);
   const acknowledgeConsent = useSessionStore((s) => s.acknowledgeConsent);
 
   const onBegin = () => {
+    if (!consentTicked) return;
     acknowledgeConsent(CONSENT_VERSION);
     next();
   };
@@ -73,9 +78,11 @@ export function WelcomeScreen(): JSX.Element {
               <strong>whole-framework presentation</strong> as an overlay above the
               current screen. Your position is preserved; nothing locks while you read.
             </HowItem>
-            <HowItem title="Interrupt and return whenever you need">
-              You can stop at any point and return via the same link. Answered screens
-              lock when you advance to the next.
+            <HowItem title="Pause and return whenever you need">
+              You can stop at any point and continue later on the same browser —
+              your in-progress answers stay on this device until you submit, when
+              they are sealed. Switching devices, clearing site data, or letting
+              24 hours pass without submitting starts a fresh session.
             </HowItem>
           </ol>
 
@@ -131,28 +138,32 @@ export function WelcomeScreen(): JSX.Element {
 
           <section className="welcome-consent">
             <label className="check">
-              <input type="checkbox" defaultChecked />
+              <input
+                type="checkbox"
+                checked={consentTicked}
+                onChange={(e) => setConsentTicked(e.target.checked)}
+              />
               <span className="check__box" aria-hidden="true" />
               <span>
                 I have read the participation terms and consent to my final answers
                 being recorded for research purposes.
               </span>
             </label>
-            <label className="check">
-              <input type="checkbox" />
-              <span className="check__box" aria-hidden="true" />
-              <span>
-                I agree that my name may be listed in the thesis' acknowledgement of
-                expert reviewers (optional).
-              </span>
-            </label>
 
             <div className="welcome-consent__cta">
-              <button type="button" className="btn btn--primary btn--lg" onClick={onBegin}>
+              <button
+                type="button"
+                className="btn btn--primary btn--lg"
+                onClick={onBegin}
+                disabled={!consentTicked}
+                aria-disabled={!consentTicked}
+              >
                 Begin <Icon name="chevron-right" size={16} />
               </button>
               <span className="note-row">
-                Best on a laptop or desktop · about 45–50 minutes total
+                {consentTicked
+                  ? 'Best on a laptop or desktop · about 45–50 minutes total'
+                  : 'Tick the consent box above to continue.'}
               </span>
             </div>
           </section>

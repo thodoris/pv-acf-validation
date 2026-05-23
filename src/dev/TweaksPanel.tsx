@@ -148,6 +148,22 @@ export function TweaksPanel({ onOpenOverlay }: TweaksPanelProps = {}): JSX.Eleme
             />
           </Section>
 
+          <Section label="Session">
+            <p
+              style={{
+                margin: 0,
+                fontSize: 12,
+                color: 'var(--ink-mute)',
+                lineHeight: 1.5,
+              }}
+            >
+              Wipes <code>pvacf:answers</code> + <code>pvacf:session</code> on this
+              device and reloads. Preserves <code>?tweaks=1</code> and the active
+              variant so the next reload stays in review mode.
+            </p>
+            <PanelButton onClick={handleResetSession}>Reset session</PanelButton>
+          </Section>
+
           <Section label="Reference overlay">
             <Select<OverlayStyle>
               label="Overlay style"
@@ -190,6 +206,30 @@ export function TweaksPanel({ onOpenOverlay }: TweaksPanelProps = {}): JSX.Eleme
       )}
     </aside>
   );
+}
+
+/** Wipe both persistence keys and reload, preserving `?tweaks=1` so the
+ *  panel comes back, and preserving `?v=<variant>` for consistent testing
+ *  across runs. Drops `?s=<screen>` so the reload lands on Welcome. */
+function handleResetSession(): void {
+  const ok = window.confirm(
+    'Reset session? This will clear all locally-saved answers and ' +
+      'session state on this device. Already-submitted responses (if any) ' +
+      'are kept by the researcher.',
+  );
+  if (!ok) return;
+
+  // Preserve the variant from the current URL (if explicitly present).
+  // Drop the screen param so we land on Welcome. Always keep tweaks=1.
+  const params = new URLSearchParams(window.location.search);
+  const next = new URLSearchParams();
+  next.set('tweaks', '1');
+  const v = params.get('v');
+  if (v) next.set('v', v);
+
+  localStorage.removeItem('pvacf:answers');
+  localStorage.removeItem('pvacf:session');
+  window.location.href = `${window.location.pathname}?${next.toString()}`;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 /* ClosePairScreen — Q4.1 (required) + Q4.2 (optional) on one screen.
-   Both lock together as a "paired" AnswerValue when Continue is pressed. */
+   Both save together as a "paired" AnswerValue when Continue is pressed
+   and remain editable until the session is sealed at Submit (ADR 0009). */
 
 import { useState } from 'react';
 import type { JSX } from 'react';
@@ -13,6 +14,7 @@ import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
+import { TEXT_LIMITS, isOverLength } from '@/lib/textLimits';
 
 export function ClosePairScreen(): JSX.Element {
   const q1 = requireStandardQuestion('c4-q1');
@@ -25,7 +27,6 @@ export function ClosePairScreen(): JSX.Element {
 
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer('c4-close'));
-  const isLocked = Boolean(lockedAnswer);
 
   const initial = hydrateFromLocked(lockedAnswer?.value);
   const [open1, setOpen1] = useState(initial.q1);
@@ -37,10 +38,14 @@ export function ClosePairScreen(): JSX.Element {
   // Required / Optional badge.
   const q1Required = effectiveRequired(q1, 'c4-q1', 'open', variant);
   const q1Answered = open1.trim().length > 0;
+  // Over-length is a HARD blocker on either field — not bypassable by
+  // review mode (the seal-time validator would refuse the lock at submit).
+  const open1OverLength = isOverLength(open1, TEXT_LIMITS.OPEN_RESPONSE);
+  const open2OverLength = isOverLength(open2, TEXT_LIMITS.OPEN_RESPONSE);
 
   const onContinue = () => {
-    if (isLocked) {
-      next();
+    if (open1OverLength || open2OverLength) {
+      setShowErrors(true);
       return;
     }
     if (q1Required && !q1Answered && !isReviewMode()) {
@@ -83,11 +88,15 @@ export function ClosePairScreen(): JSX.Element {
                 onChange={setOpen1}
                 id="open-c4-q1"
                 minHeight={220}
-                disabled={isLocked}
               />
               {showErrors && q1Required && !q1Answered && (
-                <div className="field__hint" style={{ color: 'var(--danger)' }}>
+                <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                   This open response is required.
+                </div>
+              )}
+              {showErrors && open1OverLength && (
+                <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
+                  Please keep this answer under {TEXT_LIMITS.OPEN_RESPONSE} characters.
                 </div>
               )}
             </>
@@ -103,33 +112,23 @@ export function ClosePairScreen(): JSX.Element {
             subtitle={q2.subtitle}
           >
             {q2.open && (
-              <OpenResponse
-                open={q2.open}
-                value={open2}
-                onChange={setOpen2}
-                id="open-c4-q2"
-                minHeight={160}
-                disabled={isLocked}
-              />
+              <>
+                <OpenResponse
+                  open={q2.open}
+                  value={open2}
+                  onChange={setOpen2}
+                  id="open-c4-q2"
+                  minHeight={160}
+                  />
+                {showErrors && open2OverLength && (
+                  <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
+                    Please keep this answer under {TEXT_LIMITS.OPEN_RESPONSE} characters.
+                  </div>
+                )}
+              </>
             )}
           </QuestionCard>
         </div>
-
-        {isLocked && (
-          <p
-            style={{
-              marginTop: 'var(--space-4)',
-              padding: '10px 14px',
-              background: 'var(--surface-deep)',
-              border: '0.5px solid var(--border)',
-              borderRadius: 8,
-              fontSize: 13,
-              color: 'var(--ink-soft)',
-            }}
-          >
-            <strong>Locked.</strong> Both responses are recorded.
-          </p>
-        )}
 
         <NavButtons onNext={onContinue} />
       </div>

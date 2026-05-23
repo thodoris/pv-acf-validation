@@ -1,5 +1,6 @@
 /* Paired-question screen — Q1.3 + Q1.4 share one screen as a single
-   analytical unit. Both questions lock together on Continue. */
+   analytical unit. Both questions save together on Continue and remain
+   editable until the session is sealed at Submit (see ADR 0009). */
 
 import { useState } from 'react';
 import type { JSX } from 'react';
@@ -16,6 +17,7 @@ import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
+import { TEXT_LIMITS, isOverLength } from '@/lib/textLimits';
 
 export type PairedQuestionScreenProps = {
   screenId: QuestionId;
@@ -32,7 +34,6 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
   const variant = getVariant(variantId);
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer(screenId));
-  const isLocked = Boolean(lockedAnswer);
 
   const initial = hydrateFromLocked(data.questions.map((q) => q.slot), lockedAnswer?.value);
   const [answers, setAnswers] = useState<Record<string, SubAnswerState>>(initial);
@@ -54,10 +55,15 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
     if (openReq && !a.open.trim()) return true;
     return false;
   });
+  // Over-length is a HARD blocker — not bypassable by review mode (the
+  // seal-time validator would refuse an over-length lock at submit).
+  const overLengthSlots = data.questions
+    .filter((q) => Boolean(q.open) && isOverLength(answers[q.slot]?.open, TEXT_LIMITS.OPEN_RESPONSE))
+    .map((q) => q.slot);
 
   const onContinue = () => {
-    if (isLocked) {
-      next();
+    if (overLengthSlots.length > 0) {
+      setShowErrors(true);
       return;
     }
     if (missingSlots.length > 0 && !isReviewMode()) {
@@ -111,10 +117,9 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
                     rating={q.rating}
                     value={a.rating}
                     onChange={(v) => setSub(q.slot, { rating: v })}
-                    disabled={isLocked}
                   />
                   {ratingMissing && (
-                    <div className="field__hint" style={{ color: 'var(--danger)' }}>
+                    <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                       This rating is required.
                     </div>
                   )}
@@ -128,11 +133,15 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
                     onChange={(v) => setSub(q.slot, { open: v })}
                     id={`open-${q.slot}`}
                     minHeight={120}
-                    disabled={isLocked}
                   />
                   {openMissing && (
-                    <div className="field__hint" style={{ color: 'var(--danger)' }}>
+                    <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                       This open response is required.
+                    </div>
+                  )}
+                  {showErrors && isOverLength(a.open, TEXT_LIMITS.OPEN_RESPONSE) && (
+                    <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
+                      Please keep this answer under {TEXT_LIMITS.OPEN_RESPONSE} characters.
                     </div>
                   )}
                 </>
@@ -140,23 +149,6 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
             </QuestionCard>
           );
         })}
-
-        {isLocked && (
-          <p
-            style={{
-              marginTop: 'var(--space-4)',
-              padding: '10px 14px',
-              background: 'var(--surface-deep)',
-              border: '0.5px solid var(--border)',
-              borderRadius: 8,
-              fontSize: 13,
-              color: 'var(--ink-soft)',
-            }}
-          >
-            <strong>Locked.</strong> Both answers are recorded together as one
-            analytical unit and cannot be changed.
-          </p>
-        )}
 
         <NavButtons onNext={onContinue} />
       </div>

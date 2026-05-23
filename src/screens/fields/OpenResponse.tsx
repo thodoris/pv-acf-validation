@@ -3,6 +3,7 @@
 
 import type { JSX } from 'react';
 import type { OpenField } from '@/content';
+import { TEXT_LIMITS } from '@/lib/textLimits';
 
 export type OpenResponseProps = {
   open: OpenField;
@@ -19,7 +20,7 @@ export function OpenResponse({
   value,
   onChange,
   id,
-  maxLength = 4000,
+  maxLength = TEXT_LIMITS.OPEN_RESPONSE,
   minHeight = 180,
   disabled,
 }: OpenResponseProps): JSX.Element {

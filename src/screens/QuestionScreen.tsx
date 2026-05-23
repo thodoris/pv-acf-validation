@@ -1,7 +1,9 @@
 /* Single-question screen — Cluster 1, 2, 4 question screens (not paired,
    not instrument). Wires rating / open / composite fields with validation
-   on Continue and append-only locking via answerStore (F4). Locked answers
-   are reviewable on Back, never editable. */
+   on Continue and overwrite-safe saving via answerStore. Answers are
+   editable on every visit until the session is sealed at Submit (see
+   ADR 0009). Once submitted, the App-level guard short-circuits to the
+   terminal screen — this screen is never rendered post-submit. */
 
 import { useState } from 'react';
 import type { JSX } from 'react';
@@ -19,6 +21,7 @@ import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
+import { TEXT_LIMITS, isOverLength } from '@/lib/textLimits';
 
 export type QuestionScreenProps = {
   screenId: QuestionId;
@@ -31,9 +34,9 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
   const display = displayMetaForStandard(q, screenId, variant);
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer(screenId));
-  const isLocked = Boolean(lockedAnswer);
 
-  // Hydrate from a locked answer (review on Back), or start empty.
+  // Hydrate from any previous save so revisits show the last value (which
+  // the reviewer can now edit, since the screen is never disabled).
   const initial = hydrateFromLocked(lockedAnswer?.value);
   const [rating, setRating] = useState<RatingValue>(initial.rating);
   const [openVal, setOpenVal] = useState<string>(initial.open);
@@ -52,6 +55,11 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
   const ratingAnswered = q.rating ? isStandardRatingAnswered(q.rating, rating) : true;
   const openAnswered = openVal.trim().length > 0;
   const compositeAnswered = typeof compositeVal === 'number';
+  // Over-length is a HARD blocker — not bypassable by review mode — because
+  // an over-length lock would be refused by the seal-time validator at
+  // submit, leaving the reviewer stuck. The limit applies regardless of
+  // whether the field is required or optional.
+  const openOverLength = Boolean(q.open) && isOverLength(openVal, TEXT_LIMITS.OPEN_RESPONSE);
 
   const missing: string[] = [];
   if (ratingRequired && !ratingAnswered) missing.push('rating');
@@ -59,8 +67,8 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
   if (compositeRequired && !compositeAnswered) missing.push('composite');
 
   const onContinue = () => {
-    if (isLocked) {
-      next();
+    if (openOverLength) {
+      setShowErrors(true);
       return;
     }
     if (missing.length > 0 && !isReviewMode()) {
@@ -98,10 +106,9 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
                 rating={q.rating}
                 value={rating}
                 onChange={setRating}
-                disabled={isLocked}
               />
               {showErrors && ratingRequired && !ratingAnswered && (
-                <div className="field__hint" style={{ color: 'var(--danger)' }}>
+                <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                   This rating is required.
                 </div>
               )}
@@ -114,10 +121,9 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
                 value={compositeVal}
                 onChange={setCompositeVal}
                 id={`compsel-${screenId}`}
-                disabled={isLocked}
               />
               {showErrors && compositeRequired && !compositeAnswered && (
-                <div className="field__hint" style={{ color: 'var(--danger)' }}>
+                <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                   Pick one option.
                 </div>
               )}
@@ -131,41 +137,24 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
                 onChange={setOpenVal}
                 id={`open-${screenId}`}
                 minHeight={q.type === 'open-only' ? 240 : 130}
-                disabled={isLocked}
               />
               {showErrors && openRequired && !openAnswered && (
-                <div className="field__hint" style={{ color: 'var(--danger)' }}>
+                <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                   This open response is required.
+                </div>
+              )}
+              {showErrors && openOverLength && (
+                <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
+                  Please keep this answer under {TEXT_LIMITS.OPEN_RESPONSE} characters.
                 </div>
               )}
             </>
           )}
         </QuestionCard>
 
-        {isLocked && <LockedBanner />}
-
         <NavButtons onNext={onContinue} />
       </div>
     </div>
-  );
-}
-
-function LockedBanner(): JSX.Element {
-  return (
-    <p
-      style={{
-        marginTop: 'var(--space-4)',
-        padding: '10px 14px',
-        background: 'var(--surface-deep)',
-        border: '0.5px solid var(--border)',
-        borderRadius: 8,
-        fontSize: 13,
-        color: 'var(--ink-soft)',
-      }}
-    >
-      <strong>Locked.</strong> This answer is recorded and cannot be changed. You can
-      continue, or use Back to review earlier answers.
-    </p>
   );
 }
 

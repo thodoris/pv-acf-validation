@@ -3,7 +3,7 @@
    accent: problem→coral, framework→cobalt, instruments→sage, close→saffron,
    grounding→ink-soft). */
 
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import type { JSX } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
 import { Placeholder } from '@/screens/placeholders';
@@ -46,7 +46,15 @@ export function ScreenRouter(): JSX.Element {
     window.scrollTo(0, 0);
   }, [screenId]);
 
-  return renderByKind(screen);
+  // Key the rendered subtree by screenId so navigating between two
+  // screens that map to the SAME component type (e.g. two `question`
+  // screens, c1-q5 → c1-q6) forces a full remount. Without this, React
+  // reuses the same component instance — only the `screenId` prop
+  // changes — and per-screen useState initialisers don't re-run, so
+  // local field state (selected rating pill, textarea value) leaks from
+  // the previous screen into the new one. Keying the Fragment also
+  // forces a remount for ClusterSetupScreen across different clusters.
+  return <Fragment key={screen.id}>{renderByKind(screen)}</Fragment>;
 }
 
 function renderByKind(screen: Screen): JSX.Element {

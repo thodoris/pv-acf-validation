@@ -15,11 +15,17 @@ import type { ScreenId } from './screens';
 const SCREEN_PARAM = 's';
 const VARIANT_PARAM = 'v';
 
-function readUrl(): { screen: ScreenId | null; variant: VariantId } {
+function readUrl(): {
+  screen: ScreenId | null;
+  variant: VariantId;
+  variantRaw: string | null;
+} {
   const params = new URLSearchParams(window.location.search);
+  const variantRaw = params.get(VARIANT_PARAM);
   return {
     screen: params.get(SCREEN_PARAM),
-    variant: parseVariantId(params.get(VARIANT_PARAM)),
+    variant: parseVariantId(variantRaw),
+    variantRaw,
   };
 }
 
@@ -48,8 +54,15 @@ export function useUrlSync(): void {
   // Initial mount: read URL, apply variant + screen with F1 gate.
   useEffect(() => {
     const fromUrl = readUrl();
-    if (fromUrl.variant !== variant) {
-      setVariant(fromUrl.variant);
+    // Variant reconciliation: only let the URL override the persisted
+    // variant when it is *explicitly* set. A bare `/` URL (no `v=` param)
+    // means "use whatever the store holds" — critical for SHORT recovery
+    // after closing the tab, since `parseVariantId(null)` would otherwise
+    // default to 'full' and clobber the persisted 'short'.
+    const effectiveVariant =
+      fromUrl.variantRaw === null ? variant : fromUrl.variant;
+    if (effectiveVariant !== variant) {
+      setVariant(effectiveVariant);
     }
     if (fromUrl.screen) {
       const result = resolveNavigation(fromUrl.screen, completedScreens, {
@@ -57,9 +70,9 @@ export function useUrlSync(): void {
       });
       const landing = result.ok ? result.screen.id : result.redirectTo;
       if (landing !== currentScreenId) setScreen(landing);
-      writeUrl(landing, fromUrl.variant, true);
+      writeUrl(landing, effectiveVariant, true);
     } else {
-      writeUrl(currentScreenId, fromUrl.variant, true);
+      writeUrl(currentScreenId, effectiveVariant, true);
     }
     // We deliberately run this once on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps

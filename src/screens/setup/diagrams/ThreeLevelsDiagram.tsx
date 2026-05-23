@@ -1,12 +1,39 @@
-/* PV-ACF Cluster 1 — three-levels-diagram-v1.
-   Visual anchor for c1-setup1: three rounded-rectangle nodes
-   (Strategy → Institutional → Deployment) with two flow arrows.
-   Optional dashed right-to-left feedback arrow underneath.
+/* PV-ACF Cluster 1 — three-levels-diagram-v2 (vertical trace-back ladder).
 
-   Mechanical port of docs/reference-prototype/diagrams/three-levels-diagram.jsx.
-   No external dependencies. Honours prefers-reduced-motion. Re-runs the
-   entrance animation when its `key` prop changes (the Replay button bumps
-   it via useReducer key-bump in DiagramSlot). */
+   Replaces v1's horizontal three-box diagram. The practitioner stands at
+   the deployment level (bottom) and traces back UPWARD to the institutional
+   and strategic conditions that shape what arrives there.
+
+   Structure
+   - A vertical stack of three rungs:
+       top    — Rung 03 · Strategy level       (dashed border — often invisible)
+       middle — Rung 02 · Institutional level  (lighter outline — partly visible)
+       bottom — Rung 01 · Deployment level     (solid border, full weight — visible)
+   - Connectors between adjacent rungs, each carrying an upward-pointing
+     chevron with dashed line segments above and below.
+   - Each rung: left-edge glyph (material / relational / discursive), then
+     a three-line content stack — small mono level label, dominant sans
+     question, smaller content list beneath.
+
+   Animation
+   - Rungs render fully visible from the first frame — the build is
+     carried by the cursor sweep alone. This keeps the diagram legible
+     in environments where rAF is paused (backgrounded iframes, print,
+     html-to-image capture).
+   - A horizontal reading cursor — wider than the rungs, carrying an
+     upward arrow and a "TRACING BACK" label — fades in at the deployment
+     rung, dwells, climbs to the institutional rung, dwells, climbs to
+     the strategy rung, dwells, then exits above the diagram while fading
+     out. Total sweep ~5s. Static end state shows no cursor.
+   - Honours `prefers-reduced-motion: reduce` — skips the build, renders
+     the final state (no cursor) immediately.
+   - The host (DiagramSlot) re-triggers the build by remounting the
+     component via a key bump on the Replay button. The component
+     exposes no imperative API.
+
+   Mechanical port of docs/reference-prototype/diagrams/three-levels-diagram.jsx
+   (v2). Same SVG markup, same easing math, same palette — TypeScript
+   types, ES module exports, no IIFE / window-global. */
 
 import { useEffect, useState } from 'react';
 import type { JSX } from 'react';
@@ -30,8 +57,8 @@ const C = {
 const FONT_SANS = "'IBM Plex Sans', 'Helvetica Neue', system-ui, sans-serif";
 const FONT_MONO = "'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace";
 
-const STYLE_ID = '__tld_styles_v1';
-function injectStylesOnce() {
+const STYLE_ID = '__tld_styles_v2';
+function injectStylesOnce(): void {
   if (typeof document === 'undefined' || document.getElementById(STYLE_ID)) return;
   const s = document.createElement('style');
   s.id = STYLE_ID;
@@ -91,31 +118,67 @@ function useBuildTime({ autoplay, duration }: { autoplay: boolean; duration: num
   return t;
 }
 
-const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+// ---------------------------------------------------------------------------
+// Easing
+// ---------------------------------------------------------------------------
+
 const clamp = (v: number, a: number, b: number): number => Math.max(a, Math.min(b, v));
+const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+const easeInOutCubic = (t: number): number =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const entry = (t: number, start: number, dur = 0.45): number =>
   easeOutCubic(clamp((t - start) / dur, 0, 1));
+/** Linear ramp from 0 to 1 over [t0, t1]; clamped outside. */
+const ramp = (t: number, t0: number, t1: number): number => clamp((t - t0) / (t1 - t0), 0, 1);
 
 // ---------------------------------------------------------------------------
 // Content + alt text
 // ---------------------------------------------------------------------------
 
 const DEFAULT_ALT =
-  'Three-levels diagram. Three rounded rectangles arranged horizontally, equally sized and equally weighted, named left-to-right: Strategy level (strategic priorities), Institutional level (institutional routines), Deployment level (AI deployment). Two unlabelled arrows point left-to-right between adjacent boxes, indicating that decisions taken at upstream levels shape what is possible downstream.';
-
-const DEFAULT_ALT_FEEDBACK =
-  DEFAULT_ALT +
-  ' A dashed arrow underneath the three boxes points right-to-left from the deployment level back to the strategy level, indicating that patterns established at the deployment level can feed back to reshape the upstream levels over time.';
+  'Vertical trace-back ladder. Three rungs stacked top-to-bottom: at the top, Rung 03, Strategy level, framed with a dashed border to signal that strategic priorities are often invisible from inside ordinary administrative work; in the middle, Rung 02, Institutional level, framed with a lighter outline to signal partial visibility of organisational arrangements; at the bottom, Rung 01, Deployment level, framed with a solid full-weight border to signal what the practitioner sees directly. Each rung carries a left-edge glyph, an investigative question, and a short list of what that level typically contains. Thin connectors between adjacent rungs carry upward chevrons indicating the trace-back direction.';
 
 type LevelId = 'strategy' | 'institutional' | 'deployment';
 type Highlight = LevelId | 'all' | null;
+type BorderStyle = 'solid' | 'outlined' | 'dashed';
 
-type Level = { id: LevelId; name: string; sub: string };
+type Rung = {
+  id: LevelId;
+  ord: string;
+  name: string;
+  question: string;
+  contains: string;
+  border: BorderStyle;
+};
 
-const LEVELS: Level[] = [
-  { id: 'strategy', name: 'Strategy level', sub: 'strategic priorities' },
-  { id: 'institutional', name: 'Institutional level', sub: 'institutional routines' },
-  { id: 'deployment', name: 'Deployment level', sub: 'AI deployment' },
+// Top → bottom in the diagram.
+const RUNGS: Rung[] = [
+  {
+    id: 'strategy',
+    ord: '03',
+    name: 'Strategy level',
+    question: 'Which prior priorities shaped what was on the table?',
+    contains:
+      'Strategic priorities, sectoral commitments, framings set before the deployment was specified.',
+    border: 'dashed',
+  },
+  {
+    id: 'institutional',
+    ord: '02',
+    name: 'Institutional level',
+    question: 'How is the organisation around the system arranged?',
+    contains:
+      'Procurement decisions, governance, divisions of responsibility, organisational routines.',
+    border: 'outlined',
+  },
+  {
+    id: 'deployment',
+    ord: '01',
+    name: 'Deployment level',
+    question: 'What is the AI system actually doing here?',
+    contains: 'Running systems, model outputs, frontline workflows, day-to-day operation.',
+    border: 'solid',
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -124,6 +187,8 @@ const LEVELS: Level[] = [
 
 export type ThreeLevelsDiagramProps = {
   size?: 'full' | 'small';
+  /** Reserved for compatibility with v1 — unused in v2. Kept so any
+   *  existing callsite that still passes `feedback` continues to compile. */
   feedback?: boolean;
   highlight?: Highlight;
   autoplay?: boolean;
@@ -132,13 +197,14 @@ export type ThreeLevelsDiagramProps = {
 
 export function ThreeLevelsDiagram({
   size = 'full',
-  feedback = false,
   highlight = null,
   autoplay = true,
   ariaLabel,
 }: ThreeLevelsDiagramProps): JSX.Element {
   injectStylesOnce();
-  const duration = 1.6;
+  // Cursor sweep is ~5s for full size; small variant just fades the
+  // static state in over 0.4s.
+  const duration = size === 'small' ? 0.4 : 5.3;
   const t = useBuildTime({ autoplay, duration });
 
   const maxW = size === 'small' ? 360 : 820;
@@ -149,77 +215,193 @@ export function ThreeLevelsDiagram({
   return (
     <div
       role="img"
-      aria-label={ariaLabel ?? (feedback ? DEFAULT_ALT_FEEDBACK : DEFAULT_ALT)}
-      className={`tld-wrap tld tld--${size}${feedback ? ' tld--feedback' : ''}`}
+      aria-label={ariaLabel ?? DEFAULT_ALT}
+      className={`tld-wrap tld tld--${size}`}
       style={wrapStyle}
     >
-      <Body t={t} feedback={feedback} highlight={highlight} />
+      <Body t={t} highlight={highlight} />
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Shared SVG defs
+// Inline glyphs (kept tiny — no <use>/<symbol> sizing pitfalls)
 // ---------------------------------------------------------------------------
 
-function ArrowDefs(): JSX.Element {
+type UpChevronProps = { cx: number; cy: number; scale?: number };
+
+function UpChevron({ cx, cy, scale = 1 }: UpChevronProps): JSX.Element {
+  const s = scale;
   return (
-    <defs>
-      <marker
-        id="tld-ar-soft"
-        markerWidth="9"
-        markerHeight="9"
-        refX="7"
-        refY="4.5"
-        orient="auto"
-        markerUnits="strokeWidth"
-      >
-        <path d="M0,1 L7,4.5 L0,8 z" fill={C.inkSoft} />
-      </marker>
-      <marker
-        id="tld-ar-coral"
-        markerWidth="7"
-        markerHeight="7"
-        refX="6"
-        refY="3.5"
-        orient="auto"
-        markerUnits="strokeWidth"
-      >
-        <path d="M0,0.7 L6,3.5 L0,6.3 z" fill={C.coral} />
-      </marker>
-    </defs>
+    <path
+      d={`M ${cx - 7 * s} ${cy + 4 * s} L ${cx} ${cy - 3 * s} L ${cx + 7 * s} ${cy + 4 * s}`}
+      fill="none"
+      stroke={C.inkSoft}
+      strokeWidth={1.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   );
+}
+
+type UpArrowProps = { cx: number; cy: number };
+
+function UpArrow({ cx, cy }: UpArrowProps): JSX.Element {
+  return (
+    <g
+      fill="none"
+      stroke={C.coralDeep}
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1={cx} y1={cy + 6} x2={cx} y2={cy - 5} />
+      <polyline points={`${cx - 4},${cy - 1} ${cx},${cy - 5} ${cx + 4},${cy - 1}`} />
+    </g>
+  );
+}
+
+// Per-level outline glyphs — each renders within a 36x36 box centred at (0,0).
+function RungIcon({ id }: { id: LevelId }): JSX.Element | null {
+  const stroke = C.inkStrong;
+  const sw = 1.2;
+  if (id === 'deployment') {
+    // Material / system glyph — a screen / running system
+    return (
+      <g
+        fill="none"
+        stroke={stroke}
+        strokeWidth={sw}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x={-15} y={-12} width={30} height={20} rx={2.5} />
+        <line x1={-10} y1={-6} x2={2} y2={-6} />
+        <line x1={-10} y1={-1} x2={8} y2={-1} />
+        <line x1={-10} y1={4} x2={-2} y2={4} />
+        <line x1={-6} y1={12} x2={6} y2={12} />
+        <line x1={0} y1={8} x2={0} y2={12} />
+      </g>
+    );
+  }
+  if (id === 'institutional') {
+    // Relational / organisational glyph — three connected nodes
+    return (
+      <g
+        fill="none"
+        stroke={stroke}
+        strokeWidth={sw}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1={0} y1={-9} x2={-11} y2={9} />
+        <line x1={0} y1={-9} x2={11} y2={9} />
+        <line x1={-11} y1={9} x2={11} y2={9} />
+        <circle cx={0} cy={-9} r={3.6} fill={C.surface} />
+        <circle cx={-11} cy={9} r={3.6} fill={C.surface} />
+        <circle cx={11} cy={9} r={3.6} fill={C.surface} />
+      </g>
+    );
+  }
+  if (id === 'strategy') {
+    // Discursive / directional glyph — a banner / flag on a pole
+    return (
+      <g
+        fill="none"
+        stroke={stroke}
+        strokeWidth={sw}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1={-9} y1={-14} x2={-9} y2={14} />
+        <path d="M -9 -13 L 12 -10 L 6 -4 L 12 2 L -9 -1 Z" />
+      </g>
+    );
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------
 // Bodies
 // ---------------------------------------------------------------------------
 
-type BodyProps = { t: number; feedback: boolean; highlight: Highlight };
+type BodyProps = { t: number; highlight: Highlight };
 
-function FullBody({ t, feedback, highlight }: BodyProps): JSX.Element {
+function FullBody({ t, highlight }: BodyProps): JSX.Element {
+  // ---------- Geometry ----------
   const VB_W = 820;
-  const VB_H = feedback ? 250 : 200;
-  const pad = 16;
-  const boxW = 230;
-  const boxH = 110;
-  const gap = (VB_W - 2 * pad - 3 * boxW) / 2; // → 67px
-  const boxY = 28;
 
-  const boxes = LEVELS.map((lv, i) => ({
-    ...lv,
-    x: pad + i * (boxW + gap),
-    y: boxY,
-    cx: pad + i * (boxW + gap) + boxW / 2,
-  }));
+  // Ladder rails sit inset from the SVG edges so the cursor band can
+  // extend slightly past the ladder on both sides.
+  const RUNG_X = 56;
+  const RUNG_W = 708;
+  const RUNG_H = 108;
+  const CONN_H = 46; // vertical space between adjacent rungs
+  const TOP_PAD = 28; // room above top rung (cursor exits here)
+  const BOTTOM_PAD = 28; // room below bottom rung (cursor enters here)
 
-  const boxO = [
-    entry(t, 0.0, 0.45),
-    entry(t, 0.18, 0.45),
-    entry(t, 0.36, 0.45),
+  // Top → bottom y-positions for each rung (matches RUNGS order).
+  const rungY: [number, number, number] = [
+    TOP_PAD,
+    TOP_PAD + RUNG_H + CONN_H,
+    TOP_PAD + (RUNG_H + CONN_H) * 2,
   ];
-  const arrO = [entry(t, 0.7, 0.4), entry(t, 0.85, 0.4)];
-  const fbO = feedback ? entry(t, 1.1, 0.45) : 0;
+  const VB_H = TOP_PAD + RUNG_H * 3 + CONN_H * 2 + BOTTOM_PAD;
+
+  // ---------- Cursor sweep ----------
+  // Cursor begins at t = 0.25s (small grace so it doesn't pop on mount).
+  const CURSOR_START = 0.25;
+  const yDeployment = rungY[2] + RUNG_H / 2;
+  const yInstitutional = rungY[1] + RUNG_H / 2;
+  const yStrategy = rungY[0] + RUNG_H / 2;
+  const yExitTop = -40; // off the top
+  const yEntryBottom = VB_H + 20; // off the bottom (resting position pre-fade)
+
+  // Sweep schedule (seconds elapsed since CURSOR_START).
+  const seg = {
+    fadeInEnd: 0.45, // fade in at deployment
+    dwellDeployEnd: 1.2,
+    moveToInstEnd: 1.9,
+    dwellInstEnd: 2.7,
+    moveToStratEnd: 3.4,
+    dwellStratEnd: 4.2,
+    exitEnd: 5.0, // cursor exits above top, invisible
+  };
+
+  const ct = t - CURSOR_START;
+  let cy = yEntryBottom;
+  let cOpacity = 0;
+  if (ct >= 0 && ct <= seg.exitEnd) {
+    cy = yDeployment;
+    if (ct < seg.fadeInEnd) {
+      cOpacity = easeOutCubic(ramp(ct, 0, seg.fadeInEnd));
+      cy = yDeployment;
+    } else if (ct < seg.dwellDeployEnd) {
+      cOpacity = 1;
+      cy = yDeployment;
+    } else if (ct < seg.moveToInstEnd) {
+      cOpacity = 1;
+      const k = easeInOutCubic(ramp(ct, seg.dwellDeployEnd, seg.moveToInstEnd));
+      cy = yDeployment + (yInstitutional - yDeployment) * k;
+    } else if (ct < seg.dwellInstEnd) {
+      cOpacity = 1;
+      cy = yInstitutional;
+    } else if (ct < seg.moveToStratEnd) {
+      cOpacity = 1;
+      const k = easeInOutCubic(ramp(ct, seg.dwellInstEnd, seg.moveToStratEnd));
+      cy = yInstitutional + (yStrategy - yInstitutional) * k;
+    } else if (ct < seg.dwellStratEnd) {
+      cOpacity = 1;
+      cy = yStrategy;
+    } else {
+      // Exit upward, fading as it goes.
+      const k = easeInOutCubic(ramp(ct, seg.dwellStratEnd, seg.exitEnd));
+      cy = yStrategy + (yExitTop - yStrategy) * k;
+      cOpacity = 1 - k;
+    }
+  }
+  // After the sweep, cursor is fully invisible — static final state.
+  if (ct > seg.exitEnd) cOpacity = 0;
 
   return (
     <svg
@@ -227,120 +409,239 @@ function FullBody({ t, feedback, highlight }: BodyProps): JSX.Element {
       viewBox={`0 0 ${VB_W} ${VB_H}`}
       preserveAspectRatio="xMidYMid meet"
     >
-      <ArrowDefs />
-
-      {boxes.map((b, i) => {
-        const isHi = highlight === b.id || highlight === 'all';
-        const fill = isHi ? C.coralTint : C.surface;
-        const stroke = isHi ? C.coral : C.borderStrong;
+      {/* Connectors (drawn beneath rungs so chevron sits between them) */}
+      {[0, 1].map((i) => {
+        const yTop = rungY[i]! + RUNG_H;
+        const yBottom = rungY[i + 1]!;
+        const xCenter = RUNG_X + RUNG_W / 2;
+        const yMid = (yTop + yBottom) / 2;
         return (
-          <g
-            key={b.id}
-            opacity={boxO[i]}
-            transform={`translate(0, ${(1 - boxO[i]!) * 8})`}
-          >
+          <g key={`conn-${i}`}>
+            <line
+              x1={xCenter}
+              y1={yTop + 4}
+              x2={xCenter}
+              y2={yMid - 8}
+              stroke={C.inkFaint}
+              strokeWidth={1}
+              strokeDasharray="3 4"
+              strokeLinecap="round"
+            />
+            <line
+              x1={xCenter}
+              y1={yMid + 8}
+              x2={xCenter}
+              y2={yBottom - 4}
+              stroke={C.inkFaint}
+              strokeWidth={1}
+              strokeDasharray="3 4"
+              strokeLinecap="round"
+            />
+            <UpChevron cx={xCenter} cy={yMid} />
+          </g>
+        );
+      })}
+
+      {/* Rungs */}
+      {RUNGS.map((r, i) => {
+        const y = rungY[i]!;
+        const isHi = highlight === r.id || highlight === 'all';
+        const fill = isHi ? C.coralTint : C.surface;
+
+        // Visibility-gradient borders.
+        let strokeProps: {
+          stroke: string;
+          strokeWidth: number;
+          strokeDasharray?: string;
+        };
+        if (r.border === 'solid') {
+          strokeProps = {
+            stroke: isHi ? C.coral : C.inkStrong,
+            strokeWidth: 1.6,
+          };
+        } else if (r.border === 'outlined') {
+          strokeProps = {
+            stroke: isHi ? C.coral : C.borderStrong,
+            strokeWidth: 0.9,
+          };
+        } else {
+          // dashed
+          strokeProps = {
+            stroke: isHi ? C.coral : C.borderStrong,
+            strokeWidth: 0.9,
+            strokeDasharray: '5 5',
+          };
+        }
+
+        const iconCX = RUNG_X + 44;
+        const iconCY = y + RUNG_H / 2;
+        const textX = RUNG_X + 100;
+
+        return (
+          <g key={r.id}>
             <rect
-              x={b.x}
-              y={b.y}
-              width={boxW}
-              height={boxH}
+              x={RUNG_X}
+              y={y}
+              width={RUNG_W}
+              height={RUNG_H}
               rx={6}
               ry={6}
               fill={fill}
-              stroke={stroke}
+              {...strokeProps}
+            />
+
+            {/* Icon */}
+            <g transform={`translate(${iconCX}, ${iconCY})`}>
+              <RungIcon id={r.id} />
+            </g>
+
+            {/* Vertical hairline between icon and content */}
+            <line
+              x1={RUNG_X + 84}
+              y1={y + 22}
+              x2={RUNG_X + 84}
+              y2={y + RUNG_H - 22}
+              stroke={C.border}
               strokeWidth={0.8}
             />
+
+            {/* Level label */}
             <text
-              x={b.cx}
-              y={b.y + 50}
+              x={textX}
+              y={y + 28}
+              fontFamily={FONT_MONO}
+              fontSize={11.5}
+              fill={C.inkMute}
+              letterSpacing="0.06em"
+            >
+              {r.ord} · {r.name}
+            </text>
+
+            {/* Question — dominant element */}
+            <text
+              x={textX}
+              y={y + 58}
               fontFamily={FONT_SANS}
-              fontSize={18}
+              fontSize={20}
               fontWeight={600}
               fill={C.inkStrong}
-              textAnchor="middle"
             >
-              {b.name}
+              {r.question}
             </text>
+
+            {/* Content list */}
             <text
-              x={b.cx}
-              y={b.y + 78}
-              fontFamily={FONT_MONO}
-              fontSize={12}
-              fill={C.inkMute}
-              textAnchor="middle"
-              letterSpacing="0.02em"
+              x={textX}
+              y={y + 88}
+              fontFamily={FONT_SANS}
+              fontSize={13}
+              fill={C.inkSoft}
             >
-              {b.sub}
+              {r.contains}
             </text>
           </g>
         );
       })}
 
-      {[0, 1].map((i) => {
-        const x1 = boxes[i]!.x + boxW + 10;
-        const x2 = boxes[i + 1]!.x - 4;
-        const y = boxY + boxH / 2;
-        return (
-          <line
-            key={i}
-            x1={x1}
-            y1={y}
-            x2={x2}
-            y2={y}
-            stroke={C.inkSoft}
-            strokeWidth={1.4}
-            markerEnd="url(#tld-ar-soft)"
-            opacity={arrO[i]}
-          />
-        );
-      })}
-
-      {feedback && (
-        <g opacity={fbO}>
-          <path
-            d={`M ${boxes[2]!.cx} ${boxY + boxH + 32} L ${boxes[0]!.cx + 4} ${boxY + boxH + 32}`}
-            stroke={C.coral}
-            strokeWidth={1.1}
-            strokeDasharray="5 4"
-            fill="none"
-            markerEnd="url(#tld-ar-coral)"
-          />
-          <text
-            x={(boxes[0]!.cx + boxes[2]!.cx) / 2}
-            y={boxY + boxH + 56}
-            fontFamily={FONT_MONO}
-            fontSize={11}
-            fill={C.coralDeep}
-            textAnchor="middle"
-            letterSpacing="0.04em"
-            fontStyle="italic"
-          >
-            effects feed back over time
-          </text>
-        </g>
-      )}
+      {/* Reading cursor (above rungs in z-order) */}
+      <Cursor
+        y={cy}
+        opacity={cOpacity}
+        xLeft={RUNG_X - 26}
+        xRight={RUNG_X + RUNG_W + 26}
+      />
     </svg>
   );
 }
 
-function SmallBody({ t, feedback, highlight }: BodyProps): JSX.Element {
+// ---------- The reading cursor band ----------
+
+type CursorProps = { y: number; opacity: number; xLeft: number; xRight: number };
+
+function Cursor({ y, opacity, xLeft, xRight }: CursorProps): JSX.Element | null {
+  if (opacity <= 0) return null;
+  const bandH = 30;
+  const yTop = y - bandH / 2;
+  const chipW = 130;
+  const chipH = 24;
+  const chipX = xLeft;
+  const chipY = y - chipH / 2;
+  return (
+    <g opacity={opacity}>
+      {/* Soft tinted band — translucent so rungs remain readable */}
+      <rect
+        x={xLeft}
+        y={yTop}
+        width={xRight - xLeft}
+        height={bandH}
+        fill={C.coralTint}
+        opacity={0.55}
+      />
+      {/* Top and bottom hairlines define the band crisply */}
+      <line
+        x1={xLeft}
+        y1={yTop}
+        x2={xRight}
+        y2={yTop}
+        stroke={C.coral}
+        strokeWidth={0.8}
+        opacity={0.85}
+      />
+      <line
+        x1={xLeft}
+        y1={yTop + bandH}
+        x2={xRight}
+        y2={yTop + bandH}
+        stroke={C.coral}
+        strokeWidth={0.8}
+        opacity={0.85}
+      />
+
+      {/* Chip on the left edge of the band */}
+      <rect
+        x={chipX}
+        y={chipY}
+        width={chipW}
+        height={chipH}
+        rx={3}
+        ry={3}
+        fill={C.surface}
+        stroke={C.coral}
+        strokeWidth={1}
+      />
+      <UpArrow cx={chipX + 14} cy={chipY + chipH / 2} />
+      <text
+        x={chipX + 26}
+        y={chipY + chipH / 2 + 4}
+        fontFamily={FONT_MONO}
+        fontSize={10.5}
+        fill={C.coralDeep}
+        letterSpacing="0.08em"
+      >
+        TRACING BACK
+      </text>
+    </g>
+  );
+}
+
+// ---------- Small body — compact reuse (e.g. source-card scale) ----------
+
+function SmallBody({ t, highlight }: BodyProps): JSX.Element {
   const VB_W = 360;
-  const VB_H = feedback ? 150 : 110;
-  const pad = 8;
-  const boxW = 100;
-  const boxH = 56;
-  const gap = (VB_W - 2 * pad - 3 * boxW) / 2; // → 22px
-  const boxY = 14;
+  const RUNG_X = 12;
+  const RUNG_W = 336;
+  const RUNG_H = 44;
+  const CONN_H = 20;
+  const TOP_PAD = 8;
+  const BOTTOM_PAD = 8;
+  const rungY: [number, number, number] = [
+    TOP_PAD,
+    TOP_PAD + RUNG_H + CONN_H,
+    TOP_PAD + (RUNG_H + CONN_H) * 2,
+  ];
+  const VB_H = TOP_PAD + RUNG_H * 3 + CONN_H * 2 + BOTTOM_PAD;
 
-  const boxes = LEVELS.map((lv, i) => ({
-    ...lv,
-    x: pad + i * (boxW + gap),
-    y: boxY,
-    cx: pad + i * (boxW + gap) + boxW / 2,
-  }));
-
-  const showAll = entry(t, 0.0, 0.3);
-  const fbO = feedback ? entry(t, 0.5, 0.45) : 0;
+  const opa = entry(t, 0, 0.4);
 
   return (
     <svg
@@ -348,83 +649,95 @@ function SmallBody({ t, feedback, highlight }: BodyProps): JSX.Element {
       viewBox={`0 0 ${VB_W} ${VB_H}`}
       preserveAspectRatio="xMidYMid meet"
     >
-      <ArrowDefs />
-
-      {boxes.map((b) => {
-        const isHi = highlight === b.id || highlight === 'all';
-        const fill = isHi ? C.coralTint : C.surface;
-        const stroke = isHi ? C.coral : C.borderStrong;
+      {/* Connectors */}
+      {[0, 1].map((i) => {
+        const yTop = rungY[i]! + RUNG_H;
+        const yBottom = rungY[i + 1]!;
+        const xCenter = RUNG_X + RUNG_W / 2;
+        const yMid = (yTop + yBottom) / 2;
         return (
-          <g key={b.id} opacity={showAll}>
-            <rect
-              x={b.x}
-              y={b.y}
-              width={boxW}
-              height={boxH}
-              rx={4}
-              ry={4}
-              fill={fill}
-              stroke={stroke}
-              strokeWidth={0.6}
+          <g key={`sconn-${i}`} opacity={opa}>
+            <line
+              x1={xCenter}
+              y1={yTop + 2}
+              x2={xCenter}
+              y2={yMid - 5}
+              stroke={C.inkFaint}
+              strokeWidth={0.8}
+              strokeDasharray="2 3"
+              strokeLinecap="round"
             />
-            <text
-              x={b.cx}
-              y={b.y + 34}
-              fontFamily={FONT_SANS}
-              fontSize={12}
-              fontWeight={600}
-              fill={C.inkStrong}
-              textAnchor="middle"
-            >
-              {b.name.replace(' level', '')}
-            </text>
+            <line
+              x1={xCenter}
+              y1={yMid + 5}
+              x2={xCenter}
+              y2={yBottom - 2}
+              stroke={C.inkFaint}
+              strokeWidth={0.8}
+              strokeDasharray="2 3"
+              strokeLinecap="round"
+            />
+            <UpChevron cx={xCenter} cy={yMid} scale={0.7} />
           </g>
         );
       })}
 
-      {[0, 1].map((i) => {
-        const x1 = boxes[i]!.x + boxW + 4;
-        const x2 = boxes[i + 1]!.x - 2;
-        const y = boxY + boxH / 2;
+      {/* Rungs */}
+      {RUNGS.map((r, i) => {
+        const y = rungY[i]!;
+        const isHi = highlight === r.id || highlight === 'all';
+        const fill = isHi ? C.coralTint : C.surface;
+        let strokeProps: {
+          stroke: string;
+          strokeWidth: number;
+          strokeDasharray?: string;
+        };
+        if (r.border === 'solid') {
+          strokeProps = { stroke: isHi ? C.coral : C.inkStrong, strokeWidth: 1.2 };
+        } else if (r.border === 'outlined') {
+          strokeProps = { stroke: isHi ? C.coral : C.borderStrong, strokeWidth: 0.7 };
+        } else {
+          strokeProps = {
+            stroke: isHi ? C.coral : C.borderStrong,
+            strokeWidth: 0.7,
+            strokeDasharray: '3 3',
+          };
+        }
         return (
-          <line
-            key={i}
-            x1={x1}
-            y1={y}
-            x2={x2}
-            y2={y}
-            stroke={C.inkSoft}
-            strokeWidth={1}
-            markerEnd="url(#tld-ar-soft)"
-            opacity={showAll}
-          />
+          <g key={r.id} opacity={opa}>
+            <rect
+              x={RUNG_X}
+              y={y}
+              width={RUNG_W}
+              height={RUNG_H}
+              rx={4}
+              ry={4}
+              fill={fill}
+              {...strokeProps}
+            />
+            <text
+              x={RUNG_X + 14}
+              y={y + 18}
+              fontFamily={FONT_MONO}
+              fontSize={9}
+              fill={C.inkMute}
+              letterSpacing="0.06em"
+            >
+              {r.ord} · {r.name}
+            </text>
+            <text
+              x={RUNG_X + 14}
+              y={y + 34}
+              fontFamily={FONT_SANS}
+              fontSize={11}
+              fontWeight={600}
+              fill={C.inkStrong}
+            >
+              {r.question}
+            </text>
+          </g>
         );
       })}
-
-      {feedback && (
-        <g opacity={fbO}>
-          <path
-            d={`M ${boxes[2]!.cx} ${boxY + boxH + 18} L ${boxes[0]!.cx + 3} ${boxY + boxH + 18}`}
-            stroke={C.coral}
-            strokeWidth={0.9}
-            strokeDasharray="4 3"
-            fill="none"
-            markerEnd="url(#tld-ar-coral)"
-          />
-          <text
-            x={(boxes[0]!.cx + boxes[2]!.cx) / 2}
-            y={boxY + boxH + 34}
-            fontFamily={FONT_MONO}
-            fontSize={9}
-            fill={C.coralDeep}
-            textAnchor="middle"
-            letterSpacing="0.04em"
-            fontStyle="italic"
-          >
-            feeds back over time
-          </text>
-        </g>
-      )}
     </svg>
   );
 }

@@ -34,6 +34,21 @@ type SerializedState = {
   variant: VariantId;
   sessionStartedAt: number | null;
   interview: InterviewPrefs | null;
+  /** Opt-in to be named in the thesis' acknowledgement of expert reviewers.
+   *  Only meaningful when `profile.name` is non-empty. Decided on the
+   *  Submit screen, persisted here so it survives Back→Profile→Submit
+   *  round-trips. Auto-resets to `false` whenever the profile name is
+   *  cleared, so a tick can never outlive the name it referred to. */
+  acknowledgeListing: boolean;
+  /** Timestamp at which `sealToFirestore` succeeded for this session.
+   *  Null until submission. When set, the App-level guard short-circuits
+   *  every screen request to the terminal screen — answers are no longer
+   *  reachable in the UI. The reset button on the terminal screen wipes
+   *  this (and everything else) by clearing localStorage and reloading. */
+  submittedAt: number | null;
+  /** Firestore document id returned by `sealToFirestore`. Surfaced on the
+   *  terminal screen for support / audit reference. */
+  sealedDocId: string | null;
 };
 
 type SessionState = Omit<SerializedState, 'completedScreensList'> & {
@@ -45,6 +60,8 @@ type SessionState = Omit<SerializedState, 'completedScreensList'> & {
   acknowledgeConsent: (version: string) => void;
   setVariant: (v: VariantId) => void;
   setInterview: (p: InterviewPrefs) => void;
+  setAcknowledgeListing: (v: boolean) => void;
+  markSubmitted: (docId: string) => void;
   resetSession: () => void;
 };
 
@@ -58,6 +75,9 @@ const initialState = {
   variant: 'full' as VariantId,
   sessionStartedAt: null,
   interview: null,
+  acknowledgeListing: false,
+  submittedAt: null,
+  sealedDocId: null,
 };
 
 export const useSessionStore = create<SessionState>()(
@@ -82,7 +102,14 @@ export const useSessionStore = create<SessionState>()(
           return { completedScreens: next };
         }),
 
-      setProfile: (p) => set({ profile: p }),
+      setProfile: (p) =>
+        set((s) => ({
+          profile: p,
+          // Auto-reset the acknowledgement-listing tick if the name is
+          // cleared. Per the spec, a tick cannot outlive the name it
+          // referred to: clearing the name discards any prior preference.
+          acknowledgeListing: p.name?.trim() ? s.acknowledgeListing : false,
+        })),
 
       acknowledgeConsent: (version) =>
         set({
@@ -96,6 +123,17 @@ export const useSessionStore = create<SessionState>()(
       setVariant: (v) => set({ variant: v }),
 
       setInterview: (p) => set({ interview: p }),
+
+      setAcknowledgeListing: (v) => set({ acknowledgeListing: v }),
+
+      markSubmitted: (docId) =>
+        set((s) => {
+          // Idempotent: once submitted, the first stamp wins. Re-calling
+          // (e.g. a stray retry) does not overwrite the recorded timestamp
+          // or docId.
+          if (s.submittedAt !== null) return s;
+          return { submittedAt: Date.now(), sealedDocId: docId };
+        }),
 
       resetSession: () =>
         set({
@@ -117,6 +155,9 @@ export const useSessionStore = create<SessionState>()(
         variant: s.variant,
         sessionStartedAt: s.sessionStartedAt,
         interview: s.interview,
+        acknowledgeListing: s.acknowledgeListing,
+        submittedAt: s.submittedAt,
+        sealedDocId: s.sealedDocId,
       }),
       merge: (persisted, current): SessionState => {
         const p = persisted as Partial<SerializedState> | undefined;

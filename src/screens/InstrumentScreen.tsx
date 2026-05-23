@@ -18,6 +18,7 @@ import { requireInstrument, type InstrumentId } from '@/content';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
+import { TEXT_LIMITS, isOverLength } from '@/lib/textLimits';
 
 export type InstrumentScreenProps = {
   screenId: InstrumentId;
@@ -27,7 +28,6 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
   const inst = requireInstrument(screenId);
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer(screenId));
-  const isLocked = Boolean(lockedAnswer);
 
   const initial = hydrateFromLocked(lockedAnswer?.value);
   const [q1Rating, setQ1Rating] = useState<RatingValue>(initial.q1);
@@ -39,10 +39,13 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
   const q1Answered = isStandardRatingAnswered(inst.q1.rating, q1Rating);
   const q2Answered = isStandardRatingAnswered(inst.q2.rating, q2Rating);
   const openAnswered = sharedOpenVal.trim().length > 0;
+  // Over-length is a HARD blocker — not bypassable by review mode (the
+  // seal-time validator would refuse an over-length lock at submit).
+  const openOverLength = isOverLength(sharedOpenVal, TEXT_LIMITS.OPEN_RESPONSE);
 
   const onContinue = () => {
-    if (isLocked) {
-      next();
+    if (openOverLength) {
+      setShowErrors(true);
       return;
     }
     const missing = !q1Answered || !q2Answered || !openAnswered;
@@ -153,10 +156,9 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
               rating={inst.q1.rating}
               value={q1Rating}
               onChange={setQ1Rating}
-              disabled={isLocked}
-            />
+              />
             {showErrors && !q1Answered && (
-              <div className="field__hint" style={{ color: 'var(--danger)' }}>
+              <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                 This rating is required.
               </div>
             )}
@@ -174,10 +176,9 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
               rating={inst.q2.rating}
               value={q2Rating}
               onChange={setQ2Rating}
-              disabled={isLocked}
-            />
+              />
             {showErrors && !q2Answered && (
-              <div className="field__hint" style={{ color: 'var(--danger)' }}>
+              <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                 This rating is required.
               </div>
             )}
@@ -197,31 +198,18 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
             onChange={setSharedOpenVal}
             id={`shared-open-${inst.id}`}
             minHeight={200}
-            disabled={isLocked}
           />
           {showErrors && !openAnswered && (
-            <div className="field__hint" style={{ color: 'var(--danger)' }}>
+            <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
               This open response is required.
             </div>
           )}
+          {showErrors && openOverLength && (
+            <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
+              Please keep this answer under {TEXT_LIMITS.OPEN_RESPONSE} characters.
+            </div>
+          )}
         </section>
-
-        {isLocked && (
-          <p
-            style={{
-              marginTop: 'var(--space-4)',
-              padding: '10px 14px',
-              background: 'var(--surface-deep)',
-              border: '0.5px solid var(--border)',
-              borderRadius: 8,
-              fontSize: 13,
-              color: 'var(--ink-soft)',
-            }}
-          >
-            <strong>Locked.</strong> Both ratings and the shared open response are
-            recorded for {inst.code}. Continue, or use Back to review earlier answers.
-          </p>
-        )}
 
         <NavButtons onNext={onContinue} />
       </div>

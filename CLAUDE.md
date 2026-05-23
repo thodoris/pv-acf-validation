@@ -59,8 +59,9 @@ already carry that narrative.
 
 ## Hard rules for the answer store
 
-- **`lockAnswer(questionId, value)` is append-only.** Second writes are silent no-ops with a dev-only console warning. No `unlockAnswer`, no `editAnswer`. F4 by construction.
-- **Locked answers are reviewable on Back, not editable.** The UI must render locked answers in a disabled state.
+- **`lockAnswer(questionId, value)` is the working save.** Second writes for the same id overwrite the previous value and refresh `lockedAt`. Reviewers can revise any answer at any point before submitting. (Superseded F4 lock-on-Continue — see [ADR 0009](./docs/decisions/0009-f4-boundary-shift.md).)
+- **Final immutability is the seal boundary.** The client-side boundary is `sessionStore.submittedAt`: once set, the App-level guard short-circuits every screen request to `<SubmittedTerminalScreen />` and answers are no longer reachable in the UI. The server-side boundary is Firestore rules at `responses/{docId}` (`update/delete: if false`).
+- **24-hour TTL on unsubmitted sessions.** If `sessionStartedAt !== null && submittedAt === null && Date.now() - sessionStartedAt > 24h`, the App boot check wipes both localStorage keys and reloads `/`. Submitted sessions are persistent until the terminal screen's reset button is pressed.
 
 ## Variant-readiness
 
@@ -81,21 +82,21 @@ A dev-only URL flag toggling three behaviours simultaneously:
 
 Detection is via `isReviewMode()` (`src/dev/reviewMode.ts`), a pure read of `window.location.search`. Consumers: `ProfileScreen`, `QuestionScreen`, `PairedQuestionScreen`, `ClosePairScreen`, `InstrumentScreen`, `routing/navigation.ts:jumpTo`, `routing/urlSync.ts`. `<TweaksPanel />` is mounted unconditionally in `App.tsx` and short-circuits to null when the flag is absent.
 
-**Locked answers stay locked.** F4 is by construction (the `answerStore.lockAnswer` no-op contract), not a validation rule. Review mode cannot bypass it.
+**Submitted sessions stay submitted.** Once `sessionStore.submittedAt` is set, the App-level guard renders the terminal screen regardless of any URL or review-mode flag — `?tweaks=1` cannot reach a question screen in a submitted session. Pre-submit, review mode allows free editing exactly like normal navigation; over-length text and seal-time invariants are the only hard blockers.
 
 **Launchers:** `npm start:review` / `view:review` and `start-review.bat` / `view-review.bat`.
 
-## Locked-answer hydration pattern
+## Answer hydration pattern
 
 Every screen that calls `lockAnswer` follows the same dance, repeated in `QuestionScreen.tsx`, `PairedQuestionScreen.tsx`, `InstrumentScreen.tsx`, `ClosePairScreen.tsx`:
 
-1. Read the existing locked answer at mount: `useAnswerStore((s) => s.getAnswer(screenId))`.
+1. Read the existing answer at mount: `useAnswerStore((s) => s.getAnswer(screenId))`.
 2. **Hydrate local field state** from the `AnswerValue` discriminated union — a small `hydrateFromLocked(value)` helper private to each screen, since the variant shapes differ.
-3. Track `isLocked = Boolean(lockedAnswer)`.
-4. Pass `disabled={isLocked}` to every field; show a `<strong>Locked.</strong>` banner under the card on revisit.
-5. On Continue: if `isLocked`, skip validation + skip `lockAnswer` (it would be a no-op anyway) and just advance.
+3. Render fields normally — no `disabled` plumbing, no Locked banner. On Continue, validate then call `lockAnswer` (overwrite-safe).
 
-If you're authoring a new answer-locking screen, follow this pattern. Don't extract into a shared hook yet — the variant shapes diverge enough that the abstraction would leak.
+The App-level submitted guard handles the post-submit case: a submitted session never reaches a question screen, so screens themselves don't need a `disabled` mode.
+
+If you're authoring a new answer-saving screen, follow this pattern. Don't extract into a shared hook yet — the variant shapes diverge enough that the abstraction would leak.
 
 See [ADR 0002 — AnswerValue wire format](./docs/decisions/0002-answer-value-wire-format.md) for the union shape each screen consumes.
 

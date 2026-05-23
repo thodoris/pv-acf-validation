@@ -13,17 +13,50 @@ import { TweaksPanel } from './dev/TweaksPanel';
 import { useTweaksStore } from './dev/tweaksStore';
 import { isAdminRoute } from './admin/adminMode';
 import { AdminPanel } from './admin/AdminPanel';
+import { SubmittedTerminalScreen } from './screens/SubmittedTerminalScreen';
+import { isSessionExpired } from './lib/sessionTtl';
 
 type OverlayKind = 'cards' | 'framework' | null;
 
+/** TTL check — synchronous, runs once per App render. If the persisted
+ *  session has aged past SESSION_TTL_MS without a submission, wipe both
+ *  localStorage keys and reload `/` for a clean start. The reload aborts
+ *  further execution in this render, so callers downstream are safe. */
+function checkSessionTtl(): void {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return;
+  const { sessionStartedAt, submittedAt } = useSessionStore.getState();
+  if (isSessionExpired(sessionStartedAt, submittedAt)) {
+    localStorage.removeItem('pvacf:answers');
+    localStorage.removeItem('pvacf:session');
+    window.location.href = '/';
+  }
+}
+
 export default function App(): JSX.Element {
-  // Hidden admin route — short-circuits the questionnaire entirely so no
-  // questionnaire-state hooks run on /admin. isAdminRoute() reads
-  // window.location once; the route can only change with a full reload, so a
-  // single top-level branch is safe (no Rules-of-Hooks ordering hazard).
+  // (1) TTL — fire before any subscriptions or routing. Either no-ops or
+  // navigates; the navigation aborts further execution.
+  checkSessionTtl();
+
+  // (2) Subscribe to submittedAt so post-submit transitions trigger an
+  // immediate App re-render (markSubmitted in SubmitScreen flips this).
+  // Hook called every render, ahead of any conditional return → no
+  // Rules-of-Hooks ordering hazard.
+  const submittedAt = useSessionStore((s) => s.submittedAt);
+
+  // (3) Hidden admin route — short-circuits the questionnaire entirely so
+  // no questionnaire-state hooks run on /admin. isAdminRoute() is a pure
+  // pathname read; safe to use as a non-hook conditional branch.
   if (isAdminRoute()) {
     return <AdminPanel />;
   }
+
+  // (4) Post-submit guard — once the session is sealed, every screen
+  // request short-circuits to the terminal screen. Answers are no longer
+  // reachable from the UI; the terminal screen offers a reset path.
+  if (submittedAt !== null) {
+    return <SubmittedTerminalScreen />;
+  }
+
   return <QuestionnaireApp />;
 }
 

@@ -12,6 +12,7 @@ import { useSessionStore } from '@/state/sessionStore';
 import { useAnswerStore } from '@/state/answerStore';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
+import { TEXT_LIMITS } from '@/lib/textLimits';
 
 type ProfileValues = Record<string, string>;
 
@@ -27,7 +28,6 @@ export function ProfileScreen(): JSX.Element {
   const [showErrors, setShowErrors] = useState(false);
   const setProfile = useSessionStore((s) => s.setProfile);
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
-  const alreadyLocked = useAnswerStore((s) => s.isAnswered('profile'));
 
   const set = (k: string, v: string) =>
     setValues((s) => ({ ...s, [k]: v }));
@@ -35,14 +35,22 @@ export function ProfileScreen(): JSX.Element {
   const missingFields = p.fields.filter((f) => f.required && !values[f.key]?.trim()).map(
     (f) => f.key,
   );
+  // Over-length is defensive — the input's HTML maxLength attribute already
+  // caps typing + paste at the limit. We still re-check here so an unusual
+  // path (programmatic value, dev-tool tampering) can't write a too-long
+  // value into the locked answer.
+  const overLengthFields = p.fields
+    .filter((f) => f.kind === 'text' && (values[f.key]?.length ?? 0) > TEXT_LIMITS.PROFILE_TEXT)
+    .map((f) => f.key);
 
   const onContinue = () => {
-    if (missingFields.length > 0 && !isReviewMode()) {
+    const hasBlockers = missingFields.length > 0 || overLengthFields.length > 0;
+    if (hasBlockers && !isReviewMode()) {
       setShowErrors(true);
-      // Focus first missing field
-      const firstMissing = missingFields[0];
-      if (firstMissing) {
-        const el = document.getElementById(`pf-${firstMissing}`);
+      // Focus first blocker (missing wins over over-length when both present).
+      const firstBlocker = missingFields[0] ?? overLengthFields[0];
+      if (firstBlocker) {
+        const el = document.getElementById(`pf-${firstBlocker}`);
         el?.focus();
       }
       return;
@@ -53,9 +61,8 @@ export function ProfileScreen(): JSX.Element {
       institution: values.institution || undefined,
       years: values.years || undefined,
     });
-    if (!alreadyLocked) {
-      lockAnswer('profile', { type: 'profile', data: values }, 'profile');
-    }
+    // Overwrite-safe save — revisits replace the previous value cleanly.
+    lockAnswer('profile', { type: 'profile', data: values }, 'profile');
     next();
   };
 
@@ -70,6 +77,8 @@ export function ProfileScreen(): JSX.Element {
           {p.fields.map((f) => {
             const value = values[f.key] ?? '';
             const isMissing = showErrors && f.required && !value.trim();
+            const isOverLength =
+              showErrors && f.kind === 'text' && value.length > TEXT_LIMITS.PROFILE_TEXT;
             return (
               <div className="field" key={f.key}>
                 <label className="field__label" htmlFor={`pf-${f.key}`}>
@@ -88,7 +97,8 @@ export function ProfileScreen(): JSX.Element {
                     placeholder={f.placeholder ?? ''}
                     value={value}
                     onChange={(e) => set(f.key, e.target.value)}
-                    aria-invalid={isMissing || undefined}
+                    maxLength={TEXT_LIMITS.PROFILE_TEXT}
+                    aria-invalid={isMissing || isOverLength || undefined}
                   />
                 )}
                 {f.kind === 'select' && f.options && (
@@ -114,8 +124,13 @@ export function ProfileScreen(): JSX.Element {
                 )}
                 {f.helper && <div className="field__hint">{f.helper}</div>}
                 {isMissing && (
-                  <div className="field__hint" style={{ color: 'var(--danger)' }}>
+                  <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
                     This field is required.
+                  </div>
+                )}
+                {isOverLength && (
+                  <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
+                    Please keep this under {TEXT_LIMITS.PROFILE_TEXT} characters.
                   </div>
                 )}
               </div>

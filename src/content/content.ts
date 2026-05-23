@@ -89,11 +89,11 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
   C.grounding = [
     {
       id: "g1", title: "AI in public administration",
-      tagline: "Why governance concerns often extend beyond the system itself.",
+      tagline: "AI governance is not only about the system. It is also about the conditions that make the system possible, usable, and contestable.",
     },
     {
       id: "g2", title: "The framework you will evaluate",
-      tagline: "PV-ACF as a critical-deliberative framework, not another compliance checklist.",
+      tagline: "PV-ACF is a critical-deliberative framework for examining AI deployments as institutional and political arrangements, not only as technical systems.",
     },
   ];
 
@@ -493,11 +493,11 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       clusterPosition: { ordinal: 8, totalInFull: 8 },
       registers: ["judgment", "recognition"],
       question: "Have generative AI tools — chatbots, text-generation systems — changed the nature of AI governance challenges in public administration, or mainly increased their scale?",
-      subtitle: "The question is whether the governance problem these tools pose is a different kind of problem from earlier rule-based or more narrowly scoped systems, or the same kind of problem at a larger scale.",
+      subtitle: "The question is whether generative AI creates qualitatively different governance problems, mainly amplifies familiar problems from earlier AI systems, or does both.",
       type: "rating + optional open",
       rating: {
         kind: "kind-vs-degree", required: true,
-        options: ["Fundamentally changed the challenges", "Mostly changed them", "Mainly increased existing challenges", "Made little difference", "Cannot judge"],
+        options: ["Changed the nature of the challenges", "Both changed their nature and increased their scale", "Mainly increased the scale of familiar challenges", "Neither the nature nor the scale has shifted much", "Cannot judge"],
       },
       open: {
         required: false,
@@ -513,7 +513,7 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
           title: "Scope · Using the rating scale",
           items: [
             "<strong>Cannot judge</strong> is appropriate if your work does not span both earlier and generative AI systems.",
-            "The middle options are honest answers: <em>“mostly changed”</em> is appropriate where the difference seems real but contained; <em>“mainly increased existing challenges”</em> is appropriate where the existing playbook adapts.",
+            "The middle option — <em>“both changed their nature and increased their scale”</em> — is appropriate where the difference is real and the load on existing governance has also grown. The <em>“mainly increased the scale”</em> option is appropriate where the existing playbook adapts but is being asked to do more of the same.",
           ],
         },
         {
@@ -1064,7 +1064,7 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
     intro: "The author may follow up with a short interview (about 25 minutes) where a particular response of yours would benefit from a deepening exchange. This is voluntary and entirely separate from the questionnaire’s validation analysis.",
     fields: [
       {
-        key: "willingness", kind: "radio", required: true,
+        key: "willingness", kind: "radio", required: false,
         label: "Would you be open to a short follow-up interview?",
         options: [
           "Yes — please contact me",
@@ -1085,7 +1085,7 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       },
       {
         key: "contact", kind: "text", required: false,
-        label: "Email for follow-up (only if different from your invitation address)",
+        label: "Email for follow-up (only if open for an interview)",
         placeholder: "name@institution.example",
       },
     ],

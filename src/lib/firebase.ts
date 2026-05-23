@@ -16,7 +16,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check';
 import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { initializeFirestore, type Firestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -60,7 +60,16 @@ if (appCheckSiteKey) {
   });
 }
 
-export const db: Firestore = getFirestore(app);
+// Initialise Firestore with `ignoreUndefinedProperties: true` so writes
+// containing optional fields that happen to be `undefined` (e.g.
+// `LockedAnswer.locale` when no locale was detected, optional interview
+// answers when the reviewer didn't select a value) are accepted —
+// Firestore strips the undefined keys on serialise, matching JSON
+// semantics. Without this, `addDoc` throws on any undefined field.
+// MUST be called before any `getFirestore(app)` consumer.
+export const db: Firestore = initializeFirestore(app, {
+  ignoreUndefinedProperties: true,
+});
 export const auth: Auth = getAuth(app);
 
 /** Email of the single admin user authorized to read submissions and export. */

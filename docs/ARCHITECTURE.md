@@ -243,10 +243,10 @@ This costs us essentially nothing now: a string field on `sessionStore`, a URL p
 - **Mutations:** `setScreen`, `markComplete`, `setProfile`, `acknowledgeConsent`, `setInterview`.
 - **Not in this store:** any question answer.
 
-### `answerStore` (append-only after lock)
+### `answerStore` (editable until seal — see [ADR 0009](./decisions/0009-f4-boundary-shift.md))
 - `answers: Record<QuestionId, LockedAnswer>` where `LockedAnswer = { value, lockedAt: number, screenId, locale }`
-- **One write per question.** Subsequent writes are no-ops with a console warning in dev.
-- **Mutations:** `lockAnswer(questionId, value)`. No `unlockAnswer`, no `editAnswer`. F4 by construction.
+- **Overwrite-safe writes.** `lockAnswer(questionId, value)` saves or replaces the previous entry. `lockedAt` records the *latest* save.
+- **No client-side immutability before submit.** Final immutability lives at the seal boundary: `sessionStore.submittedAt` (client) and Firestore rules `update/delete: if false` (server).
 - **Reads:** `getAnswer(id)` for the Submit summary; `isAnswered(id)` for navigation gates.
 
 ### Explore state (AST) — fully ephemeral, destroyed on close
@@ -372,7 +372,7 @@ A change is "done" when all of these pass; I'll automate the runnable ones in CI
 1. `npm run build` succeeds with zero TypeScript errors and zero ESLint errors.
 2. **Walk all screens.** A Playwright test that does the "Jump to screen" walk for every screen id and asserts each renders without errors.
 3. **F1 gate.** Test: direct-link to `?s=c1-setup1` without completing profile + grounding redirects to `welcome`.
-4. **F4 lock.** Test: answering `c1-q1`, advancing, then `Back` shows the answer disabled/uneditable; calling `answerStore.lockAnswer('c1-q1', …)` a second time is a no-op.
+4. **Answer lifecycle (supersedes F4 lock — see [ADR 0009](./decisions/0009-f4-boundary-shift.md)).** Test: answering `c1-q1`, advancing, then `Back` shows the answer editable and pre-filled; revising and Continuing overwrites the store (`lockedAt` advances). Post-submit, manually navigating to any question screen lands on `<SubmittedTerminalScreen />` via the App-level guard.
 5. **F5 firewall + AST disposal.** Test: opening the AST overlay, running it 3 times, closing — `answerStore` and `sessionStore` show no `c3-ast` mutation other than the locked Q1/Q2 evaluation answers, and the `<ast-explore>` element is removed from the DOM (shadow root and all internal state destroyed). Re-opening creates a fresh instance.
 6. **Variant readiness.** Test: with `VARIANTS.short` populated by a fixture (`hiddenScreens: ['c1-q3q4']`, `requiredOverrides: { 'c1-q5': { open: false } }`), `?v=short` walks the filtered spine, `effectiveRequired('c1-q5', 'open')` returns `false`, and progress denominator reflects the filtered count. Smoke-only; SHORT is not shipped.
 7. **A11y smoke.** axe-core run via Playwright on a handful of representative screens: no critical violations.
