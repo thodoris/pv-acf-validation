@@ -133,6 +133,7 @@ export function PairedQuestionScreen({ screenId }: PairedQuestionScreenProps): J
                     onChange={(v) => setSub(q.slot, { open: v })}
                     id={`open-${q.slot}`}
                     minHeight={120}
+                    required={openReq}
                   />
                   {openMissing && (
                     <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>

@@ -226,6 +226,7 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
             onChange={setSharedOpenVal}
             id={`shared-open-${inst.id}`}
             minHeight={200}
+            required={openRequired}
           />
           {showErrors && openRequired && !openAnswered && (
             <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>

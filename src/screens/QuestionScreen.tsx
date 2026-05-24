@@ -137,6 +137,7 @@ export function QuestionScreen({ screenId }: QuestionScreenProps): JSX.Element {
                 onChange={setOpenVal}
                 id={`open-${screenId}`}
                 minHeight={q.type === 'open-only' ? 240 : 130}
+                required={openRequired}
               />
               {showErrors && openRequired && !openAnswered && (
                 <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>

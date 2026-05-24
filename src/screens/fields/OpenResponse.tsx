@@ -13,6 +13,11 @@ export type OpenResponseProps = {
   maxLength?: number;
   minHeight?: number;
   disabled?: boolean;
+  /** Override for the required/optional badge. Defaults to `open.required`
+   *  when omitted. Callers that consult variant overrides (via
+   *  `effectiveRequired`) should pass the computed value so the badge
+   *  matches the actual validation behaviour. */
+  required?: boolean;
 };
 
 export function OpenResponse({
@@ -23,12 +28,14 @@ export function OpenResponse({
   maxLength = TEXT_LIMITS.OPEN_RESPONSE,
   minHeight = 180,
   disabled,
+  required,
 }: OpenResponseProps): JSX.Element {
+  const isRequired = required ?? open.required;
   return (
     <div className="field">
       <label className="field__label" htmlFor={id}>
         {open.label}{' '}
-        {open.required ? (
+        {isRequired ? (
           <span className="field__req">required</span>
         ) : (
           <span className="field__opt">optional</span>

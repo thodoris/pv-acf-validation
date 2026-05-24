@@ -35,8 +35,10 @@ export function ClosePairScreen(): JSX.Element {
 
   // Q4.1 is required by default but a SHORT variant may relax it via
   // requiredOverrides['c4-q1'] — same path as displayMeta uses for the
-  // Required / Optional badge.
+  // Required / Optional badge. Q4.2 is optional by default; computing
+  // effectiveRequired for forward-compat in case a future variant flips it.
   const q1Required = effectiveRequired(q1, 'c4-q1', 'open', variant);
+  const q2Required = effectiveRequired(q2, 'c4-q2', 'open', variant);
   const q1Answered = open1.trim().length > 0;
   // Over-length is a HARD blocker on either field — not bypassable by
   // review mode (the seal-time validator would refuse the lock at submit).
@@ -88,6 +90,7 @@ export function ClosePairScreen(): JSX.Element {
                 onChange={setOpen1}
                 id="open-c4-q1"
                 minHeight={220}
+                required={q1Required}
               />
               {showErrors && q1Required && !q1Answered && (
                 <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
@@ -119,6 +122,7 @@ export function ClosePairScreen(): JSX.Element {
                   onChange={setOpen2}
                   id="open-c4-q2"
                   minHeight={160}
+                  required={q2Required}
                   />
                 {showErrors && open2OverLength && (
                   <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
