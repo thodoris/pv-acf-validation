@@ -62,10 +62,31 @@ export const VARIANTS: Record<VariantId, VariantConfig> = {
     label: 'Full review',
     // The whole questionnaire as drafted. No hidden screens, no overrides.
   },
-  // short: populated by the user in a future session. Architecture is ready.
   short: {
     id: 'short',
-    label: 'Short review (not yet populated)',
+    label: 'Short review',
+    // Initial SHORT trim:
+    // - The interview screen is dropped (no follow-up willingness asked).
+    // - The four c3 instrument screens hide Q2 (applicability rating) — Q1
+    //   (quality rating) and the shared open are retained.
+    // - The shared open is relaxed from required to optional on every
+    //   instrument so a reviewer with no synthesis to add can Continue.
+    // Schema invariance is preserved automatically by sealPayload.ts:
+    // interview entry is stub-injected with null fields, and q2Rating is
+    // coerced to null on each c3 screen's outbound payload.
+    hiddenScreens: ['interview'],
+    hiddenFields: {
+      'c3-ciw': ['q2'],
+      'c3-ast': ['q2'],
+      'c3-dma': ['q2'],
+      'c3-cpd': ['q2'],
+    },
+    requiredOverrides: {
+      'c3-ciw': { open: false },
+      'c3-ast': { open: false },
+      'c3-dma': { open: false },
+      'c3-cpd': { open: false },
+    },
   },
 };
 
@@ -160,12 +181,16 @@ export function assertVariantInvariants(variant: VariantConfig): void {
         for (const sub of q.questions) knownIds.add(sub.slot);
       }
     }
+    // Instrument screens accept requiredOverrides too (consumed by
+    // InstrumentScreen for the shared open's `required` flag).
+    for (const inst of CONTENT.instruments) knownIds.add(inst.id);
     for (const key of overrideKeys) {
       if (!knownIds.has(key)) {
         throw new Error(
           `Variant "${variant.id}" has a requiredOverrides key "${key}" that ` +
-            `does not match any known question id or paired-sub slot. ` +
-            `Standard questions: c1-q1 etc. Paired subs: Q1.3, Q1.4.`,
+            `does not match any known question id, paired-sub slot, or ` +
+            `instrument screen id. Standard questions: c1-q1 etc. ` +
+            `Paired subs: Q1.3, Q1.4. Instruments: c3-ciw / c3-ast / c3-dma / c3-cpd.`,
         );
       }
     }

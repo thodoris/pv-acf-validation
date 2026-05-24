@@ -112,7 +112,10 @@ function instrumentAffordances(inst: Instrument): AffordanceDecl[] {
         '<dl class="aff__qnotes">' +
         '<div><dt>Q.1 — Quality</dt>' +
         '<dd>Paperwork is not sacred: the judgment is about analytical work, not whether the template is well-formed as a document.</dd></div>' +
-        '<div><dt>Q.2 — Applicability</dt>' +
+        // SHORT hides Q.2 on the screen (see variants.ts hiddenFields);
+        // suppress the matching sidebar entry so the rail doesn't promise
+        // a question the reviewer won't be asked.
+        '<div class="hide-in-short"><dt>Q.2 — Applicability</dt>' +
         '<dd>“Hard to apply” in the open response reaches for <em>design</em> difficulty, not the set-up work the MATURITY card names.</dd></div>' +
         '</dl>',
     },

@@ -13,7 +13,7 @@ import type { JSX, ChangeEvent } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
 import { jumpTo } from '@/routing/navigation';
 import { SCREENS } from '@/routing/screens';
-import { effectiveScreens, getVariant } from '@/content/variants';
+import { effectiveScreens, getVariant, type VariantId } from '@/content/variants';
 import {
   useTweaksStore,
   type AffordanceMode,
@@ -31,6 +31,7 @@ export function TweaksPanel({ onOpenOverlay }: TweaksPanelProps = {}): JSX.Eleme
   const [collapsed, setCollapsed] = useState(false);
   const currentScreenId = useSessionStore((s) => s.currentScreenId);
   const variantId = useSessionStore((s) => s.variant);
+  const setVariant = useSessionStore((s) => s.setVariant);
   const t = useTweaksStore();
 
   if (!isReviewMode()) return null;
@@ -116,6 +117,29 @@ export function TweaksPanel({ onOpenOverlay }: TweaksPanelProps = {}): JSX.Eleme
             Validation + F1 phase gate bypassed. Locked answers stay locked.
             Production never mounts this panel.
           </p>
+
+          <Section label="Variant">
+            <Select<VariantId>
+              label="Active variant"
+              value={variantId}
+              options={[
+                { value: 'full', label: 'Full review' },
+                { value: 'short', label: 'Short review' },
+              ]}
+              onChange={(v) => setVariant(v)}
+            />
+            <p
+              style={{
+                margin: 0,
+                fontSize: 12,
+                color: 'var(--ink-mute)',
+                lineHeight: 1.5,
+              }}
+            >
+              Toggles the live variant. URL <code>?v=</code> updates
+              automatically; hidden screens get tagged in the picker below.
+            </p>
+          </Section>
 
           <Section label="Navigation">
             <Select<string>

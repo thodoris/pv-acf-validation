@@ -40,6 +40,12 @@ function handleReset(): void {
 export function SubmittedTerminalScreen(): JSX.Element {
   const submittedAt = useSessionStore((s) => s.submittedAt);
   const sealedDocId = useSessionStore((s) => s.sealedDocId);
+  const interview = useSessionStore((s) => s.interview);
+  // The "What happens next" card promises an interview follow-up. Show it
+  // only when the reviewer explicitly said yes — under SHORT the interview
+  // screen is hidden (interview === null), and under FULL a reviewer who
+  // declined shouldn't be told someone will reach out.
+  const showInterviewCard = interview?.willingness === 'yes';
 
   return (
     <div className="main main--wide">
@@ -68,14 +74,16 @@ export function SubmittedTerminalScreen(): JSX.Element {
         </p>
 
         <div className="thanks__cards">
-          <div className="card">
-            <div className="kicker kicker--mute">What happens next</div>
-            <p style={{ margin: '8px 0 0', fontSize: 13.5 }}>
-              If you said you were open to a follow-up interview, the author will
-              reach out within two weeks. Interviews are typically 25 minutes and
-              entirely voluntary.
-            </p>
-          </div>
+          {showInterviewCard && (
+            <div className="card">
+              <div className="kicker kicker--mute">What happens next</div>
+              <p style={{ margin: '8px 0 0', fontSize: 13.5 }}>
+                The author will reach out within two weeks to schedule the
+                follow-up interview you indicated you were open to. Interviews
+                are typically 25 minutes and entirely voluntary.
+              </p>
+            </div>
+          )}
           <div className="card">
             <div className="kicker kicker--mute">If you change your mind</div>
             <p style={{ margin: '8px 0 0', fontSize: 13.5 }}>

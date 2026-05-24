@@ -214,4 +214,38 @@ describe('variants', () => {
       expect(effectiveFieldHidden('c3-ast', 'q2', v)).toBe(false);
     });
   });
+
+  describe('production SHORT variant config', () => {
+    it('passes assertVariantInvariants', () => {
+      expect(() => assertVariantInvariants(VARIANTS.short)).not.toThrow();
+    });
+
+    it('hides the interview screen from effectiveScreens', () => {
+      const out = effectiveScreens(SCREENS, VARIANTS.short);
+      expect(out.find((s) => s.id === 'interview')).toBeUndefined();
+    });
+
+    it('keeps every non-interview screen visible (current SHORT trim)', () => {
+      const fullSpine = effectiveScreens(SCREENS, VARIANTS.full);
+      const shortSpine = effectiveScreens(SCREENS, VARIANTS.short);
+      expect(shortSpine.length).toBe(fullSpine.length - 1);
+      for (const s of shortSpine) {
+        expect(fullSpine.find((f) => f.id === s.id)).toBeDefined();
+      }
+    });
+
+    it('hides q2 on all four instrument screens', () => {
+      for (const id of ['c3-ciw', 'c3-ast', 'c3-dma', 'c3-cpd'] as const) {
+        expect(effectiveFieldHidden(id, 'q2', VARIANTS.short)).toBe(true);
+        expect(effectiveFieldHidden(id, 'q1', VARIANTS.short)).toBe(false);
+        expect(effectiveFieldHidden(id, 'sharedOpen', VARIANTS.short)).toBe(false);
+      }
+    });
+
+    it('relaxes shared open from required to optional on all four instrument screens', () => {
+      for (const id of ['c3-ciw', 'c3-ast', 'c3-dma', 'c3-cpd'] as const) {
+        expect(VARIANTS.short.requiredOverrides?.[id]?.open).toBe(false);
+      }
+    });
+  });
 });

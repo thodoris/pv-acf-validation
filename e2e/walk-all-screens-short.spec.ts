@@ -1,10 +1,9 @@
-/* Walks every screen in the FULL spine via review mode's jump-to-screen
-   picker. Asserts each screen renders without throwing and shows a
-   recognisable marker (h1 or the question card stem).
+/* Walks every screen in the SHORT spine via review mode's jump-to-screen
+   picker. The SHORT spine excludes 'interview' but is otherwise identical
+   to FULL — the per-field SHORT changes (c3 q2 hidden, shared open optional)
+   are exercised by unit tests, not by this top-level walk.
 
-   URL is pinned to ?v=full so this walk is insulated from the
-   default-variant flip. SHORT spine coverage lives in walk-all-screens-
-   short.spec.ts. */
+   URL is pinned to ?v=short so the walk is variant-stable. */
 
 import { test, expect } from '@playwright/test';
 
@@ -38,24 +37,22 @@ const SCREEN_IDS = [
   'c3-cpd',
   'c4-setup',
   'c4-close',
-  'interview',
+  // 'interview' hidden under SHORT — see variants.ts.
   'submit',
   'thanks',
 ];
 
-test.describe('walk all 32 screens via review mode (FULL variant)', () => {
+test.describe('walk all 31 screens via review mode (SHORT variant)', () => {
   for (const id of SCREEN_IDS) {
     test(`renders ${id}`, async ({ page }) => {
       const errors: string[] = [];
       page.on('pageerror', (e) => errors.push(e.message));
 
-      await page.goto(`/?tweaks=1&v=full&s=${id}`);
+      await page.goto(`/?tweaks=1&v=short&s=${id}`);
       await expect(page.locator('#root')).toBeVisible();
 
-      // The App module is loaded by main.tsx via dynamic import (so the
-      // failure path of the compat gate doesn't pull in Firebase). That
-      // means the headings render shortly after `load`, not at it — use
-      // the auto-retrying matcher rather than a snapshot isVisible().
+      // App is dynamically imported (compat-gate architecture). Use the
+      // auto-retrying matcher so the test waits for the chunk to render.
       await expect(page.locator('h1, .q-card__text').first()).toBeVisible({
         timeout: 5_000,
       });

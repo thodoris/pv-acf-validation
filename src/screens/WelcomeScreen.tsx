@@ -100,7 +100,7 @@ export function WelcomeScreen(): JSX.Element {
               <ul>
                 <li>Your final, locked answers to the evaluation questions.</li>
                 <li>Your profile (institution type, years, name if given).</li>
-                <li>
+                <li className="hide-in-short">
                   Your interview-willingness response, if you say yes — stored{' '}
                   <em>separately</em> from your validation answers.
                 </li>
@@ -161,9 +161,15 @@ export function WelcomeScreen(): JSX.Element {
                 Begin <Icon name="chevron-right" size={16} />
               </button>
               <span className="note-row">
-                {consentTicked
-                  ? 'Best on a laptop or desktop · about 45–50 minutes total'
-                  : 'Tick the consent box above to continue.'}
+                {consentTicked ? (
+                  <>
+                    Best on a laptop or desktop · about{' '}
+                    <span className="hide-in-full">30–35 minutes</span>
+                    <span className="hide-in-short">45–50 minutes</span> total
+                  </>
+                ) : (
+                  'Tick the consent box above to continue.'
+                )}
               </span>
             </div>
           </section>
@@ -195,7 +201,10 @@ function WelcomeMetaCard(): JSX.Element {
       </div>
       <div className="welcome__meta-row">
         <span>Duration</span>
-        <span>45–50 minutes</span>
+        <span>
+          <span className="hide-in-full">30–35 minutes</span>
+          <span className="hide-in-short">45–50 minutes</span>
+        </span>
       </div>
       <div className="welcome__meta-row">
         <span>Sessions</span>
@@ -207,7 +216,10 @@ function WelcomeMetaCard(): JSX.Element {
       </div>
       <div className="welcome__meta-row">
         <span>Questions</span>
-        <span>24 + 1 optional</span>
+        <span>
+          <span className="hide-in-full">20</span>
+          <span className="hide-in-short">24 + 1 optional</span>
+        </span>
       </div>
       <div className="welcome__meta-row">
         <span>Device</span>
