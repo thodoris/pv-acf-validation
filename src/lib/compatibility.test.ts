@@ -127,6 +127,15 @@ describe('checkCompatibility', () => {
     });
   });
 
+  it('treats screen.width === 0 as unknown and falls back to innerWidth (headless/iframe edge case)', () => {
+    // Some headless / preview / iframe environments report screen.width
+    // as 0. The gate must not fail spuriously — 0 isn't a device width,
+    // it's an absent signal.
+    setInnerWidth(1400);
+    setScreenWidth(0);
+    expect(checkCompatibility()).toEqual({ ok: true });
+  });
+
   it('flags localStorage failure when setItem throws', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('QuotaExceededError');

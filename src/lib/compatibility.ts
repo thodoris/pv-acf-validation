@@ -68,9 +68,14 @@ function probeViewport(): { ok: true } | { ok: false; widthPx: number } {
   //   - screen.width alone misses the case where the device has a wide
   //     monitor but a narrow browser window.
   // The min catches both: a narrow window OR a small device blocks.
+  //
+  // Edge case: some headless / preview / iframe environments report
+  // `screen.width === 0` (no screen emulation attached). 0 is not a
+  // device telling us "I am small" — it's "I don't know". Treat any
+  // falsy / zero value as unknown and fall back to innerWidth alone.
   const innerW = window.innerWidth;
-  const screenW = window.screen?.width ?? innerW;
-  const w = Math.min(innerW, screenW);
+  const screenW = window.screen?.width;
+  const w = screenW && screenW > 0 ? Math.min(innerW, screenW) : innerW;
   if (w >= MIN_VIEWPORT_PX) return { ok: true };
   return { ok: false, widthPx: w };
 }
