@@ -138,7 +138,12 @@ test.describe('post-submit terminal state', () => {
     // Even with explicit ?s=c1-q1, the App guard returns the terminal.
     await page.goto('/?s=c1-q1');
     await expect(page.getByText('Thank you for your review.')).toBeVisible();
-    await expect(page.getByText('Start a new session')).toBeVisible();
+    // 'Start a new session' appears twice on the terminal screen — once
+    // as a <strong> inside the explanatory paragraph and once as the
+    // button label. Disambiguate by role.
+    await expect(
+      page.getByRole('button', { name: 'Start a new session' }),
+    ).toBeVisible();
     // No question card should be on the page.
     await expect(page.locator('.q-card__text')).toHaveCount(0);
   });
@@ -178,13 +183,31 @@ test.describe('SHORT-variant recovery', () => {
   test('explicit `/?v=full` overrides a persisted SHORT variant', async ({ page }) => {
     // Persist SHORT first.
     await page.goto('/?v=short&tweaks=1');
-    await page.evaluate(() => {
-      // sanity-check persisted state present
-      return localStorage.getItem('pvacf:session');
+    // Wait for zustand to write SHORT to localStorage — App is dynamically
+    // imported (compat-gate architecture) so persistence happens after
+    // page.goto resolves on the `load` event.
+    await page.waitForFunction(() => {
+      const raw = localStorage.getItem('pvacf:session');
+      if (!raw) return false;
+      try {
+        return (JSON.parse(raw) as { state: { variant: string } }).state.variant === 'short';
+      } catch {
+        return false;
+      }
     });
 
     // Explicit ?v=full must override.
     await page.goto('/?v=full');
+    // Same timing: wait for the override to land in storage before reading.
+    await page.waitForFunction(() => {
+      const raw = localStorage.getItem('pvacf:session');
+      if (!raw) return false;
+      try {
+        return (JSON.parse(raw) as { state: { variant: string } }).state.variant === 'full';
+      } catch {
+        return false;
+      }
+    });
     const variant = await page.evaluate(() => {
       const raw = localStorage.getItem('pvacf:session');
       if (!raw) return null;
