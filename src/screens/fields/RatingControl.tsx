@@ -24,8 +24,15 @@ export function RatingControl({
 }: RatingControlProps): JSX.Element {
   if (rating.kind === 'grid') {
     const cols = rating.options.length;
+    // Detect a trailing meta option ("Cannot judge") so it can render
+    // narrower and visually divided from the ordinal scale to its left.
+    const metaIndex =
+      rating.options[cols - 1] === 'Cannot judge' ? cols - 1 : -1;
     const gridStyle = {
-      '--rating-grid-cols': `1.8fr repeat(${cols}, 1fr)`,
+      '--rating-grid-cols':
+        metaIndex === -1
+          ? `1.8fr repeat(${cols}, 1fr)`
+          : `1.8fr repeat(${cols - 1}, 1fr) 0.9fr`,
     } as CSSProperties;
     const cellValue = Array.isArray(value) ? value : Array(rating.rows.length).fill(null);
     return (
@@ -33,7 +40,10 @@ export function RatingControl({
         <div className="rating-grid__head" style={gridStyle}>
           <div />
           {rating.options.map((o, i) => (
-            <div className="rating-grid__col-label" key={i}>
+            <div
+              className={`rating-grid__col-label${i === metaIndex ? ' rating-grid__col-label--meta' : ''}`}
+              key={i}
+            >
               {o}
             </div>
           ))}
@@ -43,11 +53,12 @@ export function RatingControl({
             <div className="rating-grid__row-label">{row}</div>
             {rating.options.map((o, ci) => {
               const selected = cellValue[ri] === ci;
+              const isMeta = ci === metaIndex;
               return (
                 <button
                   key={ci}
                   type="button"
-                  className={`rating-grid__cell ${selected ? 'is-selected' : ''}`}
+                  className={`rating-grid__cell${selected ? ' is-selected' : ''}${isMeta ? ' rating-grid__cell--meta' : ''}`}
                   onClick={() => {
                     if (disabled) return;
                     const next = [...cellValue];

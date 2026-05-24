@@ -391,6 +391,19 @@
   background: var(--coral); border-color: var(--coral);
   box-shadow: 0 0 0 4px var(--coral-tint);
 }
+/* "Cannot judge" meta column — narrower, divided from the ordinal scale
+   to its left so it reads as an abstention rather than a sixth point on
+   the frequency continuum. */
+.rating-grid__col-label--meta,
+.rating-grid__cell--meta {
+  border-left: 1px solid var(--border-strong);
+}
+.rating-grid__col-label--meta {
+  background: var(--page-subtle);
+}
+.rating-grid__row:nth-child(even) .rating-grid__cell--meta,
+.rating-grid__cell--meta { background: var(--page-subtle); }
+.rating-grid__cell--meta:hover { background: var(--page); }
 
 /* ============================================================
    Instrument screen — top panel

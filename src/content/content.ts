@@ -257,7 +257,7 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
     kind: "source",
     title: "The four structural governance gaps",
     body:
-      "<p>The framework names four conditions as structurally missing at the point a specific AI deployment is decided on and run:</p>" +
+      "<p>The framework names four structural gaps at the point a specific AI deployment is decided on and run:</p>" +
       "<ul>" +
         "<li><strong>No real deliberation about purpose</strong> — what the deployment is for is not opened to deliberation; the problem definition arrives already shaped by procurement framings, vendor offerings, or peer-institution example.</li>" +
         "<li><strong>No participation by affected people in design</strong> — the people the deployment will reach, the staff who will operate it, and independent voices able to challenge its framing have no place in the decisions that shape it.</li>" +
@@ -681,33 +681,34 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       cluster: "framework",
       kicker: "Framework · The four gaps",
       chapter: "Recognising the four structural governance gaps in practice",
-      tagline: "Recognition underside of Q2.3 — per-gap frequency grid.",
+      tagline: "How often do the four gaps appear in deployments you know directly?",
       clusterPosition: { ordinal: 4, totalInFull: 6 },
       registers: ["recognition", "judgment"],
-      question: "Thinking about AI deployments you have seen in public administration: how often was each of these conditions absent or weakened?",
-      subtitle: "This question asks about your direct experience of AI deployments rather than your general impression of the sector. Each row concerns a different governance condition the framework expects to be frequently absent or weakened in practice; rate each separately.",
+      question: "Thinking about AI deployments you have seen in public administration: how often have you seen each of these governance gaps?",
+      subtitle: "This question asks about your direct experience of AI deployments, not your general impression of the sector. Each row describes one possible governance gap. Rate how often you have seen that gap in deployments you know directly.",
       type: "rating grid + single-select",
       rating: {
         kind: "grid", required: true,
         rows: [
-          "Deliberation about purpose",
-          "Participation by affected people in design",
-          "Accountability that survives into operation",
-          "Vendor power left unconstrained — in procurement and beyond",
+          "AI use decided without real deliberation about purpose",
+          "Affected people and front-line staff excluded from design",
+          "Accountability and contestation weakened once the system was operating",
+          "Vendor influence left unconstrained in procurement or operation",
         ],
-        options: ["Almost never", "Rarely", "Sometimes", "Often", "Almost always"],
+        options: ["Almost never", "Rarely", "Sometimes", "Often", "Almost always", "Cannot judge"],
       },
       // Composite second response: single-select with option labels mirroring
-      // the grid rows above. The respondent picks the one that mattered most.
+      // the grid rows above verbatim. The respondent picks the one that
+      // mattered most; identical wording makes the equivalence unambiguous.
       composite: {
         chip: "Of these four — pick one",
         required: true,
-        subStem: "Of these four, which has mattered most in deployments you have seen?",
+        subStem: "Of these four gaps, which has mattered most in deployments you have seen?",
         options: [
-          "Deliberation about purpose",
-          "Participation by affected people in design",
-          "Accountability that survives into operation",
-          "Vendor power left unconstrained — in procurement and beyond",
+          "AI use decided without real deliberation about purpose",
+          "Affected people and front-line staff excluded from design",
+          "Accountability and contestation weakened once the system was operating",
+          "Vendor influence left unconstrained in procurement or operation",
         ],
       },
       // Rail overrides: SCOPE → SOURCES. SCOPE first because the direct-
@@ -720,7 +721,8 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
           body:
             "<p>\u201CDirect experience\u201D means AI deployments you have worked on yourself, observed inside your institution, evaluated as part of your role, or seen unfold in institutions you know closely.</p>" +
             "<p>It does not include the general impression of the public sector you have built from reading, conferences, or commentary about other institutions' deployments.</p>" +
-            "<p>If your direct experience covers only a small number of deployments, rate against what you have actually seen.</p>",
+            "<p>If your direct experience covers only a small number of deployments, rate against what you have actually seen.</p>" +
+            "<p>Use <em>Cannot judge</em> for rows where you do not have enough direct experience to rate. You can rate other rows in the same question.</p>",
         },
         FOUR_GAPS_SOURCE_CARD,
       ],
@@ -734,7 +736,7 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       clusterPosition: { ordinal: 5, totalInFull: 6 },
       registers: ["judgment"],
       question: "In your judgement, is bringing structural conditions back into operational decisions a sound design move that meaningfully strengthens AI governance in practice?",
-      subtitle: "At several points in the operational lifecycle, the framework asks practitioners to revisit the broader organisational and structural conditions identified in the diagnostic layer. The question is whether the connective move-back is a sound mechanism that does real work — not whether it is evenly built across stages, which Q2.6 takes up.",
+      subtitle: "At several points in the operational lifecycle, the framework asks practitioners to revisit the broader organisational and structural conditions identified in the diagnostic layer. The question is whether the connective move-back is a sound mechanism that does real work — not whether it is evenly built across stages.",
       type: "rating + optional open",
       rating: {
         kind: "soundness", required: true,
