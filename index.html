@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  data-variant is the source of truth for SHORT/FULL copy forks in the CSS
+  (.hide-in-short / .hide-in-full). The initial value matches the post-flip
+  default (SHORT) so first paint is correct before App.tsx mirrors the live
+  store value into the attribute. See CLAUDE.md → variant copy lever.
+-->
+<html lang="en" data-variant="short">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1280" />

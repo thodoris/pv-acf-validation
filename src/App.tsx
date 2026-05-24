@@ -43,6 +43,16 @@ export default function App(): JSX.Element {
   // Rules-of-Hooks ordering hazard.
   const submittedAt = useSessionStore((s) => s.submittedAt);
 
+  // (2b) Mirror the active variant into <html data-variant="…"> so the
+  // .hide-in-short / .hide-in-full CSS classes evaluate against the live
+  // store value. index.html ships with `data-variant="short"` so first
+  // paint matches the default; this effect handles subsequent changes
+  // (URL ?v=full, Tweaks panel switcher).
+  const variant = useSessionStore((s) => s.variant);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-variant', variant);
+  }, [variant]);
+
   // (3) Hidden admin route — short-circuits the questionnaire entirely so
   // no questionnaire-state hooks run on /admin. isAdminRoute() is a pure
   // pathname read; safe to use as a non-hook conditional branch.

@@ -23,15 +23,28 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import type { QuestionId } from '@/content';
 import type { ScreenId } from '@/routing/screens';
 
+/* AnswerValue — the discriminated union saved per locked answer.
+ *
+ * Some fields permit `null` in addition to `undefined`. The distinction
+ * matters at seal time (see sealPayload.ts):
+ * - `undefined` = "renderer never asked about this" → omitted from outbound
+ *   payload by ignoreUndefinedProperties.
+ * - `null` = "renderer asked but the variant hides / leaves blank this
+ *   field; persist explicitly so the exported schema is variant-invariant."
+ *
+ * Hidden-field cases that use null today: instrument `q2Rating` under
+ * SHORT, interview `data.{willingness,window,contact}` when the interview
+ * screen is hidden. See ADR 0010 / CLAUDE.md "schema invariance" rule.
+ */
 export type AnswerValue =
   | { type: 'rating'; value: string }
   | { type: 'open'; value: string }
   | { type: 'rating-and-open'; rating: string; open?: string }
   | { type: 'grid-and-composite'; grid: Record<string, string>; composite?: string }
   | { type: 'paired'; subAnswers: Record<string, { rating?: string; open?: string }> }
-  | { type: 'instrument'; q1Rating?: string; q2Rating?: string; sharedOpen: string }
+  | { type: 'instrument'; q1Rating?: string | null; q2Rating?: string | null; sharedOpen: string }
   | { type: 'profile'; data: Record<string, string> }
-  | { type: 'interview'; data: Record<string, string | string[] | undefined> };
+  | { type: 'interview'; data: Record<string, string | string[] | null | undefined> };
 
 export type LockedAnswer = {
   questionId: QuestionId;

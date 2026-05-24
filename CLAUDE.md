@@ -76,12 +76,31 @@ The gate lives in `src/main.tsx`, runs BEFORE the App module is imported, and re
 
 ## Variant-readiness
 
-The current questionnaire is the FULL variant. SHORT is architecturally supported (URL `?v=short`, config in `src/content/variants.ts`) but not populated. Variants can only:
+FULL and SHORT both exist in `src/content/variants.ts`. SHORT becomes the default at release (see ADR 0010 once it lands in commit 3 of the SHORT-variant work). Variants have three levers:
 
-- hide whole screens (atomic — paired screens go together), and/or
-- relax `required` attributes on questions.
+- `hiddenScreens` — hide whole screens (atomic — paired screens go together).
+- `hiddenFields` — hide named fields within an instrument screen (currently only `'q1' | 'q2' | 'sharedOpen'`; the type is per-screen-kind so typos are TS errors).
+- `requiredOverrides` — relax `required` attributes on `rating` or `open` for a question, paired sub, or instrument screen.
 
-Variants can **never** add questions or change question types. Always-on screens (`welcome`, `profile`, `submit`, `thanks`) cannot be hidden by any variant.
+Variants can **never** add questions or change question types. Always-on screens (`welcome`, `profile`, `submit`, `thanks`) cannot be hidden by any variant. `assertVariantInvariants` enforces these rules at module load — typos and forbidden combinations throw loudly.
+
+## Hard rules for the variant copy lever (`hide-in-short` / `hide-in-full`)
+
+Presentational counterpart to the structural levers. Use for prose-level copy forks (e.g. "24 questions" vs "12 questions"); **not** for interactive form fields, which need a structural lever so the value also drops out of the seal payload.
+
+- **`data-variant` is set on `<html>`** — initial value `"short"` in `index.html` so first paint matches the post-flip default; updated by an effect in `App.tsx` that mirrors `sessionStore.variant`. Parallel to the existing `data-cluster` attribute set by ScreenRouter.
+- **CSS rules live in `styles-phase-a.css`** at the bottom under "Variant-scoped visibility utilities". Both `.hide-in-short` and `.hide-in-full` are shipped — needed for copy forks where SHORT and FULL have different versions of the same string.
+- **Never use the CSS lever to hide form fields.** Hidden state would still be saved to the answer store and could leak into the seal payload across a cross-variant URL share. Form fields need `hiddenFields` (structural).
+
+## Hard rules for the seal-payload variant-invariance contract
+
+The exported data carries the **same field set across both variants** — hidden screens / fields are persisted as `null` (or empty string for text), never omitted. The downstream analysis pipeline reads SHORT and FULL submissions under one schema; the `variant` field on each row is the only distinguisher.
+
+- **`normalizeForVariantInvariance` in `src/state/sealPayload.ts`** is the source of truth. It runs in `getSealedPayload` after pulling answers from the store and before returning the payload. Two rules:
+  1. For each screen in `variant.hiddenScreens` that has a known answer-bearing shape (see `HIDDEN_SCREEN_PLACEHOLDERS`), inject a stub `LockedAnswer` with the canonical `AnswerValue` and `null` field values. Currently only `interview` has a placeholder; add new entries here when new hide-able screens gain field-bearing shapes.
+  2. For each `(screenId, field)` in `variant.hiddenFields`, coerce the field on an existing instrument answer to `null`. Fires a `console.warn` in dev when a stale value is dropped (smoke signal for cross-variant URL-share edge cases).
+- **`flattenAnswerValue` emits a canonical column set per AnswerValue type** for the schema-invariant cases (instrument: `q1`/`q2`/`open`; interview: `willingness`/`window`/`contact`). Missing values become `""`. The schema-invariance test in `sealPayload.test.ts` is the regression guard; do not weaken it.
+- **The in-memory answerStore is never mutated by the normaliser.** Only the outbound seal copy is normalised. A flip back to FULL therefore recovers prior values cheaply.
 
 ## Review mode (`?tweaks=1`)
 

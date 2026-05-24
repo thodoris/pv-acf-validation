@@ -7,7 +7,13 @@
    string/number, so the resulting xlsx is directly consumable by Excel pivot
    tables and `pandas.read_excel`. The dotted key convention also keeps
    pandas' `DataFrame.columns.str.split('.', expand=True)` round-trippable
-   if a multi-index is preferred. */
+   if a multi-index is preferred.
+
+   Schema invariance for variant-hide-able fields: instrument and interview
+   answers ALWAYS emit their canonical column set (q1/q2/open for
+   instruments; willingness/window/contact for interview). Missing values
+   become `""` so a SHORT row and a FULL row produce the same set of
+   columns. See sealPayload.ts and ADR 0010. */
 
 import type { AnswerValue } from '@/state/answerStore';
 
@@ -46,11 +52,13 @@ export function flattenAnswerValue(qid: string, value: AnswerValue): FlatRow {
     }
 
     case 'instrument': {
-      const out: FlatRow = {};
-      if (value.q1Rating !== undefined) out[`${qid}.q1`] = value.q1Rating;
-      if (value.q2Rating !== undefined) out[`${qid}.q2`] = value.q2Rating;
-      if (value.sharedOpen) out[`${qid}.open`] = value.sharedOpen;
-      return out;
+      // Canonical column set — `""` for missing/hidden values so a SHORT
+      // row matches a FULL row.
+      return {
+        [`${qid}.q1`]: value.q1Rating ?? '',
+        [`${qid}.q2`]: value.q2Rating ?? '',
+        [`${qid}.open`]: value.sharedOpen ?? '',
+      };
     }
 
     case 'profile': {
@@ -62,15 +70,20 @@ export function flattenAnswerValue(qid: string, value: AnswerValue): FlatRow {
     }
 
     case 'interview': {
-      const out: FlatRow = {};
-      for (const [k, v] of Object.entries(value.data)) {
-        if (v === undefined) continue;
-        // Arrays (e.g. interview window slots) join with '; ' — same convention
-        // pandas uses for multi-select cells. JSON-stringify would be valid
-        // but harder to read in Excel.
-        out[`${qid}.${k}`] = Array.isArray(v) ? v.join('; ') : v;
-      }
-      return out;
+      // Canonical column set for interview — willingness, window, contact —
+      // always emitted, with `""` for hidden / undeclared values.
+      const w = value.data.window;
+      return {
+        [`${qid}.willingness`]: stringOrEmpty(value.data.willingness),
+        [`${qid}.window`]: Array.isArray(w) ? w.join('; ') : stringOrEmpty(w),
+        [`${qid}.contact`]: stringOrEmpty(value.data.contact),
+      };
     }
   }
+}
+
+function stringOrEmpty(v: string | string[] | null | undefined): string {
+  if (v === null || v === undefined) return '';
+  if (Array.isArray(v)) return v.join('; ');
+  return v;
 }

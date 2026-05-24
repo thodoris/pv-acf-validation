@@ -4,6 +4,7 @@ import {
   parseVariantId,
   effectiveScreens,
   effectiveRequired,
+  effectiveFieldHidden,
   assertVariantInvariants,
   type VariantConfig,
 } from './variants';
@@ -136,6 +137,81 @@ describe('variants', () => {
         },
       };
       expect(() => assertVariantInvariants(good)).not.toThrow();
+    });
+
+    it('throws if hiddenFields key is not a known instrument screen id', () => {
+      const bad: VariantConfig = {
+        id: 'short',
+        label: 'bad',
+        hiddenFields: { 'c2-q4': ['q2'] },
+      };
+      expect(() => assertVariantInvariants(bad)).toThrow(/not a known instrument screen/);
+    });
+
+    it('throws if hiddenFields tries to hide sharedOpen', () => {
+      const bad: VariantConfig = {
+        id: 'short',
+        label: 'bad',
+        hiddenFields: { 'c3-ciw': ['sharedOpen'] },
+      };
+      expect(() => assertVariantInvariants(bad)).toThrow(/sharedOpen/);
+    });
+
+    it('throws if hiddenFields hides both q1 and q2 on the same screen', () => {
+      const bad: VariantConfig = {
+        id: 'short',
+        label: 'bad',
+        hiddenFields: { 'c3-ciw': ['q1', 'q2'] },
+      };
+      expect(() => assertVariantInvariants(bad)).toThrow(/both "q1" and "q2"/);
+    });
+
+    it('accepts hiding only q2 on every instrument', () => {
+      const good: VariantConfig = {
+        id: 'short',
+        label: 'good',
+        hiddenFields: {
+          'c3-ciw': ['q2'],
+          'c3-ast': ['q2'],
+          'c3-dma': ['q2'],
+          'c3-cpd': ['q2'],
+        },
+      };
+      expect(() => assertVariantInvariants(good)).not.toThrow();
+    });
+  });
+
+  describe('effectiveFieldHidden', () => {
+    it('returns false when the variant has no hiddenFields entry', () => {
+      expect(effectiveFieldHidden('c3-ciw', 'q2', VARIANTS.full)).toBe(false);
+    });
+
+    it('returns true for fields listed under the screen', () => {
+      const v: VariantConfig = {
+        id: 'short',
+        label: 'short fixture',
+        hiddenFields: { 'c3-ciw': ['q2'] },
+      };
+      expect(effectiveFieldHidden('c3-ciw', 'q2', v)).toBe(true);
+    });
+
+    it('returns false for fields not in the override list', () => {
+      const v: VariantConfig = {
+        id: 'short',
+        label: 'short fixture',
+        hiddenFields: { 'c3-ciw': ['q2'] },
+      };
+      expect(effectiveFieldHidden('c3-ciw', 'q1', v)).toBe(false);
+      expect(effectiveFieldHidden('c3-ciw', 'sharedOpen', v)).toBe(false);
+    });
+
+    it('returns false for screens not listed in hiddenFields', () => {
+      const v: VariantConfig = {
+        id: 'short',
+        label: 'short fixture',
+        hiddenFields: { 'c3-ciw': ['q2'] },
+      };
+      expect(effectiveFieldHidden('c3-ast', 'q2', v)).toBe(false);
     });
   });
 });

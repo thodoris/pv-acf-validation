@@ -1645,3 +1645,21 @@
   font-style: italic;
   text-align: center;
 }
+
+/* ============================================================
+   Variant-scoped visibility utilities
+   ============================================================
+
+   Presentational lever for SHORT/FULL copy differences. `data-variant`
+   is set on <html> (initial value in index.html, updated by App.tsx to
+   match sessionStore.variant). Author elements with the appropriate
+   class and they disappear under the matching variant.
+
+   Use for prose-level copy forks (e.g. "24 questions" vs "12 questions").
+   Do NOT use to hide interactive form fields — those need a structural
+   lever (hiddenFields on the variant config) so the value also drops out
+   of the seal payload. The CSS only hides; it doesn't suppress state.
+
+   See CLAUDE.md → "Hard rules for the variant copy lever". */
+[data-variant="short"] .hide-in-short { display: none !important; }
+[data-variant="full"]  .hide-in-full  { display: none !important; }

@@ -76,9 +76,23 @@ describe('flattenAnswerValue', () => {
     });
   });
 
-  it('instrument with only sharedOpen', () => {
+  it('instrument emits the full canonical column set with "" for missing values (schema invariance)', () => {
+    // SHORT submission shape: q2 hidden, open optional left blank.
+    const short: AnswerValue = { type: 'instrument', q1Rating: 'r1', q2Rating: null, sharedOpen: '' };
+    expect(flattenAnswerValue('c3-ast', short)).toEqual({
+      'c3-ast.q1': 'r1',
+      'c3-ast.q2': '',
+      'c3-ast.open': '',
+    });
+  });
+
+  it('instrument with only sharedOpen still emits q1 and q2 columns as ""', () => {
     const v: AnswerValue = { type: 'instrument', sharedOpen: 'only this' };
-    expect(flattenAnswerValue('c3-ast', v)).toEqual({ 'c3-ast.open': 'only this' });
+    expect(flattenAnswerValue('c3-ast', v)).toEqual({
+      'c3-ast.q1': '',
+      'c3-ast.q2': '',
+      'c3-ast.open': 'only this',
+    });
   });
 
   it('profile → one col per data field', () => {
@@ -92,7 +106,7 @@ describe('flattenAnswerValue', () => {
     });
   });
 
-  it('interview → one col per field; arrays join with "; "', () => {
+  it('interview → canonical willingness/window/contact columns; arrays join with "; "', () => {
     const v: AnswerValue = {
       type: 'interview',
       data: { willingness: 'yes', window: ['mon', 'tue'], contact: 'a@b.c' },
@@ -104,13 +118,59 @@ describe('flattenAnswerValue', () => {
     });
   });
 
-  it('interview skips undefined values', () => {
+  it('interview emits the canonical column set with "" for missing values (schema invariance)', () => {
+    // SHORT submission shape: interview screen hidden, seal-payload stub
+    // wrote nulls.
+    const stub: AnswerValue = {
+      type: 'interview',
+      data: { willingness: null, window: null, contact: null },
+    };
+    expect(flattenAnswerValue('interview', stub)).toEqual({
+      'interview.willingness': '',
+      'interview.window': '',
+      'interview.contact': '',
+    });
+  });
+
+  it('interview with partial data fills the rest with ""', () => {
     const v: AnswerValue = {
       type: 'interview',
       data: { willingness: 'yes', window: undefined },
     };
     expect(flattenAnswerValue('interview', v)).toEqual({
       'interview.willingness': 'yes',
+      'interview.window': '',
+      'interview.contact': '',
     });
+  });
+
+  it('SHORT and FULL submissions produce identical instrument + interview column sets', () => {
+    const fullInstrument: AnswerValue = {
+      type: 'instrument',
+      q1Rating: '1',
+      q2Rating: '2',
+      sharedOpen: 'thought',
+    };
+    const shortInstrument: AnswerValue = {
+      type: 'instrument',
+      q1Rating: '1',
+      q2Rating: null,
+      sharedOpen: '',
+    };
+    expect(Object.keys(flattenAnswerValue('c3-ast', fullInstrument)).sort()).toEqual(
+      Object.keys(flattenAnswerValue('c3-ast', shortInstrument)).sort(),
+    );
+
+    const fullInterview: AnswerValue = {
+      type: 'interview',
+      data: { willingness: 'yes', window: ['mon'], contact: 'x@y.z' },
+    };
+    const shortInterview: AnswerValue = {
+      type: 'interview',
+      data: { willingness: null, window: null, contact: null },
+    };
+    expect(Object.keys(flattenAnswerValue('interview', fullInterview)).sort()).toEqual(
+      Object.keys(flattenAnswerValue('interview', shortInterview)).sort(),
+    );
   });
 });

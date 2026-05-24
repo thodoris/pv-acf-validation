@@ -30,8 +30,9 @@
 
 import { useAnswerStore, type AnswerValue, type LockedAnswer } from '@/state/answerStore';
 import { useSessionStore } from '@/state/sessionStore';
-import type { VariantId } from '@/content/variants';
+import { getVariant, type VariantConfig, type VariantId } from '@/content/variants';
 import type { QuestionId } from '@/content';
+import type { ScreenId } from '@/routing/screens';
 import { TEXT_LIMITS, isValidEmail, isOverLength } from '@/lib/textLimits';
 
 export type SealPayload = {
@@ -48,7 +49,10 @@ export type SealPayload = {
 
 export function getSealedPayload(): SealPayload {
   const session = useSessionStore.getState();
-  const answers = useAnswerStore.getState().answers;
+  const rawAnswers = useAnswerStore.getState().answers;
+  const variant = getVariant(session.variant);
+  const submittedAt = session.submittedAt ?? Date.now();
+  const answers = normalizeForVariantInvariance(rawAnswers, variant, submittedAt);
   const hasName = (session.profile?.name?.trim().length ?? 0) > 0;
   return {
     variant: session.variant,
@@ -58,6 +62,106 @@ export function getSealedPayload(): SealPayload {
     // to acknowledge — absence of the field == "not asked".
     ...(hasName ? { acknowledgeListing: session.acknowledgeListing } : {}),
   };
+}
+
+/* ============================================================
+   Variant-invariant schema normaliser
+   ============================================================
+
+   The exported data must have the same field set regardless of which
+   variant the reviewer took. SHORT submissions therefore carry stub
+   entries for the screens / fields that SHORT hides, with `null` or
+   empty-string values; FULL submissions are unchanged.
+
+   This is the source-of-truth for the analytical schema contract. The
+   admin xlsx export reads through `flattenAnswerValue`, which emits the
+   same canonical column set per AnswerValue type, so the Firestore
+   document and the xlsx row are guaranteed to agree.
+
+   Concretely, this function applies two rules:
+
+   1. For every screen id in `variant.hiddenScreens` that has a known
+      answer-bearing shape (currently only `interview`), inject a stub
+      LockedAnswer with the canonical AnswerValue and `null` field values.
+
+   2. For every (screenId, fieldName) entry in `variant.hiddenFields`,
+      coerce the field on the existing instrument answer to `null` (for
+      ratings) — even if the in-memory answerStore still has a value
+      from a prior FULL session that was URL-switched mid-flight.
+
+   Note: this normaliser is read-only over the answer store. The store
+   keeps whatever it had so a flip back to FULL doesn't lose answers.
+   Only the outbound seal payload is normalised. */
+
+const HIDDEN_SCREEN_PLACEHOLDERS: Partial<Record<ScreenId, () => AnswerValue>> = {
+  interview: () => ({
+    type: 'interview',
+    data: { willingness: null, window: null, contact: null },
+  }),
+};
+
+export function normalizeForVariantInvariance(
+  rawAnswers: Record<QuestionId, LockedAnswer>,
+  variant: VariantConfig,
+  submittedAt: number,
+): Record<QuestionId, LockedAnswer> {
+  const out: Record<string, LockedAnswer> = { ...rawAnswers };
+
+  // 1. Inject stub answers for hidden answer-bearing screens.
+  for (const screenId of variant.hiddenScreens ?? []) {
+    if (out[screenId]) continue; // user reached this screen under a prior variant — leave their data
+    const makeStub = HIDDEN_SCREEN_PLACEHOLDERS[screenId];
+    if (!makeStub) continue;
+    out[screenId] = {
+      questionId: screenId as QuestionId,
+      value: makeStub(),
+      lockedAt: submittedAt,
+      screenId,
+    };
+  }
+
+  // 2. Coerce hidden instrument fields to null on existing answers.
+  for (const [screenId, fields] of Object.entries(variant.hiddenFields ?? {})) {
+    const existing = out[screenId];
+    if (!existing || existing.value.type !== 'instrument') continue;
+    if (!fields || fields.length === 0) continue;
+    const value = { ...existing.value };
+    let touched = false;
+    for (const f of fields) {
+      if (f === 'q1' && value.q1Rating != null) {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[sealPayload] Variant "${variant.id}" hides q1 on "${screenId}" but answerStore has a value; coercing to null.`,
+          );
+        }
+        value.q1Rating = null;
+        touched = true;
+      }
+      if (f === 'q2' && value.q2Rating != null) {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[sealPayload] Variant "${variant.id}" hides q2 on "${screenId}" but answerStore has a value; coercing to null.`,
+          );
+        }
+        value.q2Rating = null;
+        touched = true;
+      } else if (f === 'q2' && value.q2Rating === undefined) {
+        // Persist explicit null so the schema column is present in Firestore.
+        value.q2Rating = null;
+        touched = true;
+      } else if (f === 'q1' && value.q1Rating === undefined) {
+        value.q1Rating = null;
+        touched = true;
+      }
+      // sharedOpen is never hide-able (assertVariantInvariants rejects it),
+      // so no branch for it here.
+    }
+    if (touched) out[screenId] = { ...existing, value };
+  }
+
+  return out as Record<QuestionId, LockedAnswer>;
 }
 
 export type SealViolation = {

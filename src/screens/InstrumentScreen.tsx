@@ -16,6 +16,8 @@ import { ExploreOverlay } from './instruments/ExploreOverlay';
 import { InstrumentRepresentation } from './instruments/InstrumentRepresentation';
 import { requireInstrument, type InstrumentId } from '@/content';
 import { useAnswerStore, type AnswerValue } from '@/state/answerStore';
+import { useSessionStore } from '@/state/sessionStore';
+import { effectiveFieldHidden, getVariant } from '@/content/variants';
 import { next } from '@/routing/navigation';
 import { isReviewMode } from '@/dev/reviewMode';
 import { TEXT_LIMITS, isOverLength } from '@/lib/textLimits';
@@ -28,6 +30,16 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
   const inst = requireInstrument(screenId);
   const lockAnswer = useAnswerStore((s) => s.lockAnswer);
   const lockedAnswer = useAnswerStore((s) => s.getAnswer(screenId));
+
+  // Variant gates. Q2 is hide-able under SHORT (hiddenFields); the shared
+  // open can be relaxed from required to optional (requiredOverrides). Q1
+  // is always required and always shown — `assertVariantInvariants` rejects
+  // any variant that tries otherwise.
+  const variantId = useSessionStore((s) => s.variant);
+  const variant = getVariant(variantId);
+  const q2Hidden = effectiveFieldHidden(screenId, 'q2', variant);
+  const openRequired =
+    variant.requiredOverrides?.[screenId]?.open ?? inst.sharedOpen.required;
 
   const initial = hydrateFromLocked(lockedAnswer?.value);
   const [q1Rating, setQ1Rating] = useState<RatingValue>(initial.q1);
@@ -48,15 +60,23 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
       setShowErrors(true);
       return;
     }
-    const missing = !q1Answered || !q2Answered || !openAnswered;
+    const q2Missing = !q2Hidden && !q2Answered;
+    const openMissing = openRequired && !openAnswered;
+    const missing = !q1Answered || q2Missing || openMissing;
     if (missing && !isReviewMode()) {
       setShowErrors(true);
       return;
     }
+    // When q2 is hidden under SHORT, write q2Rating as undefined regardless
+    // of what's in local state (it would only be set if the user previously
+    // answered under FULL and then was URL-switched to SHORT). The seal-
+    // payload normaliser will coerce this to null for the persisted record
+    // so the exported schema stays variant-invariant.
     const value: AnswerValue = {
       type: 'instrument',
       q1Rating: typeof q1Rating === 'number' ? String(q1Rating) : undefined,
-      q2Rating: typeof q2Rating === 'number' ? String(q2Rating) : undefined,
+      q2Rating:
+        !q2Hidden && typeof q2Rating === 'number' ? String(q2Rating) : undefined,
       sharedOpen: sharedOpenVal,
     };
     lockAnswer(screenId, value, screenId);
@@ -165,31 +185,39 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
           </div>
         </QuestionCard>
 
-        <QuestionCard
-          slot="q2"
-          tag="Q.2 · Applicability"
-          question={inst.q2.question}
-          subtitle={inst.q2.subtitle}
-        >
-          <div className="field">
-            <RatingControl
-              rating={inst.q2.rating}
-              value={q2Rating}
-              onChange={setQ2Rating}
+        {!q2Hidden && (
+          <QuestionCard
+            slot="q2"
+            tag="Q.2 · Applicability"
+            question={inst.q2.question}
+            subtitle={inst.q2.subtitle}
+          >
+            <div className="field">
+              <RatingControl
+                rating={inst.q2.rating}
+                value={q2Rating}
+                onChange={setQ2Rating}
               />
-            {showErrors && !q2Answered && (
-              <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
-                This rating is required.
-              </div>
-            )}
-          </div>
-        </QuestionCard>
+              {showErrors && !q2Answered && (
+                <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
+                  This rating is required.
+                </div>
+              )}
+            </div>
+          </QuestionCard>
+        )}
 
         <section className="shared-open" aria-labelledby={`shared-open-${inst.id}`}>
           <header className="shared-open__head">
-            <span className="shared-open__chip">Q.1 + Q.2 · Shared open</span>
+            <span className="shared-open__chip">
+              {q2Hidden ? 'Q.1 · Open' : 'Q.1 + Q.2 · Shared open'}
+            </span>
             <span className="shared-open__hint">
-              One synthesis response covers both ratings above.
+              {q2Hidden
+                ? openRequired
+                  ? 'A short open response below the rating.'
+                  : 'Optional — say more if you would like.'
+                : 'One synthesis response covers both ratings above.'}
             </span>
           </header>
           <OpenResponse
@@ -199,7 +227,7 @@ export function InstrumentScreen({ screenId }: InstrumentScreenProps): JSX.Eleme
             id={`shared-open-${inst.id}`}
             minHeight={200}
           />
-          {showErrors && !openAnswered && (
+          {showErrors && openRequired && !openAnswered && (
             <div className="field__hint field__hint--error" style={{ color: 'var(--danger)' }}>
               This open response is required.
             </div>
@@ -227,8 +255,12 @@ function hydrateFromLocked(value: AnswerValue | undefined): {
   if (!value || value.type !== 'instrument') {
     return { q1: null, q2: null, sharedOpen: '' };
   }
-  const parse = (s: string | undefined): RatingValue => {
-    if (s === undefined || s === '') return null;
+  // q1Rating / q2Rating may be null when the seal-payload normaliser has
+  // written an explicit-null for a variant-hidden field; the in-memory
+  // store could replay that on a subsequent session. Treat null and
+  // undefined identically — both mean "no value to hydrate".
+  const parse = (s: string | null | undefined): RatingValue => {
+    if (s === undefined || s === null || s === '') return null;
     const n = Number(s);
     return Number.isNaN(n) ? null : n;
   };
