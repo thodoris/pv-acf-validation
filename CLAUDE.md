@@ -76,7 +76,9 @@ The gate lives in `src/main.tsx`, runs BEFORE the App module is imported, and re
 
 ## Variant-readiness
 
-FULL and SHORT both exist in `src/content/variants.ts`. SHORT becomes the default at release (see ADR 0010 once it lands in commit 3 of the SHORT-variant work). Variants have three levers:
+FULL and SHORT both live in `src/content/variants.ts`. **SHORT is the default since [ADR 0010](./docs/decisions/0010-short-variant-as-default.md)** — bare URL delivers SHORT; `?v=full` is the elevated path. Two constants must agree: `DEFAULT_VARIANT_ID` in `variants.ts` and `variant:` in `sessionStore.ts`'s `initialState`; plus the initial `<html data-variant="…">` in `index.html`. All three say `"short"` today; do not flip one without the others.
+
+Variants have three levers:
 
 - `hiddenScreens` — hide whole screens (atomic — paired screens go together).
 - `hiddenFields` — hide named fields within an instrument screen (currently only `'q1' | 'q2' | 'sharedOpen'`; the type is per-screen-kind so typos are TS errors).
