@@ -72,7 +72,9 @@ const initialState = {
   completedScreens: new Set<ScreenId>(),
   profile: null,
   consent: { acknowledged: false, acknowledgedAt: null, version: CONSENT_VERSION },
-  variant: 'full' as VariantId,
+  // SHORT is the default at release (see ADR 0010). Keep in sync with
+  // DEFAULT_VARIANT_ID in src/content/variants.ts.
+  variant: 'short' as VariantId,
   sessionStartedAt: null,
   interview: null,
   acknowledgeListing: false,

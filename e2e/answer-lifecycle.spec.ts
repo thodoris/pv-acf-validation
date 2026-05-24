@@ -181,11 +181,12 @@ test.describe('SHORT-variant recovery', () => {
   });
 
   test('explicit `/?v=full` overrides a persisted SHORT variant', async ({ page }) => {
-    // Persist SHORT first.
-    await page.goto('/?v=short&tweaks=1');
-    // Wait for zustand to write SHORT to localStorage — App is dynamically
-    // imported (compat-gate architecture) so persistence happens after
-    // page.goto resolves on the `load` event.
+    // Persist SHORT first. Note: SHORT is the default since ADR 0010, so
+    // visiting bare `/?v=short` would be a no-op for the store and Zustand
+    // wouldn't write to localStorage (no state change). Navigate to a non-
+    // default screen so currentScreenId changes and the persist middleware
+    // flushes.
+    await page.goto('/?v=short&tweaks=1&s=c1-q1');
     await page.waitForFunction(() => {
       const raw = localStorage.getItem('pvacf:session');
       if (!raw) return false;
@@ -196,9 +197,9 @@ test.describe('SHORT-variant recovery', () => {
       }
     });
 
-    // Explicit ?v=full must override.
-    await page.goto('/?v=full');
-    // Same timing: wait for the override to land in storage before reading.
+    // Explicit ?v=full must override. Use a non-default screen again so the
+    // store change propagates to localStorage.
+    await page.goto('/?v=full&s=c1-q1');
     await page.waitForFunction(() => {
       const raw = localStorage.getItem('pvacf:session');
       if (!raw) return false;

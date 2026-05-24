@@ -13,11 +13,11 @@ import { requireQuestion, requireStandardQuestion } from './index';
 
 describe('variants', () => {
   describe('parseVariantId', () => {
-    it('returns full for empty / unknown', () => {
-      expect(parseVariantId(null)).toBe('full');
-      expect(parseVariantId(undefined)).toBe('full');
-      expect(parseVariantId('')).toBe('full');
-      expect(parseVariantId('bogus')).toBe('full');
+    it('returns short for empty / unknown (SHORT is the default since ADR 0010)', () => {
+      expect(parseVariantId(null)).toBe('short');
+      expect(parseVariantId(undefined)).toBe('short');
+      expect(parseVariantId('')).toBe('short');
+      expect(parseVariantId('bogus')).toBe('short');
     });
 
     it('passes through known variants', () => {

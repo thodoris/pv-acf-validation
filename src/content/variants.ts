@@ -90,7 +90,11 @@ export const VARIANTS: Record<VariantId, VariantConfig> = {
   },
 };
 
-const DEFAULT_VARIANT_ID: VariantId = 'full';
+// SHORT is the default at release (see ADR 0010). Bare URL delivers SHORT;
+// `?v=full` is the elevated path. Keep this value in sync with the
+// `variant:` initial in src/state/sessionStore.ts and with the
+// `<html data-variant="…">` initial in index.html.
+const DEFAULT_VARIANT_ID: VariantId = 'short';
 
 export function parseVariantId(raw: string | null | undefined): VariantId {
   if (raw === 'short' || raw === 'full') return raw;
