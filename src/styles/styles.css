@@ -263,11 +263,18 @@ button { font-family: inherit; }
 }
 
 .percent-time {
-  display: flex; align-items: center; gap: var(--space-3);
+  display: flex; flex-direction: column; align-items: flex-start; gap: 4px;
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--ink-soft);
   white-space: nowrap;
+}
+.percent-time__row {
+  display: flex; align-items: center; gap: var(--space-2);
+}
+.percent-time__row--time {
+  font-size: 10.5px;
+  color: var(--ink-mute);
 }
 .percent-time__bar {
   width: 88px; height: 3px;

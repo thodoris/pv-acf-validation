@@ -66,13 +66,16 @@ export function TopBar({
             })}
           </div>
           <div className="percent-time" aria-label="Completion and remaining time">
-            <div className="percent-time__bar">
-              <div className="percent-time__fill" style={{ width: `${percent}%` }} />
+            <div className="percent-time__row">
+              <div className="percent-time__bar">
+                <div className="percent-time__fill" style={{ width: `${percent}%` }} />
+              </div>
+              <span>{percent}%</span>
             </div>
-            <span>{percent}%</span>
-            <span aria-hidden="true">·</span>
-            <Icon name="clock" size={12} />
-            <span>~{timeLeft}′</span>
+            <div className="percent-time__row percent-time__row--time">
+              <Icon name="clock" size={12} />
+              <span>~{timeLeft}′</span>
+            </div>
           </div>
         </div>
       </div>
