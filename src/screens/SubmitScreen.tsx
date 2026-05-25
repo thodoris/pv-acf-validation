@@ -23,6 +23,9 @@ type SummaryRow = {
   items: string;
   status: StatusKind;
   statusLabel: string;
+  /** Hide this row under SHORT. Set on rows that describe a screen the
+   *  SHORT variant drops (currently only the interview row). */
+  hideInShort?: boolean;
 };
 
 type SubmitState = 'idle' | 'submitting' | 'error';
@@ -75,6 +78,7 @@ const SUMMARY_ROWS: SummaryRow[] = [
     items: '—',
     status: 'neutral',
     statusLabel: 'Optional',
+    hideInShort: true,
   },
 ];
 
@@ -159,7 +163,10 @@ export function SubmitScreen(): JSX.Element {
           </div>
 
           {SUMMARY_ROWS.map((r, i) => (
-            <div className="summary__row" key={i}>
+            <div
+              className={`summary__row${r.hideInShort ? ' hide-in-short' : ''}`}
+              key={i}
+            >
               <div>
                 <div className="summary__kicker mono">{r.kicker}</div>
                 <div className="summary__title">{r.title}</div>
@@ -183,9 +190,12 @@ export function SubmitScreen(): JSX.Element {
           <p>
             Only your locked answers above are recorded. Free navigation in the
             reference library and free re-runs of the Architecture Selection Tool are
-            not captured. The optional follow-up-interview information is stored
-            separately and is not analysed alongside your responses. You consented to
-            this recording at the start of the session.
+            not captured.{' '}
+            <span className="hide-in-short">
+              The optional follow-up-interview information is stored separately and
+              is not analysed alongside your responses.{' '}
+            </span>
+            You consented to this recording at the start of the session.
           </p>
         </div>
 
