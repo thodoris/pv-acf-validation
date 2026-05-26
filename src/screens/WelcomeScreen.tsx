@@ -301,6 +301,7 @@ function ResearchContextBand({
         <p className="research-band__body">
           <strong>Theodoros Papadopoulos</strong> · PhD candidate, University of the Aegean
           <br />
+         
           Supervised by Professor Ioannis Charalampidis
         </p>
         <p className="research-band__body">
@@ -350,10 +351,10 @@ function ResearchContextBand({
         <p className="research-band__body">
           Questions about the research:
           <br />
-          <ProtectedEmail contact={RESEARCHER} className="research-band__email" />
+          
         </p>
         <p className="research-band__body">
-          Concerns about ethics or your rights as a participant:
+          <ProtectedEmail contact={RESEARCHER} className="research-band__email" />
           <br />
           <ProtectedEmail contact={SUPERVISOR} className="research-band__email" />
         </p>
