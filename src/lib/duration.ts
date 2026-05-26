@@ -20,8 +20,11 @@ import { isPairedQuestion } from '@/content/types';
 import { effectiveScreens, getVariant, type VariantId } from '@/content/variants';
 import { SCREENS, type Screen } from '@/routing/screens';
 
-export const DEFAULT_EST_DURATION_MIN = 35;
-export const FULL_VARIANT_EXTRA_MIN = 10;
+export const DEFAULT_EST_DURATION_MIN = 30;
+// FULL is held at 45 minutes (welcome span 45–50) by bumping the extra
+// from 10 to 15 when SHORT was retuned from 35 to 30. Keeps FULL's
+// estimate stable across the SHORT recalibration.
+export const FULL_VARIANT_EXTRA_MIN = 15;
 export const WELCOME_SPAN_OFFSET_MIN = 5;
 
 export type PhaseId =

@@ -38,7 +38,7 @@ describe('duration constants', () => {
 
   it('formats welcome range with an en-dash', () => {
     // En-dash, not hyphen — matches the existing copy.
-    expect(formatDurationRange('short')).toBe('35–40 minutes');
+    expect(formatDurationRange('short')).toBe('30–35 minutes');
     expect(formatDurationRange('full')).toBe('45–50 minutes');
   });
 
