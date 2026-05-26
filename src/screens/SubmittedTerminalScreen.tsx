@@ -10,6 +10,7 @@
    reloads `/` for a fresh start. Resetting does NOT remove the document
    from Firestore — the submission already happened. */
 
+import { useEffect } from 'react';
 import type { JSX } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
 import { ProtectedEmail } from '@/shell/ProtectedEmail';
@@ -43,6 +44,15 @@ export function SubmittedTerminalScreen(): JSX.Element {
   const submittedAt = useSessionStore((s) => s.submittedAt);
   const sealedDocId = useSessionStore((s) => s.sealedDocId);
   const interview = useSessionStore((s) => s.interview);
+
+  // ScreenRouter's scroll-to-top doesn't run for this screen — the App-level
+  // submitted guard renders it directly, bypassing the router. Without this,
+  // the page retains the SubmitScreen's scroll position (typically the
+  // bottom, where the Submit button lives) and the reviewer doesn't see the
+  // "Thank you" heading until they scroll back up.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   // The "What happens next" card promises an interview follow-up. Show it
   // only when the reviewer explicitly said yes — under SHORT the interview
   // screen is hidden (interview === null), and under FULL a reviewer who
