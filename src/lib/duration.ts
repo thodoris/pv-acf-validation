@@ -35,9 +35,14 @@ export type PhaseId =
   | 'post';
 
 /** Integer effort weights per phase. The total duration is distributed
- *  across phases by these shares; FULL and SHORT use the same shape and only
- *  scale the absolute minutes. Tuned so the welcome time-bar proportions
- *  match the previous hand-coded `flex` values (3/10/15/15/5). */
+ *  across phases by these shares; FULL and SHORT use the same shape and
+ *  only scale the absolute minutes.
+ *
+ *  `close = 3` reflects that the close phase is a single screen (c4-close)
+ *  after ADR 0011 merged c4-setup into it. The original `close = 5`
+ *  budgeted two screens; without rebalancing, c4-close ate ~10% of the
+ *  progress bar on its own — visibly disproportionate to a screen with
+ *  one required catch-all and one optional flag. See ADR 0013. */
 export const PHASE_WEIGHTS: Record<PhaseId, number> = {
   pre: 1,
   profile: 1,
@@ -45,7 +50,7 @@ export const PHASE_WEIGHTS: Record<PhaseId, number> = {
   problem: 10,
   framework: 15,
   instruments: 15,
-  close: 5,
+  close: 3,
   post: 1,
 };
 
