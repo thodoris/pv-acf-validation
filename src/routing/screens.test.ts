@@ -32,7 +32,6 @@ describe('SCREENS spine', () => {
       'c3-ast',
       'c3-dma',
       'c3-cpd',
-      'c4-setup',
       'c4-close',
       'interview',
       'submit',
@@ -40,30 +39,13 @@ describe('SCREENS spine', () => {
     ]);
   });
 
-  it('has 32 screens (prototype actual, not the brief\'s 34)', () => {
-    expect(SCREENS).toHaveLength(32);
+  it('has 31 screens (c4-setup merged into c4-close — ADR 0011)', () => {
+    expect(SCREENS).toHaveLength(31);
   });
 
-  it('starts at 0%, ends at 100%', () => {
-    expect(SCREENS[0]!.percentAtStart).toBe(0);
-    expect(SCREENS[SCREENS.length - 1]!.percentAtStart).toBe(100);
-  });
-
-  it('percentAtStart is monotonically non-decreasing', () => {
-    let prev = -1;
-    for (const s of SCREENS) {
-      expect(s.percentAtStart, `at ${s.id}`).toBeGreaterThanOrEqual(prev);
-      prev = s.percentAtStart;
-    }
-  });
-
-  it('minutesAtStart is monotonically non-increasing', () => {
-    let prev = Infinity;
-    for (const s of SCREENS) {
-      expect(s.minutesAtStart, `at ${s.id}`).toBeLessThanOrEqual(prev);
-      prev = s.minutesAtStart;
-    }
-  });
+  // Per-screen progress / minutes-left are derived from src/lib/duration.ts
+  // since ADR 0012; the monotonicity contract is exercised in progress.test.ts
+  // by walking the variant-effective spine through progressFor().
 
   it('getScreen / requireScreen', () => {
     expect(getScreen('welcome')).toBeDefined();

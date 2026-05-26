@@ -36,14 +36,13 @@ const SCREEN_IDS = [
   'c3-ast',
   'c3-dma',
   'c3-cpd',
-  'c4-setup',
   'c4-close',
   'interview',
   'submit',
   'thanks',
 ];
 
-test.describe('walk all 32 screens via review mode (FULL variant)', () => {
+test.describe('walk all 31 screens via review mode (FULL variant)', () => {
   for (const id of SCREEN_IDS) {
     test(`renders ${id}`, async ({ page }) => {
       const errors: string[] = [];

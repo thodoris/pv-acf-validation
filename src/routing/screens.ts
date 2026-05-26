@@ -1,13 +1,18 @@
-/* The 34-screen spine.
+/* The 31-screen spine.
    Carried over from docs/reference-prototype/app.jsx (SCREENS array).
    Field shape matches the prototype; only the types are new.
 
    Note: the bundle brief claims a 34-screen spine; the prototype's actual count
-   is 32. The prototype wins (per user brief §2). Documented in
-   docs/SOURCE_OF_TRUTH.md. */
+   was 32 and the implementation now ships 31 (c4-setup was merged into
+   c4-close, ADR 0011). The prototype wins on shape (per user brief §2);
+   merge-driven divergences are logged in docs/SOURCE_OF_TRUTH.md.
+
+   Per-screen progress (top-bar percent + minutes-left) is derived from
+   `src/lib/duration.ts` at render time — no `percentAtStart` /
+   `minutesAtStart` fields here (ADR 0012). */
 
 import { CONTENT } from '@/content';
-import type { ClusterId, StepId } from '@/content';
+import type { StepId } from '@/content';
 
 export type ScreenId = string;
 
@@ -23,7 +28,6 @@ export type ScreenKind =
   | 'framework-setup-2'
   | 'instruments-setup-1'
   | 'instruments-setup-2'
-  | 'cluster-setup'
   | 'question'
   | 'paired'
   | 'close-pair'
@@ -39,13 +43,6 @@ export type Screen = {
   kind: ScreenKind;
   hasShell?: boolean;
   advanceLabel?: string;
-  clusterId?: ClusterId;
-  /** Percent shown on the top bar at the start of this screen. Hand-tuned by
-   *  the prototype to reflect uneven effort per screen. Carried verbatim. */
-  percentAtStart: number;
-  /** Time-left in minutes shown on the top bar at the start of this screen.
-   *  Hand-tuned by the prototype; carried verbatim. */
-  minutesAtStart: number;
 };
 
 const locationFromQ = (id: string) => {
@@ -62,8 +59,6 @@ export const SCREENS: Screen[] = [
     location: 'Welcome',
     hasShell: false,
     kind: 'welcome',
-    percentAtStart: 0,
-    minutesAtStart: 50,
   },
 
   // ---------- Profile ----------
@@ -72,8 +67,6 @@ export const SCREENS: Screen[] = [
     stepId: 'profile',
     location: 'Profile · A few details about you',
     kind: 'profile',
-    percentAtStart: 2,
-    minutesAtStart: 49,
   },
 
   // ---------- Grounding · 2 screens ----------
@@ -82,16 +75,12 @@ export const SCREENS: Screen[] = [
     stepId: 'grounding',
     location: `Grounding · 1 of 2 · ${CONTENT.grounding[0]!.title}`,
     kind: 'orient-1',
-    percentAtStart: 6,
-    minutesAtStart: 48,
   },
   {
     id: 'g2',
     stepId: 'grounding',
     location: `Grounding · 2 of 2 · ${CONTENT.grounding[1]!.title}`,
     kind: 'orient-2',
-    percentAtStart: 14,
-    minutesAtStart: 46,
   },
 
   // ---------- Cluster 1 · Problem ----------
@@ -101,8 +90,6 @@ export const SCREENS: Screen[] = [
     location: 'Problem · Introductory setup · 1 of 2',
     kind: 'problem-setup-1',
     advanceLabel: 'Continue',
-    percentAtStart: 21,
-    minutesAtStart: 42,
   },
   {
     id: 'c1-setup2',
@@ -110,17 +97,13 @@ export const SCREENS: Screen[] = [
     location: 'Problem · Introductory setup · 2 of 2',
     kind: 'problem-setup-2',
     advanceLabel: 'Begin the problem',
-    percentAtStart: 23,
-    minutesAtStart: 42,
   },
   ...(['c1-q1', 'c1-q2', 'c1-q3q4', 'c1-q5', 'c1-q6', 'c1-q7', 'c1-q8'] as const).map(
-    (id, i): Screen => ({
+    (id): Screen => ({
       id,
       stepId: 'problem',
       location: locationFromQ(id),
       kind: id === 'c1-q3q4' ? 'paired' : 'question',
-      percentAtStart: [25, 28, 32, 36, 40, 43, 47][i]!,
-      minutesAtStart: [41, 39, 37, 34, 32, 31, 28][i]!,
     }),
   ),
 
@@ -131,8 +114,6 @@ export const SCREENS: Screen[] = [
     location: 'Framework · Introductory setup · 1 of 2',
     kind: 'framework-setup-1',
     advanceLabel: 'Continue',
-    percentAtStart: 49,
-    minutesAtStart: 27,
   },
   {
     id: 'c2-setup2',
@@ -140,17 +121,13 @@ export const SCREENS: Screen[] = [
     location: 'Framework · Introductory setup · 2 of 2',
     kind: 'framework-setup-2',
     advanceLabel: 'Begin the framework',
-    percentAtStart: 51,
-    minutesAtStart: 27,
   },
   ...(['c2-q1', 'c2-q2', 'c2-q3', 'c2-q4', 'c2-q5', 'c2-q6'] as const).map(
-    (id, i): Screen => ({
+    (id): Screen => ({
       id,
       stepId: 'framework',
       location: locationFromQ(id),
       kind: 'question',
-      percentAtStart: [53, 57, 61, 65, 72, 76][i]!,
-      minutesAtStart: [26, 23, 21, 19, 14, 12][i]!,
     }),
   ),
 
@@ -161,8 +138,6 @@ export const SCREENS: Screen[] = [
     location: 'Instruments · Introductory setup · 1 of 2',
     kind: 'instruments-setup-1',
     advanceLabel: 'Continue',
-    percentAtStart: 78,
-    minutesAtStart: 10,
   },
   {
     id: 'c3-setup2',
@@ -170,37 +145,22 @@ export const SCREENS: Screen[] = [
     location: 'Instruments · Introductory setup · 2 of 2',
     kind: 'instruments-setup-2',
     advanceLabel: 'Begin the instruments',
-    percentAtStart: 80,
-    minutesAtStart: 10,
   },
   ...CONTENT.instruments.map(
-    (inst, i): Screen => ({
+    (inst): Screen => ({
       id: inst.id,
       stepId: 'instruments',
       location: `Instruments · ${inst.slot} of 4 · ${inst.code} ${inst.title}`,
       kind: 'instrument',
-      percentAtStart: [82, 86, 90, 93][i]!,
-      minutesAtStart: [9, 7, 4, 2][i]!,
     }),
   ),
 
-  // ---------- Cluster 4 · Close ----------
-  {
-    id: 'c4-setup',
-    stepId: 'close',
-    location: 'Close · One last invitation',
-    kind: 'cluster-setup',
-    clusterId: 'close',
-    percentAtStart: 95,
-    minutesAtStart: 2,
-  },
+  // ---------- Cluster 4 · Close (single screen; c4-setup was merged in — ADR 0011) ----------
   {
     id: 'c4-close',
     stepId: 'close',
     location: 'Close · Q4.1 + Q4.2 · Catch-all',
     kind: 'close-pair',
-    percentAtStart: 98,
-    minutesAtStart: 1,
   },
 
   // ---------- Post-spine ----------
@@ -209,16 +169,12 @@ export const SCREENS: Screen[] = [
     stepId: 'close',
     location: 'Optional follow-up · Interview willingness',
     kind: 'interview',
-    percentAtStart: 99,
-    minutesAtStart: 1,
   },
   {
     id: 'submit',
     stepId: 'close',
     location: 'Submit · Review and confirm',
     kind: 'submit',
-    percentAtStart: 99,
-    minutesAtStart: 1,
   },
   {
     id: 'thanks',
@@ -226,8 +182,6 @@ export const SCREENS: Screen[] = [
     location: 'Complete · Thank you',
     hasShell: false,
     kind: 'thanks',
-    percentAtStart: 100,
-    minutesAtStart: 0,
   },
 ];
 

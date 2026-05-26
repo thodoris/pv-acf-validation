@@ -8,6 +8,7 @@ import { DiagramSlot } from './DiagramSlot';
 import { InstrumentReadingDiagram } from './diagrams/InstrumentReadingDiagram';
 import { SetupPreview } from './SetupPreview';
 import { clusterPreview } from './clusterPreview';
+import { useSessionStore } from '@/state/sessionStore';
 
 const FOUR_INSTRUMENTS_BLOCKS = [
   {
@@ -100,7 +101,8 @@ export function InstrumentsSetup1(): JSX.Element {
 }
 
 export function InstrumentsSetup2(): JSX.Element {
-  const preview = clusterPreview('instruments');
+  const variant = useSessionStore((s) => s.variant);
+  const preview = clusterPreview('instruments', variant);
 
   return (
     <div className="main">

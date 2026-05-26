@@ -6,7 +6,6 @@
 import { Fragment, useEffect } from 'react';
 import type { JSX } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
-import { Placeholder } from '@/screens/placeholders';
 import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { ProfileScreen } from '@/screens/ProfileScreen';
 import { OrientG1, OrientG2 } from '@/screens/OrientationScreen';
@@ -24,7 +23,6 @@ import {
   InstrumentsSetup1,
   InstrumentsSetup2,
 } from '@/screens/setup/InstrumentsSetup';
-import { ClusterSetupScreen } from '@/screens/setup/ClusterSetupScreen';
 import { requireScreen, type Screen } from './screens';
 
 export function ScreenRouter(): JSX.Element {
@@ -52,8 +50,7 @@ export function ScreenRouter(): JSX.Element {
   // reuses the same component instance — only the `screenId` prop
   // changes — and per-screen useState initialisers don't re-run, so
   // local field state (selected rating pill, textarea value) leaks from
-  // the previous screen into the new one. Keying the Fragment also
-  // forces a remount for ClusterSetupScreen across different clusters.
+  // the previous screen into the new one.
   return <Fragment key={screen.id}>{renderByKind(screen)}</Fragment>;
 }
 
@@ -79,12 +76,6 @@ function renderByKind(screen: Screen): JSX.Element {
       return <InstrumentsSetup1 />;
     case 'instruments-setup-2':
       return <InstrumentsSetup2 />;
-    case 'cluster-setup':
-      return screen.clusterId ? (
-        <ClusterSetupScreen clusterId={screen.clusterId} />
-      ) : (
-        <Placeholder name="Cluster setup · (no cluster id)" />
-      );
     case 'question':
       return <QuestionScreen screenId={screen.id} />;
     case 'paired':

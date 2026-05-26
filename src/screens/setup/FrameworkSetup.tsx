@@ -8,6 +8,7 @@ import { DiagramSlot } from './DiagramSlot';
 import { FrameworkOrganisationDiagram } from './diagrams/FrameworkOrganisationDiagram';
 import { SetupPreview } from './SetupPreview';
 import { clusterPreview } from './clusterPreview';
+import { useSessionStore } from '@/state/sessionStore';
 
 const FOUR_GAPS_BLOCKS = [
   {
@@ -97,7 +98,8 @@ export function FrameworkSetup1(): JSX.Element {
 }
 
 export function FrameworkSetup2(): JSX.Element {
-  const preview = clusterPreview('framework');
+  const variant = useSessionStore((s) => s.variant);
+  const preview = clusterPreview('framework', variant);
 
   return (
     <div className="main">

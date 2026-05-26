@@ -35,14 +35,13 @@ const SCREEN_IDS = [
   'c3-ast',
   'c3-dma',
   'c3-cpd',
-  'c4-setup',
   'c4-close',
   // 'interview' hidden under SHORT — see variants.ts.
   'submit',
   'thanks',
 ];
 
-test.describe('walk all 31 screens via review mode (SHORT variant)', () => {
+test.describe('walk all 30 screens via review mode (SHORT variant)', () => {
   for (const id of SCREEN_IDS) {
     test(`renders ${id}`, async ({ page }) => {
       const errors: string[] = [];

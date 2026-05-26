@@ -20,13 +20,13 @@ describe('CONTENT shape', () => {
     expect(CONTENT.grounding.map((g) => g.id)).toEqual(['g1', 'g2']);
   });
 
-  it('has 4 clusters with setup data', () => {
+  it('has 4 clusters; problem/framework/instruments carry setup-screen data (close does not — ADR 0011)', () => {
     const ids = Object.keys(CONTENT.clusters);
     expect(ids).toEqual(['problem', 'framework', 'instruments', 'close']);
-    for (const k of ids) {
-      const c = CONTENT.clusters[k as keyof typeof CONTENT.clusters];
-      expect(c.setup.sections.length).toBeGreaterThan(0);
+    for (const k of ['problem', 'framework', 'instruments'] as const) {
+      expect(CONTENT.clusters[k].setup.sections.length).toBeGreaterThan(0);
     }
+    expect(CONTENT.clusters.close.setup.sections).toEqual([]);
   });
 
   it('has the expected Cluster 1 questions (c1-q1..c1-q8 with c1-q3q4 paired)', () => {

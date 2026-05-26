@@ -1,9 +1,15 @@
 /* "What you will be asked" preview list — port of clusterPreview() from
    docs/reference-prototype/screens-templates.jsx. Hand-curated per cluster;
    the prototype keeps it in code rather than deriving from CONTENT.questions
-   because the preview wording is short-form copy distinct from question stems. */
+   because the preview wording is short-form copy distinct from question stems.
+
+   The `kind` string on each item is variant-aware: under SHORT the
+   instrument screens hide Q2 and relax the shared open from required to
+   optional (see variants.ts), so the preview line that names the answer
+   pattern needs to reflect that. */
 
 import { CONTENT, type ClusterId } from '@/content';
+import type { VariantId } from '@/content/variants';
 
 export type PreviewItem = {
   num: string;
@@ -16,7 +22,7 @@ export type ClusterPreview = {
   items: PreviewItem[];
 };
 
-export function clusterPreview(id: ClusterId): ClusterPreview | null {
+export function clusterPreview(id: ClusterId, variant: VariantId): ClusterPreview | null {
   if (id === 'problem') {
     return {
       count: 8,
@@ -46,24 +52,24 @@ export function clusterPreview(id: ClusterId): ClusterPreview | null {
     };
   }
   if (id === 'instruments') {
+    // SHORT hides Q2 on every instrument and relaxes the shared open from
+    // required to optional (see variants.ts). The preview's `kind` string
+    // mirrors that so c3-setup2 reads accurately under each variant.
+    const kind =
+      variant === 'short'
+        ? '1 rating + shared optional open'
+        : '2 ratings + shared required open';
     return {
       count: 4,
       items: CONTENT.instruments.map((inst, i) => ({
         num: `3.${i + 1}`,
         title: `${inst.code} — ${inst.title}`,
-        kind: '2 ratings + shared required open',
+        kind,
       })),
     };
   }
-  if (id === 'close') {
-    return {
-      count: 2,
-      items: [
-        { num: '4.1', title: "Anything important the questions haven't reached", kind: 'open-only · required' },
-        { num: '4.2', title: 'Feedback on the validation exercise itself', kind: 'open-only · optional' },
-      ],
-    };
-  }
+  // 'close' has no preview — Cluster 4 has no setup screen since ADR 0011
+  // (c4-setup was merged into c4-close).
   return null;
 }
 

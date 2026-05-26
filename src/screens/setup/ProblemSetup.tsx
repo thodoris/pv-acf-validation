@@ -8,6 +8,7 @@ import { DiagramSlot } from './DiagramSlot';
 import { ThreeLevelsDiagram } from './diagrams/ThreeLevelsDiagram';
 import { SetupPreview } from './SetupPreview';
 import { clusterPreview } from './clusterPreview';
+import { useSessionStore } from '@/state/sessionStore';
 
 const FOUR_PATTERNS_BLOCKS = [
   {
@@ -75,7 +76,8 @@ export function ProblemSetup1(): JSX.Element {
 }
 
 export function ProblemSetup2(): JSX.Element {
-  const preview = clusterPreview('problem');
+  const variant = useSessionStore((s) => s.variant);
+  const preview = clusterPreview('problem', variant);
 
   return (
     <div className="main">

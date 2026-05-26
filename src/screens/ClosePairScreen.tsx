@@ -68,12 +68,20 @@ export function ClosePairScreen(): JSX.Element {
   return (
     <div className="main">
       <div className="main__inner">
-        <div className="kicker">Close · Cluster 4 of 4</div>
-        <h1 className="h-chapter">Final two questions</h1>
+        <div className="kicker">Cluster 4 of 4 · Close</div>
+        <h1 className="h-chapter">The close</h1>
         <p className="tagline tagline--mute">
-          One required catch-all on the framework, one optional flag on the exercise
-          itself.
+          Two final open questions. Set the agenda yourself.
         </p>
+
+        <aside className="lede-panel">
+          <p>
+            You have now crossed the whole framework — the problem it addresses,
+            its design, and its four instruments. Two final open questions
+            remain: one required catch-all, and one optional flag on the
+            validation exercise itself.
+          </p>
+        </aside>
 
         <QuestionCard
           slot="q41"

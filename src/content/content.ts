@@ -217,30 +217,16 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
       },
     },
 
+    // Cluster 4 has no setup screen since ADR 0011 — c4-setup was merged into
+    // c4-close, which absorbed the load-bearing copy (title, tagline fragment,
+    // and scope-of-everything-you've-seen) directly into the close-pair screen.
     close: {
       id: "close",
       label: "The close",
       ordinal: "Cluster 4 of 4",
-      tagline: "One last open invitation. Set the agenda yourself.",
-      intro: "You have now crossed the whole framework. One open question remains: anything the structured items did not reach. A second, fully optional question collects feedback on the validation exercise itself.",
-      setup: {
-        title: "One last invitation",
-        sections: [
-          {
-            label: "The questionnaire is nearly complete",
-            body: "The structured questions are behind you. One open question remains, with an optional second.",
-          },
-          {
-            label: "What the final question is for",
-            body: "It is deliberately unbounded — the one place where what gets raised is yours to set, not the questionnaire’s. There is no wrong thing to put there.",
-          },
-          {
-            label: "“Everything you’ve seen”",
-            body: "The problem the framework addresses (Cluster 1), the framework’s design (Cluster 2), its instruments (Cluster 3).",
-          },
-        ],
-        footer: null,
-      },
+      tagline: "Two final open questions. Set the agenda yourself.",
+      intro: "You have now crossed the whole framework. Two final open questions remain: one required catch-all, and one optional flag on the validation exercise itself.",
+      setup: { title: "", sections: [], footer: null },
     },
   };
 
