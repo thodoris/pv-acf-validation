@@ -1356,6 +1356,29 @@
   font-size: 12.5px;
   color: var(--ink);
 }
+/* When .research-band__email is applied to an anchor (the post-migration
+   case via <ProtectedEmail>), drop the default browser blue + underline and
+   surface the affordance on hover/focus instead. */
+a.research-band__email {
+  text-decoration: none;
+  color: var(--ink);
+}
+a.research-band__email:hover,
+a.research-band__email:focus-visible {
+  color: var(--coral-deep);
+  text-decoration: underline;
+}
+/* Soft-tinted mono variant used by Thanks + Submitted-terminal Contact cards
+   (replaces the previous inline color: var(--ink-soft) on a <span>). */
+a.protected-email--soft {
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+a.protected-email--soft:hover,
+a.protected-email--soft:focus-visible {
+  color: var(--coral-deep);
+  text-decoration: underline;
+}
 .research-band__links {
   display: flex;
   flex-direction: column;
