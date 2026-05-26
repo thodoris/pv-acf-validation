@@ -2,12 +2,22 @@
    at-a-glance meta card. Owns its own layout (welcome-shell) because
    hasShell:false on this screen — TopBar and Rail are suppressed by App. */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { JSX, ReactNode } from 'react';
 import { Icon } from '@/shell/Icon';
+import { ProtectedEmail } from '@/shell/ProtectedEmail';
 import { CONTENT } from '@/content';
 import { useSessionStore, CONSENT_VERSION } from '@/state/sessionStore';
 import { next } from '@/routing/navigation';
+import type { VariantId } from '@/content/variants';
+import {
+  formatDurationRange,
+  formatQuestionCount,
+  phaseMinutesFor,
+  PHASE_WEIGHTS,
+  TIMEBAR_PHASES,
+} from '@/lib/duration';
+import { RESEARCHER, SUPERVISOR } from '@/lib/contacts';
 
 type InfoOverlayKind = 'research' | 'ethics' | 'data' | null;
 
@@ -18,6 +28,8 @@ export function WelcomeScreen(): JSX.Element {
   // disabled until the reviewer actively ticks it.
   const [consentTicked, setConsentTicked] = useState(false);
   const acknowledgeConsent = useSessionStore((s) => s.acknowledgeConsent);
+  const variant = useSessionStore((s) => s.variant);
+  const durationCopy = formatDurationRange(variant);
 
   const onBegin = () => {
     if (!consentTicked) return;
@@ -162,11 +174,7 @@ export function WelcomeScreen(): JSX.Element {
               </button>
               <span className="note-row">
                 {consentTicked ? (
-                  <>
-                    Best on a laptop or desktop · about{' '}
-                    <span className="hide-in-full">30–35 minutes</span>
-                    <span className="hide-in-short">45–50 minutes</span> total
-                  </>
+                  <>Best on a laptop or desktop · about {durationCopy} total</>
                 ) : (
                   'Tick the consent box above to continue.'
                 )}
@@ -176,8 +184,12 @@ export function WelcomeScreen(): JSX.Element {
         </div>
       </div>
 
-      <WelcomeMetaCard />
-      <WelcomeInfoOverlay kind={infoOverlay} onClose={() => setInfoOverlay(null)} />
+      <WelcomeMetaCard durationCopy={durationCopy} />
+      <WelcomeInfoOverlay
+        kind={infoOverlay}
+        variant={variant}
+        onClose={() => setInfoOverlay(null)}
+      />
     </div>
   );
 }
@@ -193,7 +205,9 @@ function HowItem({ title, children }: { title: string; children: ReactNode }): J
   );
 }
 
-function WelcomeMetaCard(): JSX.Element {
+function WelcomeMetaCard({ durationCopy }: { durationCopy: string }): JSX.Element {
+  const variant = useSessionStore((s) => s.variant);
+  const questionsCopy = formatQuestionCount(variant);
   return (
     <aside className="welcome__meta-card welcome__meta-card--rail">
       <div className="kicker kicker--mute" style={{ marginBottom: 'var(--space-3)' }}>
@@ -201,10 +215,7 @@ function WelcomeMetaCard(): JSX.Element {
       </div>
       <div className="welcome__meta-row">
         <span>Duration</span>
-        <span>
-          <span className="hide-in-full">30–35 minutes</span>
-          <span className="hide-in-short">45–50 minutes</span>
-        </span>
+        <span>{durationCopy}</span>
       </div>
       <div className="welcome__meta-row">
         <span>Sessions</span>
@@ -216,10 +227,7 @@ function WelcomeMetaCard(): JSX.Element {
       </div>
       <div className="welcome__meta-row">
         <span>Questions</span>
-        <span>
-          <span className="hide-in-full">20</span>
-          <span className="hide-in-short">24 + 1 optional</span>
-        </span>
+        <span>{questionsCopy}</span>
       </div>
       <div className="welcome__meta-row">
         <span>Device</span>
@@ -249,53 +257,22 @@ function WelcomeMetaCard(): JSX.Element {
           role="img"
           aria-label="Approximate time distribution across clusters"
         >
-          <span
-            className="welcome__time-seg"
-            style={{ flex: 3, background: 'var(--ink-mute)' }}
-            title="Grounding · ~3 min"
-          />
-          <span
-            className="welcome__time-seg"
-            style={{ flex: 10, background: 'var(--coral)' }}
-            title="Problem · ~10 min"
-          />
-          <span
-            className="welcome__time-seg"
-            style={{ flex: 15, background: 'var(--cobalt)' }}
-            title="Framework · ~15 min"
-          />
-          <span
-            className="welcome__time-seg"
-            style={{ flex: 15, background: 'var(--sage)' }}
-            title="Instruments · ~15 min"
-          />
-          <span
-            className="welcome__time-seg"
-            style={{ flex: 5, background: 'var(--saffron)' }}
-            title="Close · ~5 min"
-          />
+          {TIMEBAR_PHASES.map((entry) => (
+            <span
+              key={entry.phase}
+              className="welcome__time-seg"
+              style={{ flex: PHASE_WEIGHTS[entry.phase], background: entry.varToken }}
+              title={`${entry.label} · ~${phaseMinutesFor(entry.phase, variant)} min`}
+            />
+          ))}
         </div>
         <div className="welcome__time-legend">
-          <span>
-            <i style={{ background: 'var(--ink-mute)' }} />
-            Grounding
-          </span>
-          <span>
-            <i style={{ background: 'var(--coral)' }} />
-            Problem
-          </span>
-          <span>
-            <i style={{ background: 'var(--cobalt)' }} />
-            Framework
-          </span>
-          <span>
-            <i style={{ background: 'var(--sage)' }} />
-            Instruments
-          </span>
-          <span>
-            <i style={{ background: 'var(--saffron)' }} />
-            Close
-          </span>
+          {TIMEBAR_PHASES.map((entry) => (
+            <span key={entry.phase}>
+              <i style={{ background: entry.varToken }} />
+              {entry.label}
+            </span>
+          ))}
         </div>
       </div>
     </aside>
@@ -312,9 +289,9 @@ function ResearchContextBand({
       <div className="research-band__col">
         <div className="kicker kicker--mute">Research context</div>
         <p className="research-band__body">
-          <strong>[Author Name]</strong> · PhD candidate, [Department, University]
+          <strong>Theodoros Papadopoulos</strong> · PhD candidate, University of the Aegean
           <br />
-          Supervised by [Supervisor Name]
+          Supervised by Professor Ioannis Charalampidis
         </p>
         <p className="research-band__body">
           This expert review is part of a doctoral thesis on AI governance in public
@@ -364,75 +341,482 @@ function ResearchContextBand({
         <p className="research-band__body">
           Questions about the research:
           <br />
-          <span className="research-band__email">[author email]</span>
+          <ProtectedEmail contact={RESEARCHER} className="research-band__email" />
         </p>
         <p className="research-band__body">
           Concerns about ethics or your rights as a participant:
           <br />
-          <span className="research-band__email">
-            [supervisor email or ethics committee contact]
-          </span>
+          <ProtectedEmail contact={SUPERVISOR} className="research-band__email" />
         </p>
       </div>
     </section>
   );
 }
 
-const WELCOME_OVERLAYS: Record<
-  Exclude<InfoOverlayKind, null>,
-  { title: string; body: ReactNode }
-> = {
+type OverlayEntry = {
+  title: string;
+  /** Body may be a static ReactNode or a render function that receives the
+   *  active variant (so e.g. the ethics overlay can read the variant-aware
+   *  duration range from src/lib/duration.ts). */
+  body: ReactNode | ((variant: VariantId) => ReactNode);
+};
+
+const WELCOME_OVERLAYS: Record<Exclude<InfoOverlayKind, null>, OverlayEntry> = {
   research: {
     title: 'About the research',
     body: (
       <>
         <p>
-          [Overlay copy to be drafted separately.] This overlay will carry the
-          longer-form research-context narrative: the thesis's central question, the
-          role of PV-ACF in it, why expert review is being conducted at this stage, and
-          what the data collected here will be used for.
+          This expert review is part of a doctoral thesis titled{' '}
+          <em>Governing with AI, Governing AI: Developing the Public Value AI
+          Co-production Framework</em>.
         </p>
         <p>
-          Substantive content sits here so the Welcome screen above can keep
-          immediately visible only what the ethics committee requires to be immediately
-          visible.
+          The thesis examines how artificial intelligence is being governed in public
+          administration, and how public administrations are increasingly governing{' '}
+          <em>with</em> AI systems in their own services and decision processes.
+        </p>
+
+        <h3>What the thesis studies</h3>
+        <p>The research focuses on three connected levels of AI governance:</p>
+        <ul>
+          <li>
+            <strong>Policy and strategy</strong> — how national and European AI
+            strategies define what AI is for, what futures it promises, and which
+            public problems it is expected to solve.
+          </li>
+          <li>
+            <strong>Regulation</strong> — how frameworks such as the EU AI Act
+            translate these assumptions into regulatory categories, obligations, and
+            governance mechanisms.
+          </li>
+          <li>
+            <strong>Deployment</strong> — how AI systems enter public organisations,
+            reshape administrative work, and affect accountability, discretion,
+            contestation, and public value.
+          </li>
+        </ul>
+
+        <h3>The central concern</h3>
+        <p>
+          The thesis starts from a critical co-production perspective. AI systems are
+          not treated as neutral tools that simply enter public institutions from the
+          outside. They are understood as sociotechnical arrangements: shaped by public
+          institutions, policy priorities, vendors, infrastructures, and legal
+          frameworks, while also reshaping administrative routines, decision authority,
+          and citizen-state relations.
+        </p>
+        <p>
+          The central concern is that AI governance can become too narrow when it
+          focuses only on technical performance, compliance, or risk documentation.
+          These are important, but they may miss earlier and deeper questions: how the
+          problem was framed, why AI became the expected solution, who shaped the
+          deployment, what dependencies were accepted, and whether affected people can
+          meaningfully challenge the system.
+        </p>
+
+        <h3>The framework being reviewed</h3>
+        <p>
+          The Public-Value AI Co-production Framework, or PV-ACF, is the practical
+          artefact developed by the thesis. It is designed as a critical-deliberative
+          framework for public administration.
+        </p>
+        <p>
+          PV-ACF does not aim to replace legal compliance, data protection, procurement
+          review, or technical audit. Instead, it asks what these mechanisms often
+          leave under-examined: the institutional, political, and infrastructural
+          conditions under which AI deployments become possible and routine.
+        </p>
+
+        <h3>Why this review matters</h3>
+        <p>
+          This expert review supports the validation of PV-ACF. You are asked to assess
+          whether the framework names real governance problems, whether its design
+          choices are coherent, and whether selected instruments would be useful for
+          practitioners, researchers, regulators, or other governance actors.
+        </p>
+        <p>
+          Your responses will be treated as expert judgements. Agreement is not
+          assumed. Disagreement, uncertainty, examples, and limits are all valuable for
+          the research.
+        </p>
+
+        <h3>Where this review fits in the thesis</h3>
+        <p>
+          This expert review forms part of the thesis's validation strategy, which
+          combines retrospective application of the framework to a documented
+          public-administration AI case with this prospective expert validation. Your
+          responses contribute alongside the case material as reasoned expert
+          judgements that test the framework's claims, design choices, and operational
+          instruments.
+        </p>
+
+        <h3>Research outputs</h3>
+        <p>Findings from the thesis and from this expert review may inform:</p>
+        <ul>
+          <li>the doctoral thesis and its defence materials;</li>
+          <li>peer-reviewed academic publications;</li>
+          <li>conference presentations and academic working papers;</li>
+          <li>
+            subsequent refinement of the PV-ACF framework's instruments and design
+            choices.
+          </li>
+        </ul>
+
+        <h3>Researcher and supervision</h3>
+        <ul>
+          <li>
+            <strong>Researcher:</strong> Theodoros Papadopoulos, University of the
+            Aegean.
+          </li>
+          <li>
+            <strong>Supervisor:</strong> Professor Ioannis Charalampidis, University of
+            the Aegean.
+          </li>
+        </ul>
+
+        <p>
+          For procedural details on participation, data handling, and your rights as a
+          participant, see the Ethics and Data overlays from the Welcome screen.
+        </p>
+
+        <h3>Want to discuss the research before participating?</h3>
+        <p>
+          If you would like to discuss the research, the framework's intellectual
+          foundations, or the case material it draws on before completing the review,
+          you are welcome to contact the researcher directly at{' '}
+          <ProtectedEmail contact={RESEARCHER} />.
         </p>
       </>
     ),
   },
   ethics: {
-    title: 'Full ethics statement',
-    body: (
-      <p>
-        [Overlay copy to be drafted separately.] This overlay will carry the full ethics
-        statement as approved: lawful basis under GDPR, retention period, anonymisation
-        procedure, withdrawal mechanics, the process for raising a concern, and contact
-        for the ethics committee.
-      </p>
+    title: 'Ethics statement',
+    body: (variant: VariantId) => (
+      <>
+        <p>
+          This expert review forms part of a doctoral thesis on AI governance in public
+          administration. The purpose of the review is to evaluate the Public-Value AI
+          Co-production Framework (PV-ACF) through reasoned expert judgement.
+        </p>
+
+        <h3>Researcher and supervision</h3>
+        <ul>
+          <li>
+            <strong>Researcher:</strong> Theodoros Papadopoulos, University of the
+            Aegean.
+          </li>
+          <li>
+            <strong>Supervisor:</strong> Professor Ioannis Charalampidis, University of
+            the Aegean.
+          </li>
+        </ul>
+
+        <h3>What participation involves</h3>
+        <ul>
+          <li>An online expert review of the PV-ACF framework.</li>
+          <li>
+            Questions about your experience, your judgement of selected framework
+            claims, and your assessment of selected instruments.
+          </li>
+          <li>
+            Most questions use rating scales. Some invite optional open-text responses.
+          </li>
+          <li>You may answer open-text questions in English or Greek.</li>
+          <li>
+            Expected completion time: approximately {formatDurationRange(variant)}.
+          </li>
+        </ul>
+
+        <h3>Voluntary participation</h3>
+        <ul>
+          <li>Participation is voluntary.</li>
+          <li>You may stop at any point before final submission.</li>
+          <li>You do not have to answer optional open-text questions.</li>
+          <li>
+            You may withdraw without giving a reason. Withdrawal after submission is
+            possible until the analysis cut-off (see the data-handling overlay).
+          </li>
+        </ul>
+
+        <h3>What your responses are used for</h3>
+        <ul>
+          <li>
+            Your responses will be used as expert-review evidence in Chapter 9 of the
+            doctoral thesis.
+          </li>
+          <li>
+            Responses will be analysed as reasoned expert judgements, not as
+            satisfaction scores.
+          </li>
+          <li>
+            The analysis may report patterns, disagreements, examples, and named
+            limitations raised by reviewers.
+          </li>
+          <li>
+            Direct quotations may be used only in anonymised form, unless you have
+            explicitly agreed to public acknowledgement via the acknowledgement-listing
+            option on the Submit screen.
+          </li>
+        </ul>
+
+        <h3>Confidentiality and anonymity</h3>
+        <ul>
+          <li>Your name is optional. You may complete the review anonymously.</li>
+          <li>
+            If you provide your name or institution, these details will be kept
+            separate from the analytical reporting where possible.
+          </li>
+          <li>
+            Identifying details will not appear in the thesis unless you have
+            explicitly consented to public acknowledgement.
+          </li>
+        </ul>
+
+        <h3>Possible risks and benefits</h3>
+        <ul>
+          <li>
+            The review involves low risk. It asks for professional or scholarly
+            judgement, not sensitive personal information.
+          </li>
+          <li>
+            You should avoid including confidential institutional information in
+            open-text responses.
+          </li>
+          <li>There is no direct personal benefit from participation.</li>
+          <li>
+            Your contribution supports the validation and refinement of a doctoral
+            framework for democratic AI governance in public administration.
+          </li>
+        </ul>
+
+        <h3>Ethics approval</h3>
+        <ul>
+          <li>
+            <strong>Approving body:</strong> Research Ethics and Conduct Committee,
+            University of the Aegean.
+          </li>
+          <li>
+            <strong>Approval reference:</strong> [TBD]
+          </li>
+          <li>
+            <strong>Approval date:</strong> [TBD]
+          </li>
+        </ul>
+
+        <h3>Research contact</h3>
+        <ul>
+          <li>
+            <strong>Researcher email:</strong>{' '}
+            <ProtectedEmail contact={RESEARCHER} />
+          </li>
+          <li>
+            <strong>Supervisor / ethics contact:</strong>{' '}
+            <ProtectedEmail contact={SUPERVISOR} />
+          </li>
+        </ul>
+      </>
     ),
   },
   data: {
     title: 'How your data is handled',
     body: (
-      <p>
-        [Overlay copy to be drafted separately.] This overlay will detail what is
-        recorded, how it is stored, who has access, how it is anonymised before it
-        appears in the thesis, and the practical steps to withdraw your responses
-        within the 30-day window after submission.
-      </p>
+      <>
+        <p>
+          This review collects only the information needed to support the doctoral
+          validation of PV-ACF.
+        </p>
+
+        <h3>Data recorded</h3>
+        <p>The platform records:</p>
+        <ul>
+          <li>Your final locked answers to the review questions.</li>
+          <li>
+            Your profile information: institution type, years of experience, optional
+            name, optional institution.
+          </li>
+          <li>
+            Your interview-willingness response, if you choose to provide one.
+          </li>
+          <li>
+            Your acknowledgement-listing preference, if you choose to set one.
+          </li>
+        </ul>
+
+        <h3>Data not recorded</h3>
+        <p>The platform does not record:</p>
+        <ul>
+          <li>Which concept cards you open.</li>
+          <li>What you read in the reference library.</li>
+          <li>Free runs of the Architecture Selection Tool in Explore mode.</li>
+          <li>Time spent on individual screens.</li>
+          <li>Technical submission metadata such as timestamps.</li>
+          <li>IP address, browser or device metadata, cookies, or server logs.</li>
+        </ul>
+
+        <h3>Separation of identifying information</h3>
+        <ul>
+          <li>
+            Optional identifying information is treated separately from the analytical
+            content of your answers where possible.
+          </li>
+          <li>
+            Interview-willingness responses are stored separately from validation
+            answers.
+          </li>
+          <li>
+            Public acknowledgement in the thesis is optional and separate from
+            participation.
+          </li>
+        </ul>
+
+        <h3>Storage and access</h3>
+        <ul>
+          <li>
+            Data is stored on Google Firebase Cloud, in the <em>europe-west3</em>{' '}
+            region (Frankfurt, Germany), under the EU data-protection framework.
+          </li>
+          <li>Access is limited to the researcher.</li>
+          <li>
+            Data is protected by password protection, encryption, and access controls.
+          </li>
+        </ul>
+
+        <h3>Retention and deletion</h3>
+        <ul>
+          <li>Data is retained for 30 days after submission, then deleted.</li>
+          <li>
+            Withdrawal after submission is possible until 20 June 2026. After
+            anonymised or aggregated analysis has begun, withdrawal may no longer be
+            possible.
+          </li>
+        </ul>
+
+        <h3>Legal and research basis</h3>
+        <ul>
+          <li>The data are processed for doctoral research and framework validation.</li>
+          <li>
+            The lawful basis for processing under GDPR is your explicit consent, given
+            on the Welcome screen.
+          </li>
+          <li>
+            Special-category personal data are not requested. Please avoid including
+            sensitive personal data or confidential institutional information in
+            open-text responses.
+          </li>
+        </ul>
+
+        <h3>Data controller</h3>
+        <ul>
+          <li>
+            <strong>Data controller:</strong> Theodoros Papadopoulos, University of the
+            Aegean (researcher acting as data controller for this study).
+          </li>
+          <li>
+            For data-protection inquiries:{' '}
+            <ProtectedEmail contact={RESEARCHER} />.
+          </li>
+        </ul>
+
+        <h3>Reporting</h3>
+        <ul>
+          <li>
+            Findings may be reported in the thesis, defence materials, and related
+            academic outputs.
+          </li>
+          <li>
+            Reporting will use aggregated patterns, anonymised examples, or paraphrased
+            responses.
+          </li>
+          <li>
+            Any direct quotation will be anonymised unless explicit consent for
+            attribution has been given.
+          </li>
+        </ul>
+
+        <h3>Your data rights</h3>
+        <p>
+          Under GDPR, you have the following rights regarding your personal data:
+        </p>
+        <ul>
+          <li>
+            <strong>Access</strong> — to know what personal data we hold about you.
+          </li>
+          <li>
+            <strong>Rectification</strong> — to correct inaccurate or incomplete data.
+          </li>
+          <li>
+            <strong>Erasure</strong> — to have your data deleted, subject to
+            research-integrity limits.
+          </li>
+          <li>
+            <strong>Restriction</strong> — to limit how your data is processed.
+          </li>
+          <li>
+            <strong>Portability</strong> — to receive your data in a structured,
+            commonly-used format.
+          </li>
+          <li>
+            <strong>Objection</strong> — to object to certain uses of your data.
+          </li>
+          <li>
+            <strong>Withdrawal of consent</strong> — at any time before submission, and
+            where feasible after submission.
+          </li>
+        </ul>
+        <p>
+          To exercise these rights, contact:{' '}
+          <ProtectedEmail contact={RESEARCHER} />.
+        </p>
+
+        <h3>Right to complain to a supervisory authority</h3>
+        <p>
+          If you believe your personal data has been mishandled, you may complain to
+          your national data-protection authority.
+        </p>
+        <ul>
+          <li>
+            <em>For respondents in Greece:</em> the Hellenic Data Protection Authority
+            (Αρχή Προστασίας Δεδομένων Προσωπικού Χαρακτήρα),{' '}
+            <a href="https://www.dpa.gr" target="_blank" rel="noopener noreferrer">
+              www.dpa.gr
+            </a>
+            .
+          </li>
+          <li>
+            <em>For respondents elsewhere in the EU:</em> your national data-protection
+            authority.
+          </li>
+        </ul>
+      </>
     ),
   },
 };
 
 function WelcomeInfoOverlay({
   kind,
+  variant,
   onClose,
 }: {
   kind: InfoOverlayKind;
+  variant: VariantId;
   onClose: () => void;
 }): JSX.Element | null {
+  // ESC-to-close: standard aria-modal affordance, alongside the X in the
+  // title bar, the bottom Close button, and backdrop click. Listener is
+  // attached only while an overlay is open.
+  useEffect(() => {
+    if (!kind) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [kind, onClose]);
+
   if (!kind) return null;
   const c = WELCOME_OVERLAYS[kind];
+  const body = typeof c.body === 'function' ? c.body(variant) : c.body;
   return (
     <div
       className="welcome-overlay"
@@ -459,7 +843,12 @@ function WelcomeInfoOverlay({
           </button>
         </div>
         <h2 className="welcome-overlay__title">{c.title}</h2>
-        <div className="welcome-overlay__body">{c.body}</div>
+        <div className="welcome-overlay__body">{body}</div>
+        <div className="welcome-overlay__footer">
+          <button type="button" className="btn btn--ghost" onClick={onClose}>
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -12,6 +12,8 @@
 
 import type { JSX } from 'react';
 import { useSessionStore } from '@/state/sessionStore';
+import { ProtectedEmail } from '@/shell/ProtectedEmail';
+import { RESEARCHER } from '@/lib/contacts';
 
 function formatStamp(ts: number | null): string {
   if (ts === null) return '—';
@@ -95,9 +97,7 @@ export function SubmittedTerminalScreen(): JSX.Element {
           <div className="card">
             <div className="kicker kicker--mute">Contact</div>
             <p style={{ margin: '8px 0 0', fontSize: 13.5 }}>
-              <span className="mono" style={{ color: 'var(--ink-soft)' }}>
-                papadopoulos@aegean.gr
-              </span>
+              <ProtectedEmail contact={RESEARCHER} className="mono protected-email--soft" />
               <br />
               Department of Public Administration · University of the Aegean
             </p>

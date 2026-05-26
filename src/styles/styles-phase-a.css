@@ -1462,6 +1462,33 @@ a.protected-email--soft:focus-visible {
   margin: 0 0 var(--space-3);
 }
 .welcome-overlay__body p:last-child { margin-bottom: 0; }
+.welcome-overlay__body h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink-strong);
+  margin: var(--space-4) 0 var(--space-2);
+}
+.welcome-overlay__body ul {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-5);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.welcome-overlay__body li { margin-bottom: var(--space-2); }
+.welcome-overlay__body li:last-child { margin-bottom: 0; }
+.welcome-overlay__body a {
+  color: var(--coral-deep);
+  text-decoration: underline;
+}
+.welcome-overlay__body a:hover { color: var(--coral-deep); }
+.welcome-overlay__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 0.5px solid var(--border-soft);
+}
 
 /* Visual gap between research band and the consent moment that follows.
    The band is the last block of information; the consent checkboxes

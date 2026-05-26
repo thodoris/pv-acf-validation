@@ -2,6 +2,8 @@
    hasShell: false on this screen, so TopBar + Rail don't render. */
 
 import type { JSX } from 'react';
+import { ProtectedEmail } from '@/shell/ProtectedEmail';
+import { RESEARCHER } from '@/lib/contacts';
 
 export function ThanksScreen(): JSX.Element {
   return (
@@ -42,9 +44,7 @@ export function ThanksScreen(): JSX.Element {
           <div className="card">
             <div className="kicker kicker--mute">Contact</div>
             <p style={{ margin: '8px 0 0', fontSize: 13.5 }}>
-              <span className="mono" style={{ color: 'var(--ink-soft)' }}>
-                papadopoulos@aegean.gr
-              </span>
+              <ProtectedEmail contact={RESEARCHER} className="mono protected-email--soft" />
               <br />
               Department of Public Administration · University of the Aegean
             </p>
