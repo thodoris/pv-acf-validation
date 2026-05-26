@@ -50,8 +50,7 @@ export function WelcomeScreen(): JSX.Element {
             <span>{CONTENT.thesis.chapter}</span>
           </div>
           <p className="welcome__authorship">
-            A doctoral thesis by Theodoros Papadopoulos at the University of the Aegean,
-            supervised by Professor Ioannis Charalampidis.
+            A doctoral thesis by Theodoros Papadopoulos at the University of the Aegean.
           </p>
           <h1 className="h-display">
             Expert review
