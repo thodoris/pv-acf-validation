@@ -42,22 +42,28 @@ export function WelcomeScreen(): JSX.Element {
       <div className="main main--wide">
         <div className="main__inner">
           <div className="kicker kicker--mute">{CONTENT.thesis.chapter}</div>
+          <p className="welcome__authorship">
+            A doctoral thesis by Theodoros Papadopoulos at the University of the Aegean,
+            supervised by Professor Ioannis Charalampidis.
+          </p>
           <h1 className="h-display">
             Expert review
             <br />
             of the PV-ACF framework
           </h1>
-          <p className="tagline">
+          {/* Lede de-italicised + rewritten (Delta 1). Uses `.lede` rather than
+              `.tagline` so the paragraph is roman/black-body, not coral italic. */}
+          <p className="lede">
             Thank you for agreeing to evaluate the{' '}
-            <em>Public-Value AI Co-production Framework</em>, or PV-ACF. This is an
-            expert-oriented review for a doctoral thesis on AI governance. You are asked
-            to draw on your practice, scholarship, or governance experience to test how
-            well the framework names the conditions that shape AI deployments in public
-            institutions, and how useful its instruments would be if applied. The thesis
-            approaches AI through a critical co-production lens: AI systems are treated
-            as institutional and political arrangements, not neutral tools. Your
-            responses will be read as reasoned expert judgements, not as satisfaction
-            ratings or opinions to be averaged.
+            <em>Public-Value AI Co-production Framework</em>, or PV-ACF. This is an{' '}
+            <strong>expert-oriented review</strong> for a doctoral thesis on AI
+            governance. You are asked to draw on your{' '}
+            <strong>practice, scholarship, or governance experience</strong> to test
+            how well the framework names the conditions that shape AI deployments in
+            public institutions, and how useful its instruments would be if applied.
+            Your responses will be read as{' '}
+            <strong>reasoned expert judgements</strong>, not as satisfaction ratings
+            or opinions to be averaged.
           </p>
 
           <h2 className="h-chapter">How it works</h2>
@@ -87,14 +93,14 @@ export function WelcomeScreen(): JSX.Element {
             </HowItem>
             <HowItem title="Reference library — always one click away">
               From any screen, open <strong>concept cards</strong> or the{' '}
-              <strong>whole-framework presentation</strong> as an overlay above the
+              <strong>framework reference layer</strong> as an overlay above the
               current screen. Your position is preserved; nothing locks while you read.
             </HowItem>
             <HowItem title="Pause and return whenever you need">
               You can stop at any point and continue later on the same browser —
               your in-progress answers stay on this device until you submit, when
-              they are sealed. Switching devices, clearing site data, or letting
-              24 hours pass without submitting starts a fresh session.
+              they are sealed. Switching devices, clearing site data, or returning
+              after 24 hours starts a fresh session.
             </HowItem>
           </ol>
 
@@ -133,20 +139,15 @@ export function WelcomeScreen(): JSX.Element {
             </div>
           </div>
 
-          <p
-            style={{
-              fontStyle: 'italic',
-              color: 'var(--ink-soft)',
-              fontSize: 13.5,
-              marginTop: 'var(--space-4)',
-            }}
-          >
-            The platform is in English. You may answer open-text questions in{' '}
-            <strong>English or Greek</strong> — use whichever language lets you answer
-            most fully.
-          </p>
+          {/* Delta 5: standalone language note paragraph removed.
+              Delta 7: layout reorder — withdrawal note (Delta 8) sits above the
+              consent action, which itself moved above the institutional band
+              (now rendered as a footer below). */}
 
-          <ResearchContextBand onOpen={setInfoOverlay} />
+          <p className="welcome__withdraw">
+            Participation is voluntary. You may withdraw at any time without giving
+            a reason.
+          </p>
 
           <section className="welcome-consent">
             <label className="check">
@@ -181,6 +182,9 @@ export function WelcomeScreen(): JSX.Element {
               </span>
             </div>
           </section>
+
+          <hr className="welcome__footer-divider" />
+          <ResearchContextBand onOpen={setInfoOverlay} />
         </div>
       </div>
 
@@ -219,7 +223,7 @@ function WelcomeMetaCard({ durationCopy }: { durationCopy: string }): JSX.Elemen
       </div>
       <div className="welcome__meta-row">
         <span>Sessions</span>
-        <span>1 (interruption allowed)</span>
+        <span>1</span>
       </div>
       <div className="welcome__meta-row">
         <span>Clusters</span>
@@ -313,8 +317,7 @@ function ResearchContextBand({
           number], [approval date].
         </p>
         <p className="research-band__body">
-          Participation is voluntary. You may withdraw at any time without giving a
-          reason. Responses are confidential; identifying information is optional and
+          Responses are confidential; identifying information is optional and
           appears in the thesis only in anonymised form unless you have explicitly
           consented otherwise.
         </p>

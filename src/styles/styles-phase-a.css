@@ -1511,6 +1511,54 @@ a.protected-email--soft:focus-visible {
   flex-wrap: wrap;
 }
 
+/* ---------- Welcome authorship line (Delta 2) ----------
+   Sits between the eyebrow and the h1 title. One step larger than the
+   eyebrow text, light weight, roman — visually grouped with the title
+   block but distinct from the lede that follows. */
+.welcome__authorship {
+  margin: var(--space-2) 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* ---------- Withdrawal-rights note above consent (Delta 8) ----------
+   Plain paragraph; small margins; visually grouped with the consent
+   checkbox that follows. No container, no italic, no bolding. */
+.welcome__withdraw {
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink);
+  max-width: 760px;
+}
+
+/* ---------- Footer divider between consent and the institutional band (Delta 7/9) ----------
+   The institutional band moves below the consent action; a thin muted
+   rule separates the two regions. The band's own top border is removed
+   (overridden via `.welcome__footer-divider + .research-band` below). */
+.welcome__footer-divider {
+  border: 0;
+  border-top: 0.5px solid var(--border-soft);
+  margin: var(--space-7) 0 var(--space-6);
+  max-width: 760px;
+}
+
+/* Footer-register tweaks for the band when it sits below consent
+   (Delta 9). Lighter body text, tighter vertical spacing, no doubled
+   border since `.welcome__footer-divider` already separates it. */
+.welcome__footer-divider + .research-band {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  gap: var(--space-5) var(--space-6);
+}
+.welcome__footer-divider + .research-band .research-band__body {
+  color: var(--ink-soft);
+}
+
 /* ============================================================
    Consent-to-participate block (Profile screen) — rolled back.
    v1 Delta D's block is removed; styles retained but unused.
