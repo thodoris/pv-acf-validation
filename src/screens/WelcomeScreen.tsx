@@ -41,7 +41,14 @@ export function WelcomeScreen(): JSX.Element {
     <div className="welcome-shell">
       <div className="main main--wide">
         <div className="main__inner">
-          <div className="kicker kicker--mute">{CONTENT.thesis.chapter}</div>
+          {/* Site-logo treatment in the welcome hero context — same `.brand`
+              vocabulary as the TopBar (C9 mark + display-font text token),
+              upsized via `.brand--welcome` since this is the hero entry
+              point and no TopBar is rendered here (hasShell: false). */}
+          <div className="brand brand--welcome">
+            <span className="brand__mark" aria-hidden="true">C9</span>
+            <span>{CONTENT.thesis.chapter}</span>
+          </div>
           <p className="welcome__authorship">
             A doctoral thesis by Theodoros Papadopoulos at the University of the Aegean,
             supervised by Professor Ioannis Charalampidis.
