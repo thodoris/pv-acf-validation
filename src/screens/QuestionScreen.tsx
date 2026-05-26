@@ -216,7 +216,7 @@ function hydrateFromLocked(value: AnswerValue | undefined): {
       return { rating: null, open: value.value, composite: null };
     case 'rating-and-open':
       return {
-        rating: parseNumeric(value.rating),
+        rating: parseNumeric(value.rating ?? ''),
         open: value.open ?? '',
         composite: null,
       };

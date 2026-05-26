@@ -105,8 +105,8 @@ describe('effectiveSpineForCurrentVariant', () => {
     expect(effectiveSpineForCurrentVariant()).toHaveLength(SCREENS.length);
   });
 
-  it('returns the SHORT-trimmed spine when variant is short (interview hidden)', () => {
+  it('returns the SHORT-trimmed spine when variant is short (c1-q7 + interview hidden)', () => {
     useSessionStore.getState().setVariant('short');
-    expect(effectiveSpineForCurrentVariant()).toHaveLength(SCREENS.length - 1);
+    expect(effectiveSpineForCurrentVariant()).toHaveLength(SCREENS.length - 2);
   });
 });

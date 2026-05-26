@@ -92,6 +92,22 @@ describe('normalizeForVariantInvariance', () => {
     }
   });
 
+  it('SHORT injects a null-filled c1-q7 stub when the screen is hidden', () => {
+    const SHORT_HIDES_C1Q7: VariantConfig = {
+      id: 'short',
+      label: 'short fixture',
+      hiddenScreens: ['c1-q7'],
+    };
+    const out = normalizeForVariantInvariance({}, SHORT_HIDES_C1Q7, SUBMIT_TS);
+    const c1q7 = out['c1-q7' as QuestionId] as LockedAnswer | undefined;
+    expect(c1q7).toBeDefined();
+    expect(c1q7!.value.type).toBe('rating-and-open');
+    if (c1q7!.value.type !== 'rating-and-open') throw new Error('typecheck');
+    expect(c1q7!.value.rating).toBeNull();
+    expect(c1q7!.value.open).toBe('');
+    expect(c1q7!.lockedAt).toBe(SUBMIT_TS);
+  });
+
   it('SHORT injects a null-filled interview stub when the screen is hidden', () => {
     const out = normalizeForVariantInvariance(shortAnswers(), SHORT_FIXTURE, SUBMIT_TS);
     const interview = out.interview as LockedAnswer;

@@ -127,11 +127,11 @@ describe('cumulativeWeights', () => {
 });
 
 describe('effectiveQuestionCount', () => {
-  it('SHORT hides one rating per instrument (q2)', () => {
-    // c1: 8 (counting paired Q1.3+Q1.4 as 2) + c2: 6 + c3: 4×1 + c4-q1 = 19 required
-    //                                                  + 1 optional = c4-q2
+  it('SHORT hides c1-q7 and one rating per instrument (q2)', () => {
+    // c1: 7 (8 less c1-q7; paired Q1.3+Q1.4 counted as 2) + c2: 6 + c3: 4×1 + c4-q1 = 18 required
+    //                                                                          + 1 optional = c4-q2
     const tally = effectiveQuestionCount('short');
-    expect(tally.required).toBe(19);
+    expect(tally.required).toBe(18);
     expect(tally.optional).toBe(1);
   });
 
@@ -143,7 +143,7 @@ describe('effectiveQuestionCount', () => {
   });
 
   it('formats short as the bare total and full with optional surfaced', () => {
-    expect(formatQuestionCount('short')).toBe('20');
+    expect(formatQuestionCount('short')).toBe('19');
     expect(formatQuestionCount('full')).toBe('23 + 1 optional');
   });
 });

@@ -98,6 +98,10 @@ const HIDDEN_SCREEN_PLACEHOLDERS: Partial<Record<ScreenId, () => AnswerValue>> =
     type: 'interview',
     data: { willingness: null, window: null, contact: null },
   }),
+  // SHORT hides c1-q7. Persist a null rating + empty open so the seal
+  // payload — and the downstream xlsx export — still carries the canonical
+  // .rating / .open columns for that question.
+  'c1-q7': () => ({ type: 'rating-and-open', rating: null, open: '' }),
 };
 
 export function normalizeForVariantInvariance(

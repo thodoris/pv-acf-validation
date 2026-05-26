@@ -220,15 +220,16 @@ describe('variants', () => {
       expect(() => assertVariantInvariants(VARIANTS.short)).not.toThrow();
     });
 
-    it('hides the interview screen from effectiveScreens', () => {
+    it('hides the c1-q7 and interview screens from effectiveScreens', () => {
       const out = effectiveScreens(SCREENS, VARIANTS.short);
+      expect(out.find((s) => s.id === 'c1-q7')).toBeUndefined();
       expect(out.find((s) => s.id === 'interview')).toBeUndefined();
     });
 
-    it('keeps every non-interview screen visible (current SHORT trim)', () => {
+    it('keeps every non-hidden screen visible (current SHORT trim)', () => {
       const fullSpine = effectiveScreens(SCREENS, VARIANTS.full);
       const shortSpine = effectiveScreens(SCREENS, VARIANTS.short);
-      expect(shortSpine.length).toBe(fullSpine.length - 1);
+      expect(shortSpine.length).toBe(fullSpine.length - 2);
       for (const s of shortSpine) {
         expect(fullSpine.find((f) => f.id === s.id)).toBeDefined();
       }

@@ -34,12 +34,13 @@ import type { ScreenId } from '@/routing/screens';
  *
  * Hidden-field cases that use null today: instrument `q2Rating` under
  * SHORT, interview `data.{willingness,window,contact}` when the interview
- * screen is hidden. See ADR 0010 / CLAUDE.md "schema invariance" rule.
+ * screen is hidden, and `rating-and-open.rating` for c1-q7 when SHORT
+ * hides that screen. See ADR 0010 / CLAUDE.md "schema invariance" rule.
  */
 export type AnswerValue =
   | { type: 'rating'; value: string }
   | { type: 'open'; value: string }
-  | { type: 'rating-and-open'; rating: string; open?: string }
+  | { type: 'rating-and-open'; rating: string | null; open?: string }
   | { type: 'grid-and-composite'; grid: Record<string, string>; composite?: string }
   | { type: 'paired'; subAnswers: Record<string, { rating?: string; open?: string }> }
   | { type: 'instrument'; q1Rating?: string | null; q2Rating?: string | null; sharedOpen: string }

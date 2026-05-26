@@ -18,8 +18,9 @@ export function renderAnswerValue(value: AnswerValue | undefined): string {
       return value.value;
 
     case 'rating-and-open': {
+      const rating = value.rating ?? '';
       const open = value.open ?? '';
-      return open ? `${value.rating} | ${open}` : value.rating;
+      return open ? `${rating} | ${open}` : rating;
     }
 
     case 'grid-and-composite': {

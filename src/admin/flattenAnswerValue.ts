@@ -28,7 +28,10 @@ export function flattenAnswerValue(qid: string, value: AnswerValue): FlatRow {
       return { [qid]: value.value };
 
     case 'rating-and-open': {
-      const out: FlatRow = { [`${qid}.rating`]: value.rating };
+      // `rating` is null on the c1-q7 SHORT stub (variant hides the
+      // screen). Coerce to '' so the column is always emitted, matching
+      // the instrument / interview schema-invariance pattern.
+      const out: FlatRow = { [`${qid}.rating`]: value.rating ?? '' };
       if (value.open !== undefined) out[`${qid}.open`] = value.open;
       return out;
     }

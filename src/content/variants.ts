@@ -65,16 +65,20 @@ export const VARIANTS: Record<VariantId, VariantConfig> = {
   short: {
     id: 'short',
     label: 'Short review',
-    // Initial SHORT trim:
+    // SHORT trim:
+    // - c1-q7 (Problem · "Is a recognise-and-name framework warranted?") is
+    //   dropped; the cluster renumbers from 8 to 7 in the visible spine and
+    //   c1-q8 takes slot 1.7. A null/empty stub is still emitted to the
+    //   seal payload so the export schema stays variant-invariant.
     // - The interview screen is dropped (no follow-up willingness asked).
     // - The four c3 instrument screens hide Q2 (applicability rating) — Q1
     //   (quality rating) and the shared open are retained.
     // - The shared open is relaxed from required to optional on every
     //   instrument so a reviewer with no synthesis to add can Continue.
     // Schema invariance is preserved automatically by sealPayload.ts:
-    // interview entry is stub-injected with null fields, and q2Rating is
-    // coerced to null on each c3 screen's outbound payload.
-    hiddenScreens: ['interview'],
+    // c1-q7 / interview entries are stub-injected with null fields, and
+    // q2Rating is coerced to null on each c3 screen's outbound payload.
+    hiddenScreens: ['c1-q7', 'interview'],
     hiddenFields: {
       'c3-ciw': ['q2'],
       'c3-ast': ['q2'],
