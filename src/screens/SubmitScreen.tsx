@@ -13,6 +13,9 @@ import { useSessionStore } from '@/state/sessionStore';
 import { next } from '@/routing/navigation';
 import { getSealedPayload, sanitizeSealPayload } from '@/state/sealPayload';
 import { sealToFirestore } from '@/lib/sealSubmission';
+import { getVariant, type VariantConfig, type VariantId } from '@/content/variants';
+import { visibleClusterCount } from '@/content/displayMeta';
+import { CONTENT } from '@/content';
 
 type StatusKind = 'ok' | 'neutral';
 
@@ -30,63 +33,100 @@ type SummaryRow = {
 
 type SubmitState = 'idle' | 'submitting' | 'error';
 
-const SUMMARY_ROWS: SummaryRow[] = [
-  {
-    kicker: 'Profile',
-    title: 'Respondent profile',
-    sub: 'Institution type · years in practice · name (optional)',
-    items: '2 / 2 required',
-    status: 'ok',
-    statusLabel: 'Captured',
-  },
-  {
-    kicker: 'Cluster 1',
-    title: 'The problem',
-    sub: 'Solution-first framing · institutional reshaping · strategy-level priorities · cross-layer nesting · coverage of existing checks · warrant · generative-LLM shift',
-    items: '8 / 8',
-    status: 'ok',
-    statusLabel: 'Complete',
-  },
-  {
-    kicker: 'Cluster 2',
-    title: 'The framework',
-    sub: 'Two-stage architecture · recursive cycle · four governance gaps (judgment + recognition) · structural coherence · returning to the conditions · Generative-LLM Gate',
-    items: '7 / 7',
-    status: 'ok',
-    statusLabel: 'Complete',
-  },
-  {
-    kicker: 'Cluster 3',
-    title: 'The instruments',
-    sub: 'CIW · AST (flagship) · DMA · CPD — two questions per instrument',
-    items: '8 / 8',
-    status: 'ok',
-    statusLabel: 'Complete',
-  },
-  {
-    kicker: 'Cluster 4',
-    title: 'The close',
-    sub: 'Catch-all (required) · meta-feedback (optional)',
-    items: '1 / 1 required',
-    status: 'ok',
-    statusLabel: 'Complete',
-  },
-  {
-    kicker: 'Optional',
-    title: 'Follow-up interview willingness',
-    sub: 'Not part of the validation record. Voluntary capture.',
-    items: '—',
-    status: 'neutral',
-    statusLabel: 'Optional',
-    hideInShort: true,
-  },
-];
+/** Builds the cluster summary rows for the active variant. Counts and the
+ *  cluster 1 / cluster 3 legends are derived so the SHORT trim (c1-q7 hidden
+ *  and instrument Q2 hidden) reads correctly without a second source of
+ *  truth. The optional interview row stays in the list and is hidden via
+ *  the `hideInShort` flag (CSS `.hide-in-short` is the historical lever,
+ *  but the row is conditionally omitted under SHORT here to keep the row
+ *  count honest). */
+function buildSummaryRows(variantId: VariantId): SummaryRow[] {
+  const variant: VariantConfig = getVariant(variantId);
+  const c1Count = visibleClusterCount('problem', variant);
+  const c2Count = visibleClusterCount('framework', variant);
+  const instrumentScreens = CONTENT.instruments.length; // 4: CIW / AST / DMA / CPD
+  const q2HiddenEverywhere = CONTENT.instruments.every((inst) =>
+    (variant.hiddenFields?.[inst.id] ?? []).includes('q2'),
+  );
+  const ratingsPerInstrument = q2HiddenEverywhere ? 1 : 2;
+  const c3Count = instrumentScreens * ratingsPerInstrument;
+
+  // c1 legend drops "warrant" under SHORT (which hides c1-q7, the
+  // recognise-and-name framework warrant question).
+  const c1HidesQ7 = (variant.hiddenScreens ?? []).includes('c1-q7');
+  const c1Sub = c1HidesQ7
+    ? 'Solution-first framing · institutional reshaping · strategy-level priorities · cross-layer nesting · coverage of existing checks · generative-LLM shift'
+    : 'Solution-first framing · institutional reshaping · strategy-level priorities · cross-layer nesting · coverage of existing checks · warrant · generative-LLM shift';
+
+  const c3Sub =
+    ratingsPerInstrument === 1
+      ? 'CIW · AST (flagship) · DMA · CPD — one question per instrument'
+      : 'CIW · AST (flagship) · DMA · CPD — two questions per instrument';
+
+  return [
+    {
+      kicker: 'Profile',
+      title: 'Respondent profile',
+      sub: 'Institution type · years in practice · name (optional)',
+      items: '2 / 2 required',
+      status: 'ok',
+      statusLabel: 'Captured',
+    },
+    {
+      kicker: 'Cluster 1',
+      title: 'The problem',
+      sub: c1Sub,
+      items: `${c1Count} / ${c1Count}`,
+      status: 'ok',
+      statusLabel: 'Complete',
+    },
+    {
+      kicker: 'Cluster 2',
+      title: 'The framework',
+      sub: 'Two-stage architecture · recursive cycle · four governance gaps (judgment + recognition) · structural coherence · returning to the conditions · Generative-LLM Gate',
+      items: `${c2Count} / ${c2Count}`,
+      status: 'ok',
+      statusLabel: 'Complete',
+    },
+    {
+      kicker: 'Cluster 3',
+      title: 'The instruments',
+      sub: c3Sub,
+      items: `${c3Count} / ${c3Count}`,
+      status: 'ok',
+      statusLabel: 'Complete',
+    },
+    {
+      kicker: 'Cluster 4',
+      title: 'The close',
+      sub: 'Catch-all (required) · meta-feedback (optional)',
+      // Mirrors the welcome card's FULL format ("23 + 1 optional"): the
+      // items column shows required as the primary count and surfaces the
+      // optional explicitly, so cluster totals (7 + 6 + 4 + 1 + 1
+      // optional = 19) reconcile with the welcome's headline number.
+      items: '1 / 1 required + 1 optional',
+      status: 'ok',
+      statusLabel: 'Complete',
+    },
+    {
+      kicker: 'Optional',
+      title: 'Follow-up interview willingness',
+      sub: 'Not part of the validation record. Voluntary capture.',
+      items: '—',
+      status: 'neutral',
+      statusLabel: 'Optional',
+      hideInShort: true,
+    },
+  ];
+}
 
 export function SubmitScreen(): JSX.Element {
   const [confirmed, setConfirmed] = useState(false);
   const [submitState, setSubmitState] = useState<SubmitState>('idle');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const answerCount = useAnswerStore((s) => Object.keys(s.answers).length);
+  const variantId = useSessionStore((s) => s.variant);
+  const summaryRows = buildSummaryRows(variantId);
   // Acknowledgement-listing block: only rendered when the respondent gave
   // a name on the Profile screen. The opt-in itself lives in sessionStore
   // and is auto-reset to `false` whenever the name is cleared.
@@ -162,7 +202,7 @@ export function SubmitScreen(): JSX.Element {
             <span>Status</span>
           </div>
 
-          {SUMMARY_ROWS.map((r, i) => (
+          {summaryRows.map((r, i) => (
             <div
               className={`summary__row${r.hideInShort ? ' hide-in-short' : ''}`}
               key={i}
