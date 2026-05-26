@@ -6,11 +6,17 @@
    Carries the firewall tagline at the bottom — activity here is not
    captured as response data (P6). */
 
-import { useEffect } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import type { JSX } from 'react';
 import { Icon } from '@/shell/Icon';
-import { CONTENT } from '@/content';
 import { FrameworkOrganisationDiagram } from '@/screens/setup/diagrams/FrameworkOrganisationDiagram';
+import {
+  allCardsByTier,
+  conceptCardsFor,
+} from '@/content/conceptCards';
+import { sanitizeCardBody } from '@/lib/sanitizeCardBody';
+import type { ConceptCard } from '@/content/types';
+import type { ScreenId } from '@/routing/screens';
 
 export type ReferenceOverlayKind = 'cards' | 'framework';
 export type ReferenceOverlayVariant = 'drawer' | 'fullscreen' | 'floating';
@@ -18,8 +24,9 @@ export type ReferenceOverlayVariant = 'drawer' | 'fullscreen' | 'floating';
 export type ReferenceOverlayProps = {
   kind: ReferenceOverlayKind | null;
   onClose: () => void;
-  /** Hint shown above the concept list — e.g. "Problem · M1 · Q1.1". */
-  contextRelevant?: string | null;
+  /** Current screen id. Used by the concept-cards renderer to look up
+   *  the per-screen mapping. */
+  screenId: ScreenId;
   /** Visual variant. Drawer is the production default; fullscreen and
    *  floating are Tweaks-only alternates (brief §3). */
   variant?: ReferenceOverlayVariant;
@@ -28,9 +35,14 @@ export type ReferenceOverlayProps = {
 export function ReferenceOverlay({
   kind,
   onClose,
-  contextRelevant,
+  screenId,
   variant = 'drawer',
 }: ReferenceOverlayProps): JSX.Element | null {
+  // Curated (screen-mapped) vs full-pool view. State is local to the
+  // overlay: it resets when the overlay closes/re-opens, including across
+  // screen transitions (parent auto-closes the drawer on navigation).
+  const [mode, setMode] = useState<'curated' | 'all'>('curated');
+
   // Trap Escape inside the overlay so it doesn't bubble to the App-level
   // keydown listener and toggle the overlay back open.
   useEffect(() => {
@@ -45,16 +57,23 @@ export function ReferenceOverlay({
     return () => window.removeEventListener('keydown', onKey, { capture: true });
   }, [kind, onClose]);
 
+  // Reset the curated/all toggle whenever the overlay closes (kind === null)
+  // so re-opening always starts curated.
+  useEffect(() => {
+    if (!kind) setMode('curated');
+  }, [kind]);
+
   if (!kind) return null;
 
-  const title =
-    kind === 'cards'
+  const isCards = kind === 'cards';
+  const title = isCards
+    ? mode === 'curated'
       ? 'Concepts relevant to this screen'
-      : 'PV-ACF — whole-framework presentation';
-  const kindLabel =
-    kind === 'cards'
-      ? 'Reference · Concepts & terminology'
-      : 'Reference · The whole framework';
+      : 'All concepts'
+    : 'PV-ACF — whole-framework presentation';
+  const kindLabel = isCards
+    ? 'Reference · Concepts & terminology'
+    : 'Reference · The whole framework';
 
   const overlayClass =
     variant === 'fullscreen'
@@ -84,19 +103,34 @@ export function ReferenceOverlay({
             <div className="overlay__kind">{kindLabel}</div>
             <div className="overlay__title">{title}</div>
           </div>
-          <button
-            type="button"
-            className="overlay__close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <Icon name="close" />
-          </button>
+          <div className="overlay__head-actions">
+            {isCards && (
+              <button
+                type="button"
+                className="overlay__toggle"
+                onClick={() => setMode((m) => (m === 'curated' ? 'all' : 'curated'))}
+                aria-pressed={mode === 'all'}
+              >
+                <Icon name={mode === 'curated' ? 'list' : 'chevron-left'} size={14} />
+                <span>
+                  {mode === 'curated' ? 'See all concepts' : 'Back to screen concepts'}
+                </span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="overlay__close"
+              onClick={onClose}
+              aria-label="Close"
+            >
+              <Icon name="close" />
+            </button>
+          </div>
         </header>
 
         <div className="overlay__body">
-          {kind === 'cards' ? (
-            <ConceptCards contextRelevant={contextRelevant} />
+          {isCards ? (
+            <ConceptCards screenId={screenId} mode={mode} />
           ) : (
             <FrameworkPresentation />
           )}
@@ -114,48 +148,47 @@ export function ReferenceOverlay({
 }
 
 function ConceptCards({
-  contextRelevant,
+  screenId,
+  mode,
 }: {
-  contextRelevant?: string | null;
+  screenId: ScreenId;
+  mode: 'curated' | 'all';
 }): JSX.Element {
+  const cards: ConceptCard[] = mode === 'curated' ? conceptCardsFor(screenId) : allCardsByTier();
+  // Divider goes after card index 2 (the 3rd card), only in curated mode
+  // and only when 5+ cards are mapped to the screen (spec §4.4).
+  const showDivider = mode === 'curated' && cards.length >= 5;
   return (
-    <>
-      {contextRelevant && (
-        <div className="relevance-banner">
-          <Icon name="info" size={14} />
-          <span>
-            Concepts most relevant to the current screen ({contextRelevant}) are listed
-            first.
-          </span>
-        </div>
-      )}
-      <div className="concept-list">
-        {CONTENT.concepts.map((c, i) => (
-          <article
-            className={`concept ${c.featured ? 'concept--featured' : ''}`}
-            key={i}
-          >
+    <div className="concept-list">
+      {cards.map((c, i) => (
+        <Fragment key={c.key}>
+          <article className="concept">
             <div className="concept__head">
               <h3 className="concept__title">{c.title}</h3>
-              <span className="concept__greek">{c.gr}</span>
+              <span className="concept__subtitle">{c.subtitle}</span>
             </div>
             <div
               className="concept__body"
-              dangerouslySetInnerHTML={{ __html: c.body }}
+              dangerouslySetInnerHTML={{ __html: sanitizeCardBody(c.body) }}
             />
-            {c.rels.length > 0 && (
-              <div className="concept__rel">
-                {c.rels.map((r, j) => (
-                  <span className="concept__rel-chip" key={j}>
-                    {r}
-                  </span>
-                ))}
-              </div>
-            )}
+            <div className="concept__tags">
+              {c.tags.map((t, j) => (
+                <span className="concept__tag-chip" key={j}>
+                  {t}
+                </span>
+              ))}
+            </div>
           </article>
-        ))}
-      </div>
-    </>
+          {showDivider && i === 2 && (
+            <hr
+              className="concept-divider"
+              role="presentation"
+              aria-hidden="true"
+            />
+          )}
+        </Fragment>
+      ))}
+    </div>
   );
 }
 

@@ -318,14 +318,28 @@ export type InterviewSection = {
 
 // ---------------------------------------------------------------------------
 // Reference overlay concept cards
+//   Pool + per-screen mapping live in src/content/conceptCards.ts.
+//   Shape (key/tier/title/subtitle/body/tags) is fixed here; the renderer
+//   in src/overlays/ReferenceOverlay.tsx reads through these types.
 // ---------------------------------------------------------------------------
 
-export type Concept = {
-  featured?: boolean;
+export type ConceptTier = 'core' | 'framework';
+
+export type ConceptCard = {
+  /** Stable, content-independent identifier. Kebab-case, immutable. */
+  key: string;
+  /** 'core' (Tier A) or 'framework' (Tier B) — drives ordering in the
+   *  "See all concepts" expansion view. No visual variant in v1. */
+  tier: ConceptTier;
   title: string;
-  gr: string;
+  /** Short italic register tag, right-aligned in the card head. */
+  subtitle: string;
+  /** Trusted HTML, sanitised at render time to <strong>, <em>,
+   *  <span class>. Other tags / attributes are stripped. */
   body: string;
-  rels: string[];
+  /** Exactly two short tag strings. Tuple type so a typo (one tag,
+   *  three tags) surfaces as a TS error. */
+  tags: readonly [string, string];
 };
 
 // ---------------------------------------------------------------------------
@@ -351,5 +365,4 @@ export type ContentRoot = {
   questions: Record<QuestionId, Question>;
   instruments: Instrument[];
   interview: InterviewSection;
-  concepts: Concept[];
 };

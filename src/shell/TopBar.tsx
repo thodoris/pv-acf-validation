@@ -17,6 +17,10 @@ export type TopBarProps = {
   location: string;
   onOpenRef: (kind: OverlayKind) => void;
   refOpen: OverlayKind;
+  /** Whether the Concept-cards trigger should render at all. False on
+   *  screens whose concept-cards mapping is empty (see §4.2 of the
+   *  concept-cards spec). The Whole-framework trigger is always shown. */
+  showConceptsTrigger: boolean;
 };
 
 export function TopBar({
@@ -27,6 +31,7 @@ export function TopBar({
   location,
   onOpenRef,
   refOpen,
+  showConceptsTrigger,
 }: TopBarProps): JSX.Element {
   const currentIdx = steps.findIndex((x) => x.id === currentStepId);
   const [head, ...tail] = location.split(' · ');
@@ -81,18 +86,20 @@ export function TopBar({
       </div>
 
       <div className="topbar__right">
-        <button
-          type="button"
-          className="ref-trigger"
-          onClick={() => onOpenRef('cards')}
-          aria-pressed={refOpen === 'cards'}
-        >
-          <span className="ref-trigger__icon">
-            <Icon name="cards" />
-          </span>
-          Concept cards
-          <span className="ref-trigger__kbd">C</span>
-        </button>
+        {showConceptsTrigger && (
+          <button
+            type="button"
+            className="ref-trigger"
+            onClick={() => onOpenRef('cards')}
+            aria-pressed={refOpen === 'cards'}
+          >
+            <span className="ref-trigger__icon">
+              <Icon name="cards" />
+            </span>
+            Concept cards
+            <span className="ref-trigger__kbd">C</span>
+          </button>
+        )}
         <button
           type="button"
           className="ref-trigger"

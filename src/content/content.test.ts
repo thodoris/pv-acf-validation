@@ -56,10 +56,8 @@ describe('CONTENT shape', () => {
     expect(q2.open?.required).toBe(false);
   });
 
-  it('has concept cards for the reference overlay', () => {
-    expect(CONTENT.concepts.length).toBeGreaterThan(0);
-    expect(CONTENT.concepts.some((c) => c.featured)).toBe(true);
-  });
+  // Concept cards now live in src/content/conceptCards.ts and are
+  // covered by src/content/conceptCards.test.ts.
 });
 
 // ---------------------------------------------------------------------------

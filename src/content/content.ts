@@ -1079,78 +1079,8 @@ export const CONTENT: ContentRoot = ((): ContentRoot => {
     ],
   };
 
-  /* ============================================================
-     Concept cards (refined in Phase B)
-     ============================================================ */
-  C.concepts = [
-    {
-      featured: true,
-      title: "Four governance gaps",
-      gr: "The framework’s diagnostic set",
-      body: "The <strong>four structural absences</strong> the diagnostic stage screens for at the deployment level: deliberation about purpose; participation by affected people in design; accountability that survives into operation; constraint on vendor power.",
-      rels: ["diagnostic stage", "deployment-level"],
-    },
-    {
-      title: "Upward visibility",
-      gr: "Accountability anchor",
-      body: "Responsibility for the decision stays visible to hierarchically superior bodies — regardless of the degree of automation.",
-      rels: ["accountability", "audit trail"],
-    },
-    {
-      title: "Discretion locus",
-      gr: "Where discretion sits",
-      body: "The clearly identified point at which discretion is exercised by a natural person. <strong>Discretion migration</strong> — its silent transfer to a system — is what the DMA template is designed to surface.",
-      rels: ["caseworker", "DMA"],
-    },
-    {
-      title: "Contestation pathway",
-      gr: "Right-to-challenge design",
-      body: "The explicitly designed route through which an affected party can challenge an outcome. Designed at Stage 3 via the Contestation Pathway Design Specification Table.",
-      rels: ["due process", "Stage 3"],
-    },
-    {
-      title: "Generative LLM Gate",
-      gr: "Stage 2 conditional check",
-      body: "A five-question procurement checkpoint applied <em>only</em> when the deployment incorporates a generative model. Two of its questions — model openness and infrastructure control — form a paired <strong>stopping condition</strong>.",
-      rels: ["framework-level"],
-    },
-    {
-      title: "Critical-deliberative stance",
-      gr: "Theoretical grounding",
-      body: "<em>Critical</em> of the assumptions any deployment carries; <em>deliberative</em> in the procedural space where those assumptions are surfaced and negotiated.",
-      rels: ["foundations"],
-    },
-    {
-      title: "Specification vs. set-up work",
-      gr: "How to read instrument maturity",
-      body: "Every instrument has a <strong>specification</strong> (form, columns, the questions it makes a practitioner ask) and the <strong>set-up work</strong> an institution needs to make it deployable. The framework provides the first and leaves the second to the institution. An instrument that needs a lot of set-up work is a <em>described property</em>, not a fault.",
-      rels: ["Cluster 3", "maturity"],
-    },
-    {
-      title: "Contextual Integrity Worksheet (CIW)",
-      gr: "Stage 2 · information flows",
-      body: "A structured template that surfaces a deployment’s information flows before and after the AI system, sorting each into one of three verdicts: appropriate, requires justification, refused. The most operationally mature of the four instruments.",
-      rels: ["contextual integrity", "Stage 2"],
-    },
-    {
-      title: "Architecture Selection Tool (AST)",
-      gr: "Stage 2 · architectural choice as governance",
-      body: "A five-phase procedure that returns one of three verdicts — select an architecture, escalate, or stop and reframe. Surviving architectures are ordered by how governable they are. The framework’s one genuinely operable instrument.",
-      rels: ["governability", "Stage 2", "GLG handoff"],
-    },
-    {
-      title: "Discretion Migration Analysis (DMA)",
-      gr: "Stage 3 · discretion + oversight",
-      body: "Maps how decision-making authority moves when an AI system is introduced, and specifies the oversight response — who can override, on what timeline, with what information, with what safeguards against automation bias.",
-      rels: ["override authority", "Stage 3"],
-    },
-    {
-      title: "Contestation Pathway Design (CPD)",
-      gr: "Stage 3 · contestation as design",
-      body: "Specifies six interlocking dimensions of a contestation pathway: notification, explanation, channel accessibility, human reviewer with substantive authority, timeline, feedback loop. Most of the deployment-specific filling is deliberately left to the institution.",
-      rels: ["due process", "Stage 3"],
-    },
-  ];
+  // Concept cards now live in src/content/conceptCards.ts (pool +
+  // per-screen mapping) — see ADR / concept-cards spec.
 
   return C;
 })();

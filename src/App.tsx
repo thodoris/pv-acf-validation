@@ -7,7 +7,8 @@ import { useSessionStore } from './state/sessionStore';
 import { useUrlSync } from './routing/urlSync';
 import { progressFor } from './routing/progress';
 import { requireScreen } from './routing/screens';
-import { CONTENT, isPairedQuestion } from './content';
+import { CONTENT } from './content';
+import { conceptKeysFor } from './content/conceptCards';
 import { ReferenceOverlay } from './overlays/ReferenceOverlay';
 import { TweaksPanel } from './dev/TweaksPanel';
 import { useTweaksStore } from './dev/tweaksStore';
@@ -86,8 +87,21 @@ function QuestionnaireApp(): JSX.Element {
   const hasAffs = affordances.length > 0;
   const showShell = screen.hasShell !== false;
   const railOn = showShell && affordanceMode === 'rail' && hasAffs;
+  // Concept-cards trigger is hidden on screens that have no mapped cards
+  // (see concept-cards spec §4.2). Used by the TopBar and by the C
+  // keyboard shortcut.
+  const showConceptsTrigger = conceptKeysFor(screenId).length > 0;
+
+  // Auto-close the reference drawer on every screen transition (concept-
+  // cards spec §5.1). Without this, advancing to a new screen would leave
+  // the drawer open showing stale content.
+  useEffect(() => {
+    setOverlayKind(null);
+  }, [screenId]);
 
   // Keyboard shortcuts: C / F open the two reference overlays; Esc closes.
+  // C is suppressed on screens whose concept-cards trigger is hidden, to
+  // keep visual + keyboard affordances in lock-step.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -98,6 +112,7 @@ function QuestionnaireApp(): JSX.Element {
       }
       const k = e.key.toLowerCase();
       if (k === 'c') {
+        if (!showConceptsTrigger) return;
         setOverlayKind((current) => (current === 'cards' ? null : 'cards'));
       } else if (k === 'f') {
         setOverlayKind((current) => (current === 'framework' ? null : 'framework'));
@@ -105,7 +120,7 @@ function QuestionnaireApp(): JSX.Element {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [showConceptsTrigger]);
 
   const shellClass = !railOn
     ? 'shell shell--no-rail'
@@ -124,6 +139,7 @@ function QuestionnaireApp(): JSX.Element {
           location={screen.location}
           onOpenRef={setOverlayKind}
           refOpen={overlayKind}
+          showConceptsTrigger={showConceptsTrigger}
         />
       )}
 
@@ -144,25 +160,11 @@ function QuestionnaireApp(): JSX.Element {
       <ReferenceOverlay
         kind={overlayKind}
         onClose={() => setOverlayKind(null)}
-        contextRelevant={contextRelevantFor(screenId)}
+        screenId={screenId}
         variant={overlayStyle}
       />
 
       <TweaksPanel onOpenOverlay={setOverlayKind} />
     </>
   );
-}
-
-/** "Concepts relevant to this screen ({contextRelevant}) are listed first" hint
- *  shown in the overlay. Derived from the active screen — questions surface
- *  their chapter, instruments surface their code, other screens omit the hint. */
-function contextRelevantFor(screenId: string): string | null {
-  const q = CONTENT.questions[screenId];
-  if (q) {
-    if (isPairedQuestion(q)) return q.chapter;
-    return q.chapter;
-  }
-  const inst = CONTENT.instruments.find((i) => i.id === screenId);
-  if (inst) return `Instrument · ${inst.code}`;
-  return null;
 }

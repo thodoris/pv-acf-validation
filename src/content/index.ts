@@ -1,7 +1,6 @@
 import { CONTENT } from './content';
 import type {
   ClusterId,
-  Concept,
   GroundingId,
   Instrument,
   InstrumentId,
@@ -65,6 +64,5 @@ export function getGrounding(id: GroundingId) {
   return CONTENT.grounding.find((g) => g.id === id);
 }
 
-export function getConcepts(): Concept[] {
-  return CONTENT.concepts;
-}
+// Concept cards moved to src/content/conceptCards.ts — import from there
+// directly rather than via the CONTENT root.

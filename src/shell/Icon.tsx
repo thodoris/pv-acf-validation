@@ -17,7 +17,8 @@ export type IconName =
   | 'lock'
   | 'explore'
   | 'lightbulb'
-  | 'check';
+  | 'check'
+  | 'list';
 
 export type IconProps = {
   name: IconName;
@@ -130,6 +131,15 @@ export function Icon({ name, size = 16 }: IconProps): JSX.Element | null {
       return (
         <svg {...common}>
           <path d="M5 12.5l4.5 4.5L19 7.5" />
+        </svg>
+      );
+    case 'list':
+      return (
+        <svg {...common}>
+          <path d="M8 6h12M8 12h12M8 18h12" />
+          <circle cx="4" cy="6" r="0.75" fill="currentColor" />
+          <circle cx="4" cy="12" r="0.75" fill="currentColor" />
+          <circle cx="4" cy="18" r="0.75" fill="currentColor" />
         </svg>
       );
     default:
