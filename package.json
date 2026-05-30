@@ -24,7 +24,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "deploy": "npm run build && firebase deploy --only hosting",
-    "export:firestore": "tsx scripts/export-firestore.ts"
+    "export:firestore": "tsx scripts/export-firestore.ts",
+    "analyze": "tsx scripts/analyze-results.ts"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",

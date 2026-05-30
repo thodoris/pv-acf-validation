@@ -56,6 +56,8 @@ service-account*.json
 
 # Exports produced by `npm run export:firestore` (CLI writes here)
 results/
+# Aggregate stats reports produced by `npm run analyze` (markdown + optional opens)
+analysis/
 # Legacy export paths (CLI used to write to the project root; keep the
 # patterns gitignored so a stray run never gets committed)
 pvacf-submissions-*.xlsx
