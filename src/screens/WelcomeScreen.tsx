@@ -320,10 +320,6 @@ function ResearchContextBand({
       <div className="research-band__col">
         <div className="kicker kicker--mute">Ethics and participation</div>
         <p className="research-band__body">
-          Approved by <strong>[Ethics Committee Name]</strong>, reference [approval
-          number], [approval date].
-        </p>
-        <p className="research-band__body">
           Responses are confidential; identifying information is optional and
           appears in the thesis only in anonymised form unless you have explicitly
           consented otherwise.
@@ -597,20 +593,6 @@ const WELCOME_OVERLAYS: Record<Exclude<InfoOverlayKind, null>, OverlayEntry> = {
           <li>
             Your contribution supports the validation and refinement of a doctoral
             framework for democratic AI governance in public administration.
-          </li>
-        </ul>
-
-        <h3>Ethics approval</h3>
-        <ul>
-          <li>
-            <strong>Approving body:</strong> Research Ethics and Conduct Committee,
-            University of the Aegean.
-          </li>
-          <li>
-            <strong>Approval reference:</strong> [TBD]
-          </li>
-          <li>
-            <strong>Approval date:</strong> [TBD]
           </li>
         </ul>
 
