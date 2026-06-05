@@ -1,0 +1,1208 @@
+[
+  {
+    "name": "profile_name",
+    "screenId": "profile",
+    "chapter": "Profile",
+    "location": "Profile · A few details about you",
+    "stem": "Your full name",
+    "role": "profile-text",
+    "measure": "text",
+    "required": false,
+    "restricted": true
+  },
+  {
+    "name": "profile_institutionname",
+    "screenId": "profile",
+    "chapter": "Profile",
+    "location": "Profile · A few details about you",
+    "stem": "Your institution",
+    "role": "profile-text",
+    "measure": "text",
+    "required": false,
+    "restricted": true
+  },
+  {
+    "name": "profile_institution",
+    "screenId": "profile",
+    "chapter": "Profile",
+    "location": "Profile · A few details about you",
+    "stem": "Type of institution",
+    "role": "profile-coded",
+    "measure": "nominal",
+    "options": [
+      {
+        "code": 1,
+        "label": "National government or public administration body",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Regional or local government body",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Regulator or oversight body",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Academia or research institution",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Civil society organisation",
+        "substantive": true
+      },
+      {
+        "code": 6,
+        "label": "Other",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "profile_years",
+    "screenId": "profile",
+    "chapter": "Profile",
+    "location": "Profile · A few details about you",
+    "stem": "Years working in public administration",
+    "role": "profile-coded",
+    "measure": "ordinal",
+    "options": [
+      {
+        "code": 1,
+        "label": "None / not applicable",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Under 5 years",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "5–10 years",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "11–20 years",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Over 20 years",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q1_rating",
+    "screenId": "c1-q1",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M1 — Is the gap real? · Solution-first adoption",
+    "stem": "Have you seen cases where AI was adopted first, and the justification for using it came afterwards?",
+    "subtitle": "This draws on your direct experience in public administration, not your general impression of the sector — cases where AI adoption came before a clear definition of the public problem it was meant to address.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "frequency",
+    "options": [
+      {
+        "code": 1,
+        "label": "Never seen this",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Seen it once or twice",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Seen it occasionally",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Seen it often",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "It is the norm",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q1_open",
+    "screenId": "c1-q1",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M1 — Is the gap real? · Solution-first adoption",
+    "stem": "Have you seen cases where AI was adopted first, and the justification for using it came afterwards?",
+    "subtitle": "This draws on your direct experience in public administration, not your general impression of the sector — cases where AI adoption came before a clear definition of the public problem it was meant to address.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "Your experience",
+    "openPrompt": "If you have seen this, briefly describe what it looked like — and what tended to be driving it."
+  },
+  {
+    "name": "c1_q2_rating",
+    "screenId": "c1-q2",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Institutional reshaping",
+    "stem": "When AI systems are introduced in public administration, have you seen the organisation adapt itself around the system rather than the system adapting to the organisation?",
+    "subtitle": "This one pattern can show up as decision-making shifting from experienced staff toward the system, as the internal expertise to question the system weakening, or as problem definitions increasingly following the system rather than the institution.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "frequency",
+    "options": [
+      {
+        "code": 1,
+        "label": "Never seen this",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Seen it once or twice",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Seen it occasionally",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Seen it often",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "It is the norm",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q2_open",
+    "screenId": "c1-q2",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Institutional reshaping",
+    "stem": "When AI systems are introduced in public administration, have you seen the organisation adapt itself around the system rather than the system adapting to the organisation?",
+    "subtitle": "This one pattern can show up as decision-making shifting from experienced staff toward the system, as the internal expertise to question the system weakening, or as problem definitions increasingly following the system rather than the institution.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "In what ways",
+    "openPrompt": "If yes, briefly describe what you have seen."
+  },
+  {
+    "name": "c1_q3q4_q1_3_rating",
+    "screenId": "c1-q3q4",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Strategy-level priority-setting",
+    "stem": "In your judgement, to what extent are the national AI priorities, as set out in AI strategies and vision documents, influenced by technology companies and consulting firms involved in AI strategy or implementation?",
+    "subtitle": "The question is about firms with a commercial stake in AI being adopted, in any form of involvement — consultation, advisory, drafting, or implementation. It is not asking about lobbying in general.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "influence",
+    "options": [
+      {
+        "code": 1,
+        "label": "Strongly influenced",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Somewhat influenced",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Slightly influenced",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Not influenced",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q3q4_q1_3_open",
+    "screenId": "c1-q3q4",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Strategy-level priority-setting",
+    "stem": "In your judgement, to what extent are the national AI priorities, as set out in AI strategies and vision documents, influenced by technology companies and consulting firms involved in AI strategy or implementation?",
+    "subtitle": "The question is about firms with a commercial stake in AI being adopted, in any form of involvement — consultation, advisory, drafting, or implementation. It is not asking about lobbying in general.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "Your reasoning",
+    "openPrompt": "If you think they are influenced, in what way? If you disagree, what makes you confident the priorities are set independently?"
+  },
+  {
+    "name": "c1_q3q4_q1_4_rating",
+    "screenId": "c1-q3q4",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Strategy-level priority-setting",
+    "stem": "Are you aware of any open discussion or consultation process about what the national AI priorities, as set out in AI strategies and vision documents, should be?",
+    "subtitle": "This asks about a process open to public-sector staff, civil society, or the public, concerned with what those priorities should be. It does not include consultation on a plan or agenda already settled.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "awareness",
+    "options": [
+      {
+        "code": 1,
+        "label": "Yes — I took part in or followed one",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Yes — I am aware one took place",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "I am not aware of any",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "I am fairly sure none took place",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q3q4_q1_4_open",
+    "screenId": "c1-q3q4",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Strategy-level priority-setting",
+    "stem": "Are you aware of any open discussion or consultation process about what the national AI priorities, as set out in AI strategies and vision documents, should be?",
+    "subtitle": "This asks about a process open to public-sector staff, civil society, or the public, concerned with what those priorities should be. It does not include consultation on a plan or agenda already settled.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "What you know of",
+    "openPrompt": "If you are aware of one, what was it? If not, would such a process be worth having?"
+  },
+  {
+    "name": "c1_q5_rating",
+    "screenId": "c1-q5",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Are the layers connected?",
+    "stem": "In your judgement, do problems in individual AI deployments often reflect decisions or priorities set at higher policy levels?",
+    "subtitle": "The question is whether problems in an AI deployment can usually be addressed within the deployment itself, or whether their causes often come from higher-level decisions — such as procurement choices, institutional arrangements, or national strategy.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "connection",
+    "options": [
+      {
+        "code": 1,
+        "label": "Clearly so",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Mostly",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Sometimes",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Rarely",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Not at all",
+        "substantive": true
+      },
+      {
+        "code": 6,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q5_open",
+    "screenId": "c1-q5",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M2 — Is it structural? · Are the layers connected?",
+    "stem": "In your judgement, do problems in individual AI deployments often reflect decisions or priorities set at higher policy levels?",
+    "subtitle": "The question is whether problems in an AI deployment can usually be addressed within the deployment itself, or whether their causes often come from higher-level decisions — such as procurement choices, institutional arrangements, or national strategy.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "An example",
+    "openPrompt": "If you see them as connected, can you give an example of one feeding another? If you see them as mostly separate, what makes you confident they are?"
+  },
+  {
+    "name": "c1_q6_rating",
+    "screenId": "c1-q6",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M3 — Do existing mechanisms address it? · What existing checks examine",
+    "stem": "In your administration, do existing AI governance checks — audits, impact assessments, procurement rules, data-protection reviews — examine these broader organisational or policy issues, or mainly technical and legal compliance?",
+    "subtitle": "The “broader issues” are the ones the previous questions raised: whether the problem was defined before the solution, whether the institution is being reshaped, where the priorities came from, and whether these connect.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "coverage",
+    "options": [
+      {
+        "code": 1,
+        "label": "Examine them well",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Examine them partly",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Barely",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Mainly compliance only",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "These checks are not yet in place in my administration",
+        "substantive": false
+      },
+      {
+        "code": 6,
+        "label": "Not familiar enough to say",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q6_open",
+    "screenId": "c1-q6",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M3 — Do existing mechanisms address it? · What existing checks examine",
+    "stem": "In your administration, do existing AI governance checks — audits, impact assessments, procurement rules, data-protection reviews — examine these broader organisational or policy issues, or mainly technical and legal compliance?",
+    "subtitle": "The “broader issues” are the ones the previous questions raised: whether the problem was defined before the solution, whether the institution is being reshaped, where the priorities came from, and whether these connect.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "Closest process",
+    "openPrompt": "Which process comes closest, and where are its limits?"
+  },
+  {
+    "name": "c1_q8_rating",
+    "screenId": "c1-q8",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M4 — What follows? · Have generative AI tools changed the picture?",
+    "stem": "Have generative AI tools — chatbots, text-generation systems — changed the nature of AI governance challenges in public administration, or mainly increased their scale?",
+    "subtitle": "The question is whether generative AI creates qualitatively different governance problems, mainly amplifies familiar problems from earlier AI systems, or does both.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "kind-vs-degree",
+    "options": [
+      {
+        "code": 1,
+        "label": "Changed the nature of the challenges",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Both changed their nature and increased their scale",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Mainly increased the scale of familiar challenges",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Neither the nature nor the scale has shifted much",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c1_q8_open",
+    "screenId": "c1-q8",
+    "chapter": "Chapter 1 — Problem",
+    "location": "Problem · M4 — What follows? · Have generative AI tools changed the picture?",
+    "stem": "Have generative AI tools — chatbots, text-generation systems — changed the nature of AI governance challenges in public administration, or mainly increased their scale?",
+    "subtitle": "The question is whether generative AI creates qualitatively different governance problems, mainly amplifies familiar problems from earlier AI systems, or does both.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "The change you’ve seen",
+    "openPrompt": "If they have changed things, what is the most important change you have seen?"
+  },
+  {
+    "name": "c2_q1_rating",
+    "screenId": "c2-q1",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · Architecture · Is the two-layer structure useful?",
+    "stem": "In your judgement, is organising the framework as a two-layer structure — a diagnostic layer followed by an operational lifecycle — a reasonable and useful way to govern AI deployments?",
+    "subtitle": "The framework separates an initial diagnostic layer from the operational lifecycle that follows. The question is whether that overall structure is useful and workable — not whether the diagnostic layer connects to the operational lifecycle in the right way.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "soundness",
+    "options": [
+      {
+        "code": 1,
+        "label": "A sound approach",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly reasonable",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Uncertain",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "A questionable approach",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Not a sound approach",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q1_open",
+    "screenId": "c2-q1",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · Architecture · Is the two-layer structure useful?",
+    "stem": "In your judgement, is organising the framework as a two-layer structure — a diagnostic layer followed by an operational lifecycle — a reasonable and useful way to govern AI deployments?",
+    "subtitle": "The framework separates an initial diagnostic layer from the operational lifecycle that follows. The question is whether that overall structure is useful and workable — not whether the diagnostic layer connects to the operational lifecycle in the right way.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "What shapes your view",
+    "openPrompt": "If you wish, say what makes the approach reasonable, or where you would question it."
+  },
+  {
+    "name": "c2_q2_rating",
+    "screenId": "c2-q2",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · Recursive cycle · AI governance as a recurring cycle",
+    "stem": "In your judgement, is it a sound structural commitment to treat AI governance as an ongoing review cycle in which a deployment is re-justified at each cycle rather than continuing automatically?",
+    "subtitle": "The framework treats AI governance as an ongoing review cycle rather than a one-time approval: a deployment is expected to be re-justified over time rather than continuing automatically. The question asks whether this is a sound structural commitment — not whether it adds to review workload.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "soundness",
+    "options": [
+      {
+        "code": 1,
+        "label": "A sound commitment",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly reasonable",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Uncertain",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "A questionable commitment",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Not a sound commitment",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q2_open",
+    "screenId": "c2-q2",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · Recursive cycle · AI governance as a recurring cycle",
+    "stem": "In your judgement, is it a sound structural commitment to treat AI governance as an ongoing review cycle in which a deployment is re-justified at each cycle rather than continuing automatically?",
+    "subtitle": "The framework treats AI governance as an ongoing review cycle rather than a one-time approval: a deployment is expected to be re-justified over time rather than continuing automatically. The question asks whether this is a sound structural commitment — not whether it adds to review workload.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "Your view",
+    "openPrompt": "If you wish, say what such a model would need to work in public administration, or where it would run into trouble."
+  },
+  {
+    "name": "c2_q3_rating",
+    "screenId": "c2-q3",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The four gaps · Are these the right four structural governance gaps?",
+    "stem": "In your judgement, how well do these four structural governance gaps capture the main conditions a framework like this needs to make visible?",
+    "subtitle": "The question is whether this set of four captures the main governance conditions a framework like this should help practitioners make visible — not whether each gap is always present.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "coverage",
+    "options": [
+      {
+        "code": 1,
+        "label": "Captures them very well",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly captures them",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Partly captures them",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Misses important conditions",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q3_open",
+    "screenId": "c2-q3",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The four gaps · Are these the right four structural governance gaps?",
+    "stem": "In your judgement, how well do these four structural governance gaps capture the main conditions a framework like this needs to make visible?",
+    "subtitle": "The question is whether this set of four captures the main governance conditions a framework like this should help practitioners make visible — not whether each gap is always present.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "What feels missing, unnecessary, overlapping, or misplaced",
+    "openPrompt": "If you wish, name what feels missing, unnecessary, overlapping, or misplaced — and say why."
+  },
+  {
+    "name": "c2_q4_row0",
+    "screenId": "c2-q4",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The four gaps · Recognising the four structural governance gaps in practice",
+    "stem": "Thinking about AI deployments you have seen in public administration: how often have you seen each of these governance gaps? — AI use decided without real deliberation about purpose",
+    "role": "grid",
+    "measure": "ordinal",
+    "scaleKind": "grid",
+    "options": [
+      {
+        "code": 1,
+        "label": "Almost never",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Rarely",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Sometimes",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Often",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Almost always",
+        "substantive": true
+      },
+      {
+        "code": 6,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q4_row1",
+    "screenId": "c2-q4",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The four gaps · Recognising the four structural governance gaps in practice",
+    "stem": "Thinking about AI deployments you have seen in public administration: how often have you seen each of these governance gaps? — Affected people and front-line staff excluded from design",
+    "role": "grid",
+    "measure": "ordinal",
+    "scaleKind": "grid",
+    "options": [
+      {
+        "code": 1,
+        "label": "Almost never",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Rarely",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Sometimes",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Often",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Almost always",
+        "substantive": true
+      },
+      {
+        "code": 6,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q4_row2",
+    "screenId": "c2-q4",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The four gaps · Recognising the four structural governance gaps in practice",
+    "stem": "Thinking about AI deployments you have seen in public administration: how often have you seen each of these governance gaps? — Accountability and contestation weakened once the system was operating",
+    "role": "grid",
+    "measure": "ordinal",
+    "scaleKind": "grid",
+    "options": [
+      {
+        "code": 1,
+        "label": "Almost never",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Rarely",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Sometimes",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Often",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Almost always",
+        "substantive": true
+      },
+      {
+        "code": 6,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q4_row3",
+    "screenId": "c2-q4",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The four gaps · Recognising the four structural governance gaps in practice",
+    "stem": "Thinking about AI deployments you have seen in public administration: how often have you seen each of these governance gaps? — Vendor influence left unconstrained in procurement or operation",
+    "role": "grid",
+    "measure": "ordinal",
+    "scaleKind": "grid",
+    "options": [
+      {
+        "code": 1,
+        "label": "Almost never",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Rarely",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Sometimes",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Often",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Almost always",
+        "substantive": true
+      },
+      {
+        "code": 6,
+        "label": "Cannot judge",
+        "substantive": false
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q4_composite",
+    "screenId": "c2-q4",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The four gaps · Recognising the four structural governance gaps in practice",
+    "stem": "Of these four gaps, which has mattered most in deployments you have seen?",
+    "role": "composite",
+    "measure": "nominal",
+    "scaleKind": "single-select",
+    "options": [
+      {
+        "code": 1,
+        "label": "AI use decided without real deliberation about purpose",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Affected people and front-line staff excluded from design",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Accountability and contestation weakened once the system was operating",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Vendor influence left unconstrained in procurement or operation",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q5_rating",
+    "screenId": "c2-q5",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · Returning to the conditions · Bringing structural conditions back into view",
+    "stem": "In your judgement, is bringing structural conditions back into operational decisions a sound design move that meaningfully strengthens AI governance in practice?",
+    "subtitle": "At several points in the operational lifecycle, the framework asks practitioners to revisit the broader organisational and structural conditions identified in the diagnostic layer. The question is whether the connective move-back is a sound mechanism that does real work — not whether it is evenly built across stages.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "soundness",
+    "options": [
+      {
+        "code": 1,
+        "label": "A sound mechanism",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly reasonable",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Uncertain",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "A questionable mechanism",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Not a sound mechanism",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q5_open",
+    "screenId": "c2-q5",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · Returning to the conditions · Bringing structural conditions back into view",
+    "stem": "In your judgement, is bringing structural conditions back into operational decisions a sound design move that meaningfully strengthens AI governance in practice?",
+    "subtitle": "At several points in the operational lifecycle, the framework asks practitioners to revisit the broader organisational and structural conditions identified in the diagnostic layer. The question is whether the connective move-back is a sound mechanism that does real work — not whether it is evenly built across stages.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "Your view",
+    "openPrompt": "If you wish, say where this would be most valuable in practice, or where it would thin out as a design move."
+  },
+  {
+    "name": "c2_q6_rating",
+    "screenId": "c2-q6",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The Generative LLM Gate · A stopping condition rather than a score",
+    "stem": "In your judgement, is the framework justified in treating a closed generative model run on vendor-controlled infrastructure as a reason to stop or reconsider a deployment rather than a risk factor to be balanced against other safeguards?",
+    "subtitle": "When a deployment uses a generative LLM, the framework applies a dedicated governance checkpoint. Two conditions are treated as non-negotiable: whether the institution can meaningfully inspect the model, and whether it retains control over the infrastructure and data environment on which the system operates.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "verdict",
+    "options": [
+      {
+        "code": 1,
+        "label": "Yes — clearly reasonable",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Probably reasonable",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Unsure",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "A graduated assessment would be better",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "Clearly the wrong design",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c2_q6_open",
+    "screenId": "c2-q6",
+    "chapter": "Chapter 2 — Framework",
+    "location": "Framework · The Generative LLM Gate · A stopping condition rather than a score",
+    "stem": "In your judgement, is the framework justified in treating a closed generative model run on vendor-controlled infrastructure as a reason to stop or reconsider a deployment rather than a risk factor to be balanced against other safeguards?",
+    "subtitle": "When a deployment uses a generative LLM, the framework applies a dedicated governance checkpoint. Two conditions are treated as non-negotiable: whether the institution can meaningfully inspect the model, and whether it retains control over the infrastructure and data environment on which the system operates.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "Your reasoning",
+    "openPrompt": "What makes a hard floor here defensible — or what makes a more flexible assessment preferable?"
+  },
+  {
+    "name": "c3_ciw_q1",
+    "screenId": "c3-ciw",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 1 of 4 · CIW Contextual Integrity Worksheet",
+    "stem": "Does this instrument do distinctive analytical work, coherently structured?",
+    "subtitle": "The question is whether the instrument makes a practitioner notice and reason about something they would otherwise miss, and whether its parts fit together without overlapping. Anything “missing or concerning” means a fault in the instrument’s own design — not the set-up work an institution would still need to do, which the MATURITY card names separately.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "quality",
+    "options": [
+      {
+        "code": 1,
+        "label": "Yes, clearly",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly yes",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Uncertain",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Not really",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "No",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c3_ciw_open",
+    "screenId": "c3-ciw",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 1 of 4 · CIW Contextual Integrity Worksheet",
+    "stem": "What stands out, where it lands",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "What stands out, where it lands",
+    "openPrompt": "What is your overall view of this instrument? What it does that’s distinctive, anything missing or concerning in its design — and where it would work, where it would be hard to apply."
+  },
+  {
+    "name": "c3_ast_q1",
+    "screenId": "c3-ast",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 2 of 4 · AST Architecture Selection Tool",
+    "stem": "Does this instrument do distinctive analytical work, coherently structured?",
+    "subtitle": "The question is whether the instrument makes a practitioner notice and reason about something they would otherwise miss, and whether its parts fit together without overlapping — judged on the analytical procedure the tool runs, not on how the optional Explore overlay feels to operate. Anything “missing or concerning” means a fault in the instrument’s own design — not the set-up work an institution would still need to do, which the MATURITY card names separately.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "quality",
+    "options": [
+      {
+        "code": 1,
+        "label": "Yes, clearly",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly yes",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Uncertain",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Not really",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "No",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c3_ast_open",
+    "screenId": "c3-ast",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 2 of 4 · AST Architecture Selection Tool",
+    "stem": "What stands out, where it lands",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "What stands out, where it lands",
+    "openPrompt": "What is your overall view of this instrument? What it does that’s distinctive, anything missing or concerning in its design — and where it would work, where it would be hard to apply."
+  },
+  {
+    "name": "c3_dma_q1",
+    "screenId": "c3-dma",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 3 of 4 · DMA Discretion Migration Analysis",
+    "stem": "Does this instrument do distinctive analytical work, coherently structured?",
+    "subtitle": "The question is whether the instrument makes a practitioner notice and reason about something they would otherwise miss, and whether its parts fit together without overlapping. Anything “missing or concerning” means a fault in the instrument’s own design — not the set-up work an institution would still need to do, which the MATURITY card names separately.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "quality",
+    "options": [
+      {
+        "code": 1,
+        "label": "Yes, clearly",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly yes",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Uncertain",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Not really",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "No",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c3_dma_open",
+    "screenId": "c3-dma",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 3 of 4 · DMA Discretion Migration Analysis",
+    "stem": "What stands out, where it lands",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "What stands out, where it lands",
+    "openPrompt": "What is your overall view of this instrument? What it does that’s distinctive, anything missing or concerning in its design — and where it would work, where it would be hard to apply."
+  },
+  {
+    "name": "c3_cpd_q1",
+    "screenId": "c3-cpd",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 4 of 4 · CPD Contestation Pathway Design",
+    "stem": "Does this instrument do distinctive analytical work, coherently structured?",
+    "subtitle": "The question is whether the instrument makes a practitioner notice and reason about something they would otherwise miss, and whether its six dimensions fit together as the right interlocking set. Most of those dimensions are deliberately left for the institution to fill in — and that openness is how the instrument is meant to work, not a sign it is unfinished.",
+    "role": "rating",
+    "measure": "ordinal",
+    "scaleKind": "quality",
+    "options": [
+      {
+        "code": 1,
+        "label": "Yes, clearly",
+        "substantive": true
+      },
+      {
+        "code": 2,
+        "label": "Broadly yes",
+        "substantive": true
+      },
+      {
+        "code": 3,
+        "label": "Uncertain",
+        "substantive": true
+      },
+      {
+        "code": 4,
+        "label": "Not really",
+        "substantive": true
+      },
+      {
+        "code": 5,
+        "label": "No",
+        "substantive": true
+      }
+    ],
+    "required": true,
+    "restricted": false
+  },
+  {
+    "name": "c3_cpd_open",
+    "screenId": "c3-cpd",
+    "chapter": "Chapter 3 — Instruments",
+    "location": "Instruments · 4 of 4 · CPD Contestation Pathway Design",
+    "stem": "What stands out, where it lands",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "What stands out, where it lands",
+    "openPrompt": "What is your overall view of this instrument? What it does that’s distinctive, anything missing or concerning in its design — and where it would work, where it would be hard to apply."
+  },
+  {
+    "name": "c4_q1_open",
+    "screenId": "c4-close",
+    "chapter": "Chapter 4 — Close",
+    "location": "Close · Q4.1 + Q4.2 · Catch-all",
+    "stem": "Is there anything important the questions haven’t reached?",
+    "subtitle": "Look back over the whole questionnaire — the problem the framework addresses, its design, and its four instruments. The question is deliberately unbounded.",
+    "role": "open",
+    "measure": "text",
+    "required": true,
+    "restricted": true,
+    "openLabel": "Anything to add",
+    "openPrompt": "Whatever you’d raise — a concern, a gap, a strength the earlier questions passed over, a question they should have asked. If they covered the ground for you, saying so is a complete answer."
+  },
+  {
+    "name": "c4_q2_open",
+    "screenId": "c4-close",
+    "chapter": "Chapter 4 — Close",
+    "location": "Close · Q4.1 + Q4.2 · Catch-all",
+    "stem": "Is there anything about the questionnaire or platform itself you’d want to flag?",
+    "subtitle": "This is about the questionnaire and platform themselves — the questions, the flow, the experience of taking it (this can be positive or negative). The framework and its instruments were the object of the earlier questions; here the object is the validation exercise itself. Entirely optional.",
+    "role": "open",
+    "measure": "text",
+    "required": false,
+    "restricted": true,
+    "openLabel": "Anything to flag",
+    "openPrompt": "If something stood out — confusing, well-judged, awkward, broken — note it. If nothing comes to mind, leave it blank."
+  }
+]

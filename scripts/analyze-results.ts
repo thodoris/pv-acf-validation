@@ -1,22 +1,23 @@
-/* analyze-results — offline aggregation of a paired JSON export.
+/* analyze-results — offline aggregation of a SHORT-variant JSON export.
 
-   Reads `results/{short,full}-pvacf-submissions-<stamp>.json` (the JSON
-   payload produced by `npm run export:firestore`) and writes a single
-   markdown report to `analysis/report-<stamp>.md`.
+   Reads `results/short-pvacf-submissions-<stamp>.json` (the JSON payload
+   produced by `npm run export:firestore`) and writes a single markdown
+   report to `analysis/report-<stamp>.md`.
 
    The script does not call Firestore. It only consumes files already on
-   disk. Submissions whose `submittedAt` is null are excluded.
+   disk. Submissions whose `submittedAt` is null, or whose `submittedAt`
+   predates the permanent cut-off (see below), are excluded.
 
-   Pooling rule (per the approved plan): questions present in BOTH variants
-   are reported as one combined frequency table / one set of stats — no
-   per-variant breakdown rows. Questions or fields hidden in SHORT
-   (c1-q7, interview, every instrument's q2) are reported as FULL-only and
-   tagged in the section header.
+   SHORT-only. The platform ships the SHORT variant exclusively (the FULL
+   variant is not in use), so this report covers the SHORT instrument and
+   nothing else. Fields SHORT never collects — the `c1-q7` warrant question,
+   each instrument's Q2 applicability rating, and the follow-up `interview`
+   screen — are omitted entirely rather than reported as empty.
 
    Usage:
      npm run analyze
      npm run analyze -- --stamp=2026-05-26T14-30-00
-     npm run analyze -- --short=results/foo.json --full=results/bar.json
+     npm run analyze -- --short=results/foo.json
      npm run analyze -- --include-opens     # also writes analysis/opens-<stamp>.txt
 */
 
@@ -26,10 +27,7 @@ import * as path from 'node:path';
 import { SCREENS, type Screen } from '../src/routing/screens';
 import { VARIANTS, effectiveFieldHidden } from '../src/content/variants';
 import { CONTENT, isPairedQuestion } from '../src/content/index';
-import type {
-  AnswerValue,
-  LockedAnswer,
-} from '../src/state/answerStore';
+import type { AnswerValue } from '../src/state/answerStore';
 import type {
   Instrument,
   PairedSubQuestion,
@@ -37,21 +35,24 @@ import type {
   Rating,
   StandardQuestion,
 } from '../src/content/types';
+import {
+  type SubmissionRow,
+  SUBMISSION_CUTOFF_ISO,
+  resolveShortInput,
+  loadShortSubmissions,
+  analysisDirFor,
+} from './lib/submissions';
+import {
+  isNonSubstantiveOption,
+  enumerateShortVariables,
+  extractRaw,
+  respondentCodes,
+} from './lib/codebook';
 
 /* ── Types ────────────────────────────────────────────────────────────── */
 
-type SubmissionRow = {
-  docId: string;
-  submittedAt: string | null;
-  variant: string;
-  answerCount: number;
-  answers: Record<string, LockedAnswer>;
-  userAgent: string;
-};
-
 type CliOptions = {
   shortPath: string | null;
-  fullPath: string | null;
   stamp: string | null;
   includeOpens: boolean;
 };
@@ -79,20 +80,11 @@ type OpenStats = {
   charMedian: number | null;
 };
 
-type MultiSelectStats = {
-  nTotal: number;
-  nResponded: number;
-  nMissing: number;
-  totalSelections: number;
-  frequencies: { label: string; count: number; percent: number }[];
-};
-
 /* ── Constants ────────────────────────────────────────────────────────── */
 
-const RESULTS_DIR = 'results';
-const ANALYSIS_DIR = 'analysis';
-const FILE_PATTERN = /^(short|full)-pvacf-submissions-(.+)\.json$/;
-
+/* Screens the SHORT variant hides outright. Skipped wholesale in the report
+ * — they bear no SHORT data (the seal payload stubs them to null only to
+ * keep the export schema variant-invariant). */
 const SHORT_HIDDEN_SCREENS = new Set(VARIANTS.short.hiddenScreens ?? []);
 
 /* ── CLI ──────────────────────────────────────────────────────────────── */
@@ -100,7 +92,6 @@ const SHORT_HIDDEN_SCREENS = new Set(VARIANTS.short.hiddenScreens ?? []);
 function parseArgs(argv: string[]): CliOptions {
   const opts: CliOptions = {
     shortPath: null,
-    fullPath: null,
     stamp: null,
     includeOpens: false,
   };
@@ -109,8 +100,6 @@ function parseArgs(argv: string[]): CliOptions {
       opts.includeOpens = true;
     } else if (arg.startsWith('--short=')) {
       opts.shortPath = arg.slice('--short='.length);
-    } else if (arg.startsWith('--full=')) {
-      opts.fullPath = arg.slice('--full='.length);
     } else if (arg.startsWith('--stamp=')) {
       opts.stamp = arg.slice('--stamp='.length);
     } else if (arg === '--help' || arg === '-h') {
@@ -125,104 +114,16 @@ function parseArgs(argv: string[]): CliOptions {
 
 function printHelp(): void {
   process.stdout.write(
-    'analyze-results — produce a markdown stats report from a JSON export pair.\n' +
+    'analyze-results — produce a SHORT-only markdown stats report from a JSON export.\n' +
       '\n' +
       'Usage:\n' +
       '  npm run analyze\n' +
       '  npm run analyze -- --stamp=<timestamp>\n' +
-      '  npm run analyze -- --short=<path> --full=<path>\n' +
+      '  npm run analyze -- --short=<path>\n' +
       '  npm run analyze -- --include-opens\n' +
       '\n' +
-      'Defaults: picks the newest paired JSON export under results/.\n',
+      'Defaults: picks the newest SHORT JSON export under results/.\n',
   );
-}
-
-/* ── Input resolution ─────────────────────────────────────────────────── */
-
-async function resolveInputPair(
-  opts: CliOptions,
-): Promise<{ shortPath: string | null; fullPath: string | null; stamp: string }> {
-  if (opts.shortPath || opts.fullPath) {
-    const stamp =
-      opts.stamp ?? deriveStampFromPaths(opts.shortPath, opts.fullPath) ?? nowStamp();
-    return {
-      shortPath: opts.shortPath ?? (opts.stamp ? defaultPath('short', opts.stamp) : null),
-      fullPath: opts.fullPath ?? (opts.stamp ? defaultPath('full', opts.stamp) : null),
-      stamp,
-    };
-  }
-  if (opts.stamp) {
-    return {
-      shortPath: await pathIfExists(defaultPath('short', opts.stamp)),
-      fullPath: await pathIfExists(defaultPath('full', opts.stamp)),
-      stamp: opts.stamp,
-    };
-  }
-  // Auto-discover the newest pair in results/.
-  const entries = await safeReaddir(RESULTS_DIR);
-  if (entries.length === 0) {
-    throw new Error(
-      `No results/ directory or no exports found. Run \`npm run export:firestore\` first, ` +
-        `or pass --short / --full / --stamp explicitly.`,
-    );
-  }
-  const stamps = new Set<string>();
-  for (const f of entries) {
-    const m = FILE_PATTERN.exec(f);
-    if (m) stamps.add(m[2]!);
-  }
-  if (stamps.size === 0) {
-    throw new Error(
-      `results/ contained no files matching {short,full}-pvacf-submissions-*.json`,
-    );
-  }
-  const newest = [...stamps].sort().reverse()[0]!;
-  return {
-    shortPath: await pathIfExists(defaultPath('short', newest)),
-    fullPath: await pathIfExists(defaultPath('full', newest)),
-    stamp: newest,
-  };
-}
-
-function defaultPath(variant: 'short' | 'full', stamp: string): string {
-  return path.join(RESULTS_DIR, `${variant}-pvacf-submissions-${stamp}.json`);
-}
-
-function deriveStampFromPaths(...paths: (string | null)[]): string | null {
-  for (const p of paths) {
-    if (!p) continue;
-    const m = FILE_PATTERN.exec(path.basename(p));
-    if (m) return m[2]!;
-  }
-  return null;
-}
-
-function nowStamp(): string {
-  return new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-}
-
-async function pathIfExists(p: string): Promise<string | null> {
-  try {
-    await fs.access(p);
-    return p;
-  } catch {
-    return null;
-  }
-}
-
-async function safeReaddir(dir: string): Promise<string[]> {
-  try {
-    return await fs.readdir(dir);
-  } catch {
-    return [];
-  }
-}
-
-async function loadSubmissions(filePath: string | null): Promise<SubmissionRow[]> {
-  if (!filePath) return [];
-  const raw = await fs.readFile(filePath, 'utf8');
-  const parsed = JSON.parse(raw) as SubmissionRow[];
-  return parsed.filter((r) => r.submittedAt !== null);
 }
 
 /* ── Pool construction ────────────────────────────────────────────────── */
@@ -414,59 +315,6 @@ function computeOpenStats(responses: (string | null)[], nTotal: number): OpenSta
   };
 }
 
-function computeMultiSelectStats(
-  responses: (string | string[] | null | undefined)[],
-  options: string[],
-  nTotal: number,
-): MultiSelectStats {
-  const counts = new Map<string, number>();
-  for (const opt of options) counts.set(opt, 0);
-  let nResponded = 0;
-  let totalSelections = 0;
-  for (const r of responses) {
-    if (r === null || r === undefined) continue;
-    const picks = Array.isArray(r) ? r : nonEmpty(r) ? splitJoined(r) : [];
-    if (picks.length === 0) continue;
-    nResponded++;
-    for (const pick of picks) {
-      const trimmed = pick.trim();
-      if (trimmed.length === 0) continue;
-      counts.set(trimmed, (counts.get(trimmed) ?? 0) + 1);
-      totalSelections++;
-    }
-  }
-  const frequencies = options.map((opt) => ({
-    label: opt,
-    count: counts.get(opt) ?? 0,
-    percent: nResponded === 0 ? 0 : ((counts.get(opt) ?? 0) / nResponded) * 100,
-  }));
-  // If respondents picked values that were not in the option list, surface
-  // them at the bottom (defensive — shouldn't happen with normal data).
-  for (const [label, count] of counts) {
-    if (!options.includes(label) && count > 0) {
-      frequencies.push({
-        label: `${label} (unrecognised option)`,
-        count,
-        percent: nResponded === 0 ? 0 : (count / nResponded) * 100,
-      });
-    }
-  }
-  return {
-    nTotal,
-    nResponded,
-    nMissing: nTotal - nResponded,
-    totalSelections,
-    frequencies,
-  };
-}
-
-/** Split a "; "-joined export string back into individual picks. The xlsx
- *  export joins arrays this way; the JSON export keeps them as arrays. We
- *  handle both paths so the script is robust to either. */
-function splitJoined(s: string): string[] {
-  return s.split(/\s*;\s*/).filter((part) => part.length > 0);
-}
-
 /* ── Markdown rendering helpers ───────────────────────────────────────── */
 
 function renderRatingBlock(title: string, stats: RatingStats, tag?: string): string {
@@ -487,6 +335,20 @@ function renderRatingBlock(title: string, stats: RatingStats, tag?: string): str
     lines.push(
       `- Mean position: ${stats.mean.toFixed(2)} (SD ${stats.sd.toFixed(2)}). ` +
         `*Interval treatment — see overview.*`,
+    );
+  }
+  // Transparency line: how many of the responses chose a non-substantive
+  // option ("Cannot judge" / "Not familiar" / "not in place"). Only shown
+  // when the scale actually defines one. The count stays in the figures
+  // above (per the analysis decision); this surfaces it for the reader.
+  const nonSub = stats.frequencies.filter((f) => isNonSubstantiveOption(f.label));
+  if (nonSub.length > 0) {
+    const nNonSub = nonSub.reduce((a, f) => a + f.count, 0);
+    const pct = stats.nResponded > 0 ? (nNonSub / stats.nResponded) * 100 : 0;
+    lines.push(
+      `- No-opinion / not-applicable: ${nNonSub} of ${stats.nResponded} responded ` +
+        `(${pct.toFixed(1)}%) — ${nonSub.map((f) => `"${f.label}"`).join(', ')}. ` +
+        `*Kept in the figures above; recode to missing for interval stats.*`,
     );
   }
   lines.push('');
@@ -521,33 +383,6 @@ function renderOpenBlock(title: string, stats: OpenStats, tag?: string): string 
   return lines.join('\n');
 }
 
-function renderMultiSelectBlock(
-  title: string,
-  stats: MultiSelectStats,
-  tag?: string,
-): string {
-  const headerTag = tag ? ` *(${tag})*` : '';
-  const lines: string[] = [];
-  lines.push(`**${title}**${headerTag}`);
-  lines.push('');
-  lines.push(
-    `- N respondents = ${stats.nResponded} of ${stats.nTotal} eligible. ` +
-      `${stats.totalSelections} total selection(s) across all respondents.`,
-  );
-  if (stats.nResponded === 0) {
-    lines.push('- No selections recorded.');
-    lines.push('');
-    return lines.join('\n');
-  }
-  lines.push('| Option | Count | % of respondents |');
-  lines.push('| --- | ---: | ---: |');
-  for (const f of stats.frequencies) {
-    lines.push(`| ${escapePipes(f.label)} | ${f.count} | ${f.percent.toFixed(1)}% |`);
-  }
-  lines.push('');
-  return lines.join('\n');
-}
-
 function renderCountBlock(title: string, nFilled: number, nTotal: number, tag?: string): string {
   const headerTag = tag ? ` *(${tag})*` : '';
   return (
@@ -563,26 +398,13 @@ function escapePipes(s: string): string {
 
 /* ── Per-screen analyzers ─────────────────────────────────────────────── */
 
-/* Pooling rule recap:
- * - Screen visible in both variants → pool short + full rows for that field.
- * - Screen visible only in FULL (c1-q7, interview) → pool only full rows;
- *   tag the section "FULL only".
- * - Field hidden on a screen in SHORT (every instrument's q2) → pool only
- *   full rows for that field; tag it "FULL only". The screen as a whole
- *   stays "both".
+/* SHORT-only. Every analyzer consumes the single pool of SHORT submission
+ * rows. Screens SHORT hides (c1-q7, interview) never reach these functions —
+ * they are skipped in renderReport. Each instrument's Q2 rating is hidden in
+ * SHORT and skipped inside analyzeInstrument.
  */
 
-function combinedRowsFor(
-  screenId: string,
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): SubmissionRow[] {
-  if (SHORT_HIDDEN_SCREENS.has(screenId)) return fullRows;
-  return [...shortRows, ...fullRows];
-}
-
-function analyzeProfile(shortRows: SubmissionRow[], fullRows: SubmissionRow[]): string {
-  const rows = combinedRowsFor('profile', shortRows, fullRows);
+function analyzeProfile(rows: SubmissionRow[]): string {
   const sections: string[] = [];
   sections.push('## Profile of reviewers');
   sections.push('');
@@ -602,17 +424,10 @@ function analyzeProfile(shortRows: SubmissionRow[], fullRows: SubmissionRow[]): 
   return sections.join('\n');
 }
 
-function analyzeStandardQuestion(
-  screen: Screen,
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): string {
+function analyzeStandardQuestion(screen: Screen, rows: SubmissionRow[]): string {
   const q = CONTENT.questions[screen.id];
   if (!q || isPairedQuestion(q)) return '';
   const stdQ = q as StandardQuestion;
-  const isFullOnly = SHORT_HIDDEN_SCREENS.has(screen.id);
-  const rows = combinedRowsFor(screen.id, shortRows, fullRows);
-  const tag = isFullOnly ? 'FULL only' : undefined;
   const lines: string[] = [];
   lines.push(`### ${screen.location}`);
   lines.push('');
@@ -621,7 +436,7 @@ function analyzeStandardQuestion(
 
   // c2-q4 is rating-grid + composite; handle separately.
   if (stdQ.rating?.kind === 'grid') {
-    lines.push(renderGridBlock(screen.id, stdQ.rating, rows, tag));
+    lines.push(renderGridBlock(screen.id, stdQ.rating, rows));
     if (stdQ.composite) {
       const compositeResponses = pool(rows, (r) =>
         extractByKind(r, screen.id, 'grid-and-composite', (v) => v.composite ?? null),
@@ -631,7 +446,7 @@ function analyzeStandardQuestion(
         stdQ.composite.options,
         compositeResponses.nTotal,
       );
-      lines.push(renderRatingBlock(stdQ.composite.subStem, stats, tag));
+      lines.push(renderRatingBlock(stdQ.composite.subStem, stats));
     }
     return lines.join('\n');
   }
@@ -647,7 +462,7 @@ function analyzeStandardQuestion(
       stdQ.rating.options,
       ratingResponses.nTotal,
     );
-    lines.push(renderRatingBlock('Rating', stats, tag));
+    lines.push(renderRatingBlock('Rating', stats));
   }
 
   if (stdQ.open) {
@@ -655,7 +470,7 @@ function analyzeStandardQuestion(
       extractByKind(r, screen.id, 'rating-and-open', (v) => v.open ?? null),
     );
     const stats = computeOpenStats(openResponses.values, openResponses.nTotal);
-    lines.push(renderOpenBlock(`Open — ${stdQ.open.label}`, stats, tag));
+    lines.push(renderOpenBlock(`Open — ${stdQ.open.label}`, stats));
   }
 
   return lines.join('\n');
@@ -665,7 +480,6 @@ function renderGridBlock(
   screenId: string,
   rating: Extract<Rating, { kind: 'grid' }>,
   rows: SubmissionRow[],
-  tag?: string,
 ): string {
   // The grid is persisted with synthetic keys `row0`, `row1`, ... (see
   // QuestionScreen.buildAnswerValue) — not the row text. Iterate by index
@@ -678,20 +492,14 @@ function renderGridBlock(
       extractByKind(r, screenId, 'grid-and-composite', (v) => v.grid[key] ?? null),
     );
     const stats = computeRatingStats(pulled.values, rating.options, pulled.nTotal);
-    lines.push(renderRatingBlock(`Row · ${rowText}`, stats, tag));
+    lines.push(renderRatingBlock(`Row · ${rowText}`, stats));
   }
   return lines.join('\n');
 }
 
-function analyzePaired(
-  screen: Screen,
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): string {
+function analyzePaired(screen: Screen, rows: SubmissionRow[]): string {
   const q = CONTENT.questions[screen.id];
   if (!q || !isPairedQuestion(q)) return '';
-  const rows = combinedRowsFor(screen.id, shortRows, fullRows);
-  const tag = SHORT_HIDDEN_SCREENS.has(screen.id) ? 'FULL only' : undefined;
   const lines: string[] = [];
   lines.push(`### ${screen.location}`);
   lines.push('');
@@ -703,25 +511,20 @@ function analyzePaired(
         extractByKind(r, screen.id, 'paired', (v) => v.subAnswers[sub.slot]?.rating ?? null),
       );
       const stats = computeRatingStats(pulled.values, sub.rating.options, pulled.nTotal);
-      lines.push(renderRatingBlock(`Rating · ${sub.slot}`, stats, tag));
+      lines.push(renderRatingBlock(`Rating · ${sub.slot}`, stats));
     }
     if (sub.open) {
       const pulled = pool(rows, (r) =>
         extractByKind(r, screen.id, 'paired', (v) => v.subAnswers[sub.slot]?.open ?? null),
       );
       const stats = computeOpenStats(pulled.values, pulled.nTotal);
-      lines.push(renderOpenBlock(`Open · ${sub.slot} — ${sub.open.label}`, stats, tag));
+      lines.push(renderOpenBlock(`Open · ${sub.slot} — ${sub.open.label}`, stats));
     }
   }
   return lines.join('\n');
 }
 
-function analyzeClosePair(
-  screen: Screen,
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): string {
-  const rows = combinedRowsFor(screen.id, shortRows, fullRows);
+function analyzeClosePair(screen: Screen, rows: SubmissionRow[]): string {
   const lines: string[] = [];
   lines.push(`### ${screen.location}`);
   lines.push('');
@@ -742,21 +545,18 @@ function analyzeClosePair(
   return lines.join('\n');
 }
 
-function analyzeInstrument(
-  screen: Screen,
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): string {
+function analyzeInstrument(screen: Screen, rows: SubmissionRow[]): string {
   const inst = CONTENT.instruments.find((i) => i.id === screen.id) as Instrument | undefined;
   if (!inst) return '';
   const lines: string[] = [];
   lines.push(`### ${screen.location}`);
   lines.push('');
 
+  // Q1 (quality rating) is collected in SHORT; Q2 (applicability) is hidden
+  // and therefore skipped. Driven by the variant config so a future
+  // instrument that keeps Q2 would report it without a code change.
   for (const field of ['q1', 'q2'] as const) {
-    const hiddenInShort = effectiveFieldHidden(screen.id, field, VARIANTS.short);
-    const rows = hiddenInShort ? fullRows : [...shortRows, ...fullRows];
-    const tag = hiddenInShort ? 'FULL only' : undefined;
+    if (effectiveFieldHidden(screen.id, field, VARIANTS.short)) continue;
     const sub = field === 'q1' ? inst.q1 : inst.q2;
     const pulled = pool(rows, (r) =>
       extractByKind(r, screen.id, 'instrument', (v) =>
@@ -766,90 +566,28 @@ function analyzeInstrument(
     const stats = computeRatingStats(pulled.values, sub.rating.options, pulled.nTotal);
     lines.push(`*${field.toUpperCase()} — ${sub.question}*`);
     lines.push('');
-    lines.push(renderRatingBlock(`Rating · ${field.toUpperCase()}`, stats, tag));
+    lines.push(renderRatingBlock(`Rating · ${field.toUpperCase()}`, stats));
   }
 
-  // sharedOpen: combined; required in FULL, optional in SHORT.
-  const openRows = [...shortRows, ...fullRows];
-  const pulled = pool(openRows, (r) =>
+  // sharedOpen: optional in SHORT (relaxed from required via requiredOverrides).
+  const pulled = pool(rows, (r) =>
     extractByKind(r, screen.id, 'instrument', (v) => v.sharedOpen ?? null),
   );
   const stats = computeOpenStats(pulled.values, pulled.nTotal);
   lines.push(`*Shared open — ${inst.sharedOpen.label}*`);
   lines.push('');
-  lines.push(
-    renderOpenBlock(
-      'Synthesis',
-      stats,
-      'required in FULL, optional in SHORT',
-    ),
-  );
-  return lines.join('\n');
-}
-
-function analyzeInterview(_screen: Screen, fullRows: SubmissionRow[]): string {
-  const section = CONTENT.interview;
-  const lines: string[] = [];
-  lines.push('## Optional follow-up — Interview *(FULL only)*');
-  lines.push('');
-  lines.push(`*${section.intro}*`);
-  lines.push('');
-
-  for (const field of section.fields) {
-    const tag = 'FULL only';
-    if (field.kind === 'radio') {
-      const pulled = pool(fullRows, (r) =>
-        extractByKind(r, 'interview', 'interview', (v) => {
-          const raw = v.data[field.key];
-          return typeof raw === 'string' ? raw : null;
-        }),
-      );
-      const stats = computeRatingStats(
-        pulled.values,
-        field.options ?? [],
-        pulled.nTotal,
-        'label',
-      );
-      lines.push(renderRatingBlock(`${field.label} (${field.key})`, stats, tag));
-    } else if (field.kind === 'checkbox-list') {
-      const pulled = pool(fullRows, (r) =>
-        extractByKind(r, 'interview', 'interview', (v) => {
-          const raw = v.data[field.key];
-          if (raw === null || raw === undefined) return null;
-          return raw;
-        }),
-      );
-      const stats = computeMultiSelectStats(
-        pulled.values,
-        field.options ?? [],
-        pulled.nTotal,
-      );
-      lines.push(renderMultiSelectBlock(`${field.label} (${field.key})`, stats, tag));
-    } else {
-      // text — contact email; only count, never log.
-      const pulled = pool(fullRows, (r) =>
-        extractByKind(r, 'interview', 'interview', (v) => {
-          const raw = v.data[field.key];
-          return typeof raw === 'string' && nonEmpty(raw) !== null ? raw : null;
-        }),
-      );
-      const nFilled = pulled.values.length;
-      lines.push(renderCountBlock(`${field.label} (${field.key})`, nFilled, pulled.nTotal, tag));
-    }
-  }
+  lines.push(renderOpenBlock('Synthesis', stats, 'optional in SHORT'));
   return lines.join('\n');
 }
 
 /* ── Overview section ────────────────────────────────────────────────── */
 
 function analyzeOverview(
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
+  rows: SubmissionRow[],
   stamp: string,
-  inputs: { shortPath: string | null; fullPath: string | null },
+  inputPath: string | null,
 ): string {
-  const all = [...shortRows, ...fullRows];
-  const submittedAt = all
+  const submittedAt = rows
     .map((r) => r.submittedAt)
     .filter((v): v is string => v !== null && v.length > 0)
     .sort();
@@ -858,16 +596,16 @@ function analyzeOverview(
   return (
     `# PV-ACF validation analysis — ${stamp}\n\n` +
     `## Overview\n\n` +
-    `- Submissions: short = **${shortRows.length}**, full = **${fullRows.length}**, ` +
-    `total = **${shortRows.length + fullRows.length}**.\n` +
+    `- Submissions (SHORT): **${rows.length}**.\n` +
     `- Submission window: ${earliest} → ${latest}.\n` +
-    `- Inputs: short = \`${inputs.shortPath ?? '(none)'}\`, full = \`${inputs.fullPath ?? '(none)'}\`.\n` +
-    `\n` +
-    `### Pooling rule\n\n` +
-    `Questions present in **both** variants are reported as a single combined ` +
-    `frequency table. Questions or fields hidden in SHORT (\`c1-q7\`, the ` +
-    `\`interview\` screen, and every instrument's Q2 rating) are reported as ` +
-    `**FULL only** and tagged in each section header.\n` +
+    `- **Cut-off filter (permanent):** only submissions sealed on or after ` +
+    `\`${SUBMISSION_CUTOFF_ISO}\` (27 May 2026, midnight UTC) are included. ` +
+    `Earlier submissions are excluded from every count, table, and appendix.\n` +
+    `- **Variant: SHORT only.** This report covers the SHORT instrument exclusively ` +
+    `(the FULL variant is not in use). Fields SHORT never collects — the \`c1-q7\` ` +
+    `warrant question, each instrument's Q2 applicability rating, and the follow-up ` +
+    `\`interview\` screen — are omitted entirely.\n` +
+    `- Input: \`${inputPath ?? '(none)'}\`.\n` +
     `\n` +
     `### Statistic conventions\n\n` +
     `- **Frequency tables** list every option the question defines, including ` +
@@ -878,6 +616,10 @@ function analyzeOverview(
     `- **Mean & SD** treat the option index (1-based) as an interval variable. ` +
     `This is conventional in validation reporting but ordinal-purists may prefer ` +
     `to quote the median and frequency table only.\n` +
+    `- **Non-substantive options** ("Cannot judge", "Not familiar enough to say", ` +
+    `"…not yet in place") are kept at their scale position in the figures; their ` +
+    `combined rate is reported per item as a no-opinion / not-applicable line so ` +
+    `the reader can judge each item's interpretability.\n` +
     `- **Open-response** sections report only N + word/character counts. ` +
     `Verbatim text is never written to this report; pass \`--include-opens\` ` +
     `if you need the corpus as a side-file.\n` +
@@ -887,17 +629,13 @@ function analyzeOverview(
 
 /* ── Appendix: free-text corpus summary ──────────────────────────────── */
 
-function analyzeAppendix(
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): string {
-  const allRows = [...shortRows, ...fullRows];
+function analyzeAppendix(rows: SubmissionRow[]): string {
   let totalEntries = 0;
   let totalFilled = 0;
   let totalWords = 0;
   let totalChars = 0;
 
-  for (const r of allRows) {
+  for (const r of rows) {
     for (const [, locked] of Object.entries(r.answers)) {
       for (const text of openTextsFromValue(locked.value)) {
         totalEntries++;
@@ -914,7 +652,7 @@ function analyzeAppendix(
     `## Appendix — Free-text corpus summary\n\n` +
     `Aggregate roll-up across every open-response field on every submission ` +
     `(profile text fields, every open + composite, instrument synthesis opens, ` +
-    `close-pair opens, interview contact). Verbatim text is not reported.\n\n` +
+    `close-pair opens). Verbatim text is not reported.\n\n` +
     `- Open-response slots eligible: ${totalEntries}.\n` +
     `- Slots filled: ${totalFilled} (${totalEntries === 0 ? 0 : ((totalFilled / totalEntries) * 100).toFixed(1)}%).\n` +
     `- Total words in the open corpus: **${totalWords}**.\n` +
@@ -952,27 +690,38 @@ function openTextsFromValue(v: AnswerValue): string[] {
 
 /* ── Opens side-file ─────────────────────────────────────────────────── */
 
-function buildOpensSideFile(
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): string {
+function buildOpensSideFile(rows: SubmissionRow[]): string {
+  // Grouped by question (for qualitative coding / quoting), under anonymised
+  // respondent codes that match the dataset from `npm run dataset`.
+  const codes = respondentCodes(rows);
+  const openVars = enumerateShortVariables().filter((v) => v.role === 'open');
+
   const out: string[] = [];
-  out.push('PV-ACF — verbatim open responses');
-  out.push('================================');
+  out.push('PV-ACF — verbatim open responses (SHORT), grouped by question');
+  out.push('=============================================================');
   out.push('');
-  out.push('Generated by `npm run analyze -- --include-opens`. Do not commit.');
+  out.push(
+    'Generated by `npm run analyze -- --include-opens`. RESTRICTED — contains ' +
+      'verbatim responses; do not commit or share without an identifiability review.',
+  );
+  out.push('Respondent codes (R…) match the dataset from `npm run dataset`.');
   out.push('');
 
-  const allRows = [...shortRows.map((r) => [r, 'short'] as const), ...fullRows.map((r) => [r, 'full'] as const)];
-  for (const [r, variant] of allRows) {
-    out.push(`--- ${variant} · ${r.docId} · ${r.submittedAt ?? ''}`);
-    for (const [qid, locked] of Object.entries(r.answers)) {
-      const texts = openTextsFromValue(locked.value).filter((t) => nonEmpty(t) !== null);
-      if (texts.length === 0) continue;
-      out.push(`  [${qid}]`);
-      for (const t of texts) {
-        out.push(`    ${t.replace(/\r?\n/g, '\n    ')}`);
-      }
+  for (const v of openVars) {
+    const entries: { code: string; text: string }[] = [];
+    for (const r of rows) {
+      const t = nonEmpty(extractRaw(r.answers, v.source));
+      if (t) entries.push({ code: codes.get(r.docId) ?? r.docId, text: t });
+    }
+    entries.sort((a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0));
+
+    out.push(`### ${v.name} — ${v.location}`);
+    if (v.openPrompt) out.push(`Prompt: ${v.openPrompt}`);
+    out.push(`Filled: ${entries.length} of ${rows.length}.`);
+    out.push('');
+    for (const e of entries) {
+      out.push(`[${e.code}] ${e.text.replace(/\r?\n/g, '\n      ')}`);
+      out.push('');
     }
     out.push('');
   }
@@ -981,20 +730,16 @@ function buildOpensSideFile(
 
 /* ── Section dispatcher ──────────────────────────────────────────────── */
 
-function analyzeScreen(
-  screen: Screen,
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
-): string | null {
+function analyzeScreen(screen: Screen, rows: SubmissionRow[]): string | null {
   switch (screen.kind) {
     case 'question':
-      return analyzeStandardQuestion(screen, shortRows, fullRows);
+      return analyzeStandardQuestion(screen, rows);
     case 'paired':
-      return analyzePaired(screen, shortRows, fullRows);
+      return analyzePaired(screen, rows);
     case 'close-pair':
-      return analyzeClosePair(screen, shortRows, fullRows);
+      return analyzeClosePair(screen, rows);
     case 'instrument':
-      return analyzeInstrument(screen, shortRows, fullRows);
+      return analyzeInstrument(screen, rows);
     default:
       return null;
   }
@@ -1003,14 +748,13 @@ function analyzeScreen(
 /* ── Report assembly ─────────────────────────────────────────────────── */
 
 function renderReport(
-  shortRows: SubmissionRow[],
-  fullRows: SubmissionRow[],
+  rows: SubmissionRow[],
   stamp: string,
-  inputs: { shortPath: string | null; fullPath: string | null },
+  inputPath: string | null,
 ): string {
   const sections: string[] = [];
-  sections.push(analyzeOverview(shortRows, fullRows, stamp, inputs));
-  sections.push(analyzeProfile(shortRows, fullRows));
+  sections.push(analyzeOverview(rows, stamp, inputPath));
+  sections.push(analyzeProfile(rows));
 
   // Chapter headers driven by the screen order, so the report mirrors the
   // questionnaire flow exactly.
@@ -1023,9 +767,11 @@ function renderReport(
   const seenChapters = new Set<string>();
 
   for (const screen of SCREENS) {
-    if (screen.id === 'interview' || screen.id === 'submit' || screen.id === 'thanks') {
-      continue; // handled separately or has no data
+    if (screen.id === 'submit' || screen.id === 'thanks') {
+      continue; // no answer data
     }
+    // Skip screens SHORT hides outright (c1-q7, interview).
+    if (SHORT_HIDDEN_SCREENS.has(screen.id)) continue;
     if (screen.kind === 'welcome' || screen.kind === 'profile') continue;
     if (
       screen.kind === 'orient-1' ||
@@ -1047,17 +793,11 @@ function renderReport(
       seenChapters.add(stepId);
     }
 
-    const out = analyzeScreen(screen, shortRows, fullRows);
+    const out = analyzeScreen(screen, rows);
     if (out) sections.push(out);
   }
 
-  // Interview section (FULL only).
-  const interviewScreen = SCREENS.find((s) => s.id === 'interview');
-  if (interviewScreen) {
-    sections.push(analyzeInterview(interviewScreen, fullRows));
-  }
-
-  sections.push(analyzeAppendix(shortRows, fullRows));
+  sections.push(analyzeAppendix(rows));
 
   return sections.join('\n');
 }
@@ -1066,34 +806,32 @@ function renderReport(
 
 async function main(): Promise<void> {
   const opts = parseArgs(process.argv.slice(2));
-  const { shortPath, fullPath, stamp } = await resolveInputPair(opts);
+  const { shortPath, stamp } = await resolveShortInput(opts);
 
-  if (!shortPath && !fullPath) {
+  if (!shortPath) {
     throw new Error(
-      `Could not resolve any input file for stamp "${stamp}". ` +
-        `Expected ${defaultPath('short', stamp)} or ${defaultPath('full', stamp)}.`,
+      `Could not resolve a SHORT input file for stamp "${stamp}". ` +
+        `Run \`npm run export:firestore\` first, or pass --short / --stamp.`,
     );
   }
 
-  const shortRows = await loadSubmissions(shortPath);
-  const fullRows = await loadSubmissions(fullPath);
+  const rows = await loadShortSubmissions(shortPath);
 
   process.stderr.write(
-    `[analyze] stamp=${stamp}  short=${shortRows.length}  full=${fullRows.length}\n`,
+    `[analyze] stamp=${stamp}  short=${rows.length}  (SHORT-only, post-cut-off)\n`,
   );
-  if (!shortPath) process.stderr.write(`[analyze] (no SHORT file for this stamp)\n`);
-  if (!fullPath) process.stderr.write(`[analyze] (no FULL file for this stamp)\n`);
 
-  await fs.mkdir(ANALYSIS_DIR, { recursive: true });
+  const outDir = analysisDirFor(stamp);
+  await fs.mkdir(outDir, { recursive: true });
 
-  const md = renderReport(shortRows, fullRows, stamp, { shortPath, fullPath });
-  const outPath = path.join(ANALYSIS_DIR, `report-${stamp}.md`);
+  const md = renderReport(rows, stamp, shortPath);
+  const outPath = path.join(outDir, 'report.md');
   await fs.writeFile(outPath, md, 'utf8');
   process.stderr.write(`[analyze] wrote ${outPath}\n`);
 
   if (opts.includeOpens) {
-    const opens = buildOpensSideFile(shortRows, fullRows);
-    const opensPath = path.join(ANALYSIS_DIR, `opens-${stamp}.txt`);
+    const opens = buildOpensSideFile(rows);
+    const opensPath = path.join(outDir, 'opens.txt');
     await fs.writeFile(opensPath, opens, 'utf8');
     process.stderr.write(`[analyze] wrote ${opensPath}\n`);
   }

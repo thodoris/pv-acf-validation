@@ -25,7 +25,11 @@
     "typecheck": "tsc --noEmit",
     "deploy": "npm run build && firebase deploy --only hosting",
     "export:firestore": "tsx scripts/export-firestore.ts",
-    "analyze": "tsx scripts/analyze-results.ts"
+    "analyze": "tsx scripts/analyze-results.ts",
+    "codebook": "tsx scripts/build-codebook.ts",
+    "dataset": "tsx scripts/build-dataset.ts",
+    "clean": "tsx scripts/clean-runs.ts",
+    "freeze": "tsx scripts/freeze-snapshot.ts"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",

@@ -1,0 +1,158 @@
+/* freeze-snapshot — freeze a snapshot's shareable artifacts for the thesis.
+
+   Copies ONLY the non-PII subset of one snapshot into a TRACKED folder
+   docs/validation/snapshot-<stamp>/ so the validation chapter's numbers are
+   reproducible and version-controlled:
+
+     · report.md               — descriptive report (counts only, no verbatim)
+     · dataset-anonymised.{xlsx,csv} — coded data, no free text, no doc_id
+     · codebook.{md,json}      — the data dictionary (copied for self-containment)
+     · SNAPSHOT.md             — manifest (stamp, N, cut-off, what's in/out)
+
+   It NEVER copies the PII-bearing artifacts (raw submissions.json, the
+   restricted dataset, opens.txt, respondent-map.csv). A guard refuses any
+   filename on the forbidden list as a defence against accidental exposure.
+
+   Usage:
+     npm run freeze                  # freeze the newest analysed snapshot
+     npm run freeze -- --stamp=<ts>  # freeze a specific snapshot
+*/
+
+import { promises as fs } from 'node:fs';
+import * as path from 'node:path';
+
+import { analysisDirFor, listAllStamps } from './lib/submissions';
+
+const DOCS_VALIDATION_DIR = path.join('docs', 'validation');
+
+/** Shareable artifacts copied from analysis/<stamp>/. report.md and the
+ *  anonymised dataset are required; if any are missing we refuse. */
+const ANALYSIS_SHAREABLE = [
+  'report.md',
+  'dataset-anonymised.xlsx',
+  'dataset-anonymised.csv',
+] as const;
+
+/** Codebook copied from docs/validation/ for a self-contained snapshot. */
+const CODEBOOK_FILES = ['codebook.md', 'codebook.json'] as const;
+
+/** Defence in depth: nothing matching these basenames may ever be copied. */
+const FORBIDDEN = new Set([
+  'submissions.json',
+  'submissions.xlsx',
+  'dataset-restricted.xlsx',
+  'dataset-restricted.csv',
+  'opens.txt',
+  'respondent-map.csv',
+]);
+
+function parseArgs(argv: string[]): { stamp: string | null } {
+  let stamp: string | null = null;
+  for (const arg of argv) {
+    if (arg.startsWith('--stamp=')) stamp = arg.slice('--stamp='.length);
+    else if (arg === '--help' || arg === '-h') {
+      process.stdout.write(
+        'freeze-snapshot — freeze the shareable subset of a snapshot.\n' +
+          'Usage: npm run freeze [-- --stamp=<ts>]\n',
+      );
+      process.exit(0);
+    } else process.stderr.write(`[freeze] unknown arg "${arg}" — ignored\n`);
+  }
+  return { stamp };
+}
+
+async function exists(p: string): Promise<boolean> {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Newest stamp whose analysis/<stamp>/ holds a report.md. */
+async function newestAnalysedStamp(): Promise<string | null> {
+  const stamps = (await listAllStamps()).sort().reverse();
+  for (const s of stamps) {
+    if (await exists(path.join(analysisDirFor(s), 'report.md'))) return s;
+  }
+  return null;
+}
+
+async function copyGuarded(src: string, destDir: string): Promise<void> {
+  const base = path.basename(src);
+  if (FORBIDDEN.has(base)) {
+    throw new Error(`[freeze] refusing to copy forbidden (PII) file: ${base}`);
+  }
+  await fs.copyFile(src, path.join(destDir, base));
+}
+
+/** Count data rows in a no-embedded-newline CSV (the anonymised dataset has
+ *  no free text, so a plain line count is exact). */
+async function csvDataRowCount(csvPath: string): Promise<number> {
+  let s = await fs.readFile(csvPath, 'utf8');
+  if (s.charCodeAt(0) === 0xfeff) s = s.slice(1);
+  const lines = s.split(/\r?\n/).filter((l) => l.length > 0);
+  return Math.max(0, lines.length - 1);
+}
+
+async function main(): Promise<void> {
+  const { stamp: argStamp } = parseArgs(process.argv.slice(2));
+  const stamp = argStamp ?? (await newestAnalysedStamp());
+  if (!stamp) {
+    throw new Error(
+      'No analysed snapshot found. Run `npm run analyze` (and `npm run dataset`) first.',
+    );
+  }
+
+  const analysisDir = analysisDirFor(stamp);
+  for (const f of ANALYSIS_SHAREABLE) {
+    if (!(await exists(path.join(analysisDir, f)))) {
+      throw new Error(
+        `[freeze] missing ${f} in ${analysisDir}. ` +
+          `Run \`npm run analyze\` and \`npm run dataset\` for stamp ${stamp} first.`,
+      );
+    }
+  }
+  for (const f of CODEBOOK_FILES) {
+    if (!(await exists(path.join(DOCS_VALIDATION_DIR, f)))) {
+      throw new Error(
+        `[freeze] missing ${f} in ${DOCS_VALIDATION_DIR}. Run \`npm run codebook\` first.`,
+      );
+    }
+  }
+
+  const destDir = path.join(DOCS_VALIDATION_DIR, `snapshot-${stamp}`);
+  await fs.mkdir(destDir, { recursive: true });
+
+  for (const f of ANALYSIS_SHAREABLE) await copyGuarded(path.join(analysisDir, f), destDir);
+  for (const f of CODEBOOK_FILES) await copyGuarded(path.join(DOCS_VALIDATION_DIR, f), destDir);
+
+  const n = await csvDataRowCount(path.join(destDir, 'dataset-anonymised.csv'));
+  const manifest =
+    `# PV-ACF validation snapshot — ${stamp}\n\n` +
+    `Frozen for the thesis validation chapter. Generated by \`npm run freeze\`.\n\n` +
+    `- Snapshot stamp: \`${stamp}\` (the export this analysis was run against).\n` +
+    `- Respondents (SHORT, post-cut-off): **${n}**.\n` +
+    `- Cut-off: submissions sealed on or after \`2026-05-27T00:00:00.000Z\` only.\n\n` +
+    `## Included (shareable — no PII)\n\n` +
+    `- \`report.md\` — descriptive report; open responses as counts only, no verbatim.\n` +
+    `- \`dataset-anonymised.{xlsx,csv}\` — coded data; R-codes, no name/institution, no open text, no doc_id.\n` +
+    `- \`codebook.{md,json}\` — data dictionary (variable names, codes, option vocabulary).\n\n` +
+    `## Deliberately excluded (PII / re-identifying — kept offline only)\n\n` +
+    `- raw \`submissions.json\`, \`dataset-restricted.*\`, \`opens.txt\`, \`respondent-map.csv\`.\n\n` +
+    `Note: \`submitted_at\` is retained in the anonymised dataset as a faint ` +
+    `quasi-identifier; drop it before any wider release if stricter ` +
+    `de-identification is required.\n`;
+  await fs.writeFile(path.join(destDir, 'SNAPSHOT.md'), manifest, 'utf8');
+
+  process.stderr.write(`[freeze] froze snapshot ${stamp} (N=${n}) → ${destDir}/\n`);
+  process.stderr.write(
+    `[freeze] included: report.md, dataset-anonymised.{xlsx,csv}, codebook.{md,json}, SNAPSHOT.md\n`,
+  );
+}
+
+main().catch((err) => {
+  console.error('[freeze] failed', err);
+  process.exit(1);
+});

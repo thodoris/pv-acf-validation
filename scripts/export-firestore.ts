@@ -23,14 +23,15 @@ import * as path from 'node:path';
 import {
   buildJsonPayload,
   buildWorkbook,
-  exportBaseName,
-  groupRowsByVariant,
   type SubmissionRow,
 } from '@/admin/exportXlsx';
 import { SUBMISSIONS_COLLECTION } from '@/lib/firestoreCollections';
 import type { LockedAnswer } from '@/state/answerStore';
-
-const RESULTS_DIR = 'results';
+import {
+  RESULTS_DIR,
+  SUBMISSIONS_FILE,
+  SUBMISSIONS_XLSX,
+} from './lib/submissions';
 
 /** Auto-discover a Firebase Admin SDK key in the project root.
  *  Firebase's "Generate new private key" emits files matching
@@ -70,7 +71,7 @@ async function main(): Promise<void> {
     .orderBy('submittedAt', 'desc')
     .get();
 
-  const rows: SubmissionRow[] = snap.docs.map((d) => {
+  const allRows: SubmissionRow[] = snap.docs.map((d) => {
     const data = d.data();
     const ts = data.submittedAt;
     return {
@@ -83,28 +84,31 @@ async function main(): Promise<void> {
     };
   });
 
-  console.log(`[export] fetched ${rows.length} submissions`);
+  // SHORT only. The platform ships the SHORT variant exclusively; the FULL
+  // variant is not in use (the handful of FULL docs are pre-launch author
+  // dry-runs). Drop non-SHORT rows so results/ only ever holds SHORT exports.
+  const rows = allRows.filter((r) => r.variant === 'short');
+  const skipped = allRows.length - rows.length;
 
-  const outDir = path.resolve(process.cwd(), RESULTS_DIR);
+  console.log(
+    `[export] fetched ${allRows.length} submissions; ${rows.length} SHORT` +
+      (skipped > 0 ? ` (skipped ${skipped} non-SHORT)` : ''),
+  );
+
+  // One self-contained snapshot folder per export: results/<stamp>/.
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const outDir = path.resolve(process.cwd(), RESULTS_DIR, stamp);
   fs.mkdirSync(outDir, { recursive: true });
 
-  const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const jsonPath = path.join(outDir, SUBMISSIONS_FILE);
+  fs.writeFileSync(jsonPath, JSON.stringify(buildJsonPayload(rows), null, 2), 'utf8');
 
-  // Write one xlsx + json per variant so files group by variant when sorted.
-  const groups = groupRowsByVariant(rows);
-  for (const [variant, variantRows] of groups) {
-    const baseName = exportBaseName(variant, stamp);
+  const xlsxPath = path.join(outDir, SUBMISSIONS_XLSX);
+  XLSX.writeFile(buildWorkbook(rows), xlsxPath);
 
-    const xlsxPath = path.join(outDir, `${baseName}.xlsx`);
-    XLSX.writeFile(buildWorkbook(variantRows), xlsxPath);
-
-    const jsonPath = path.join(outDir, `${baseName}.json`);
-    fs.writeFileSync(jsonPath, JSON.stringify(buildJsonPayload(variantRows), null, 2), 'utf8');
-
-    console.log(
-      `[export] ${variant}: ${variantRows.length} row(s) → ${path.relative(process.cwd(), xlsxPath)} + .json`,
-    );
-  }
+  console.log(
+    `[export] short: ${rows.length} row(s) → ${path.relative(process.cwd(), jsonPath)} (+ ${SUBMISSIONS_XLSX})`,
+  );
 }
 
 main().catch((err) => {
