@@ -29,7 +29,8 @@
     "codebook": "tsx scripts/build-codebook.ts",
     "dataset": "tsx scripts/build-dataset.ts",
     "clean": "tsx scripts/clean-runs.ts",
-    "freeze": "tsx scripts/freeze-snapshot.ts"
+    "freeze": "tsx scripts/freeze-snapshot.ts",
+    "bundle": "tsx scripts/build-bundle.ts"
   },
   "dependencies": {
     "@types/dompurify": "^3.0.5",
