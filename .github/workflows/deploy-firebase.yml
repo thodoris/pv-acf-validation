@@ -1,17 +1,25 @@
-name: Deploy to Firebase Hosting (production)
+name: Deploy to Firebase Hosting (production) [DISABLED]
 
-# Auto-deploy on every push to main. The `live` channel of project
-# pv-acf-questionnaire is served simultaneously at:
+# ─────────────────────────────────────────────────────────────────────────────
+# DISABLED 2026-06-23. This workflow no longer deploys on push.
+#
+# To re-enable: uncomment the `push` / `workflow_dispatch` triggers below and
+# remove the `if: ${{ false }}` guard on the `deploy` job. The original config
+# was: auto-deploy on every push to main, plus manual workflow_dispatch.
+#
+# The `live` channel of project pv-acf-questionnaire is served simultaneously at:
 #   · https://pv-acf-questionnaire.web.app/
 #   · https://pv-acf-questionnaire.firebaseapp.com/
 #   · https://validation.thodoris.net/        (custom domain, already authorized)
-#
-# Manual trigger (workflow_dispatch) lets you re-deploy without a code change.
+# ─────────────────────────────────────────────────────────────────────────────
 
+# Triggers removed so nothing runs automatically. `workflow_dispatch` is kept
+# so the workflow is still selectable in the Actions UI, but the job below is
+# hard-gated off, so even a manual run is a no-op.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+  # push:
+  #   branches: [main]
 
 # Don't race: queue overlapping deploys instead of cancelling in flight.
 concurrency:
@@ -21,6 +29,8 @@ concurrency:
 jobs:
   deploy:
     name: Build and deploy
+    # Hard-disabled. Remove this guard (and restore the triggers above) to re-enable.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

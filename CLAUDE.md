@@ -144,7 +144,9 @@ Firebase App Check is initialized in `src/lib/firebase.ts` with the reCAPTCHA v3
 
 Production is served by Firebase Hosting at **`validation.thodoris.net`** (custom domain), with the default `pv-acf-questionnaire.web.app` and `*.firebaseapp.com` URLs serving the same `live` channel.
 
-**Auto-deploy on push to `main`** via GitHub Actions ([.github/workflows/deploy-firebase.yml](./.github/workflows/deploy-firebase.yml)). The workflow installs deps, writes `.env.local` from repo Secrets, runs `npm test` (gate), builds, and calls `FirebaseExtended/action-hosting-deploy@v0` on the `live` channel. Concurrency is queued (`cancel-in-progress: false`) so overlapping pushes don't race.
+**⚠️ Auto-deploy is DISABLED as of 2026-06-23.** The workflow ([.github/workflows/deploy-firebase.yml](./.github/workflows/deploy-firebase.yml)) no longer runs: its `push` trigger is commented out and the `deploy` job is hard-gated with `if: ${{ false }}`. Pushes to `main` no longer deploy. To re-enable, uncomment the `push` trigger and remove the `if` guard (both have inline notes). The description below documents the workflow's behaviour **when enabled**.
+
+**Auto-deploy on push to `main`** via GitHub Actions. The workflow installs deps, writes `.env.local` from repo Secrets, runs `npm test` (gate), builds, and calls `FirebaseExtended/action-hosting-deploy@v0` on the `live` channel. Concurrency is queued (`cancel-in-progress: false`) so overlapping pushes don't race.
 
 **Secrets in GitHub → repo → Settings → Secrets and variables → Actions:**
 
